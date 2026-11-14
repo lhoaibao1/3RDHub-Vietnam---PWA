@@ -1,0 +1,64 @@
+name: Android APK
+# Mỗi lần đẩy code: build file APK Android và đăng lên GitHub Releases.
+# Link tải cố định (luôn là bản mới nhất):
+#   https://github.com/lhoaibao1/3RDHub-Vietnam---PWA/releases/latest/download/3RDHub-Vietnam.apk
+# APK chạy độc lập, KHÔNG nhận cập nhật qua Expo: muốn bản mới thì tải và cài đè APK mới (giữ nguyên dữ liệu đăng nhập).
+on:
+  push:
+    branches: [main, claude/nifty-wozniak-y6il87]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci
+      - run: npx tsc --noEmit
+      # Bản APK không dùng Expo Updates; versionCode tăng theo số lần build để cài đè được bản cũ.
+      - name: Cấu hình bản APK
+        run: |
+          node -e '
+            const fs = require("fs"); const p = "app.json"; const a = JSON.parse(fs.readFileSync(p, "utf8"));
+            a.expo.updates = { ...(a.expo.updates || {}), enabled: false };
+            a.expo.android.versionCode = Number(process.env.RUN);
+            a.expo.version = a.expo.version.split(".").slice(0, 2).join(".") + "." + process.env.RUN;
+            fs.writeFileSync(p, JSON.stringify(a, null, 2));
+          '
+        env: { RUN: "${{ github.run_number }}" }
+      - run: npx expo prebuild --platform android --no-install --clean
+        env:
+          EXPO_PUBLIC_BUILD_SHA: ${{ github.sha }}
+          EXPO_PUBLIC_BUILD_AT: ${{ github.event.head_commit.timestamp }}
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+        env:
+          EXPO_PUBLIC_BUILD_SHA: ${{ github.sha }}
+          EXPO_PUBLIC_BUILD_AT: ${{ github.event.head_commit.timestamp }}
+      - run: cp android/app/build/outputs/apk/release/app-release.apk 3RDHub-Vietnam.apk && ls -la 3RDHub-Vietnam.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: 3RDHub-Vietnam-apk, path: 3RDHub-Vietnam.apk }
+      - name: Đăng lên Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-${{ github.run_number }}
+          name: Android bản ${{ github.run_number }}
+          body: |
+            Bản Android tự build từ commit ${{ github.sha }}.
+            Tải: 3RDHub-Vietnam.apk bên dưới → mở file → cho phép "Cài ứng dụng không rõ nguồn gốc" → Cài đặt.
+          files: 3RDHub-Vietnam.apk
+          make_latest: true

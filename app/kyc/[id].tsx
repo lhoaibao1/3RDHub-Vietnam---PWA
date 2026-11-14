@@ -11,6 +11,7 @@ import { Chip2, Hero, InfoGroup, InfoRow } from "../../src/detail"
 import { Notice } from "../../src/form"
 import { Text } from "../../src/text"
 import { unix } from "./index"
+import { prompt } from "../../src/prompt"
 
 const SIDES = [["front", "Mặt trước"], ["back", "Mặt sau"], ["portrait", "Chân dung"]] as const
 
@@ -31,7 +32,7 @@ export default function KycDetail() {
   const k = x.kyc, st = KYC_STATE[k.status] ?? KYC_STATE.none!
   const src = (side: string) => img(`/api/v1/tenant/kyc/${id}/${side}`)
   const approve = () => Alert.alert("Duyệt định danh", `Xác nhận giấy tờ của ${k.full_name || x.display_name} hợp lệ?`, [{ text: "Hủy", style: "cancel" }, { text: "Duyệt", onPress: () => review.mutate({ decision: "approved", note: "" }) }])
-  const reject = () => Alert.prompt("Từ chối định danh", "Ghi lý do để thành viên biết cần làm lại gì:", (note) => { if (note?.trim()) review.mutate({ decision: "rejected", note: note.trim() }); else Alert.alert("Cần ghi lý do từ chối") })
+  const reject = () => void prompt({ title: "Từ chối định danh", message: "Ghi lý do để thành viên biết cần làm lại gì:", ok: "Từ chối" }).then((note) => { if (note === null) return; if (note.trim()) review.mutate({ decision: "rejected", note: note.trim() }); else Alert.alert("Cần ghi lý do từ chối") })
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Hồ sơ định danh" />

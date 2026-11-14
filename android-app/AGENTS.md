@@ -1,3 +1,5 @@
+> **Không còn dùng (owner, 2026-11-14):** Android giờ build từ chính code Expo ở thư mục gốc (xem `AGENTS.md` gốc và `.github/workflows/android.yml`). File dưới đây chỉ để tham khảo, đừng viết app Kotlin riêng.
+
 # AGENTS.md — Android app "3RDHub Vietnam" (dành cho Publisher)
 
 Bạn (Codex) làm **app Android native** trong thư mục `android-app/` này.

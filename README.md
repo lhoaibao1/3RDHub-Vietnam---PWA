@@ -1,6 +1,16 @@
-# 3RDHub Vietnam (iOS)
+# 3RDHub Vietnam (iOS + Android)
 
-App Expo / React Native cho Publisher. Android làm riêng trong `android-app/`.
+App Expo / React Native cho Publisher, một bộ code cho cả iOS và Android.
+
+## Android: tải file APK
+
+Link cố định, luôn là bản mới nhất:
+
+```
+https://github.com/lhoaibao1/3RDHub-Vietnam---PWA/releases/latest/download/3RDHub-Vietnam.apk
+```
+
+Mở link trên điện thoại Android → tải về → mở file → cho phép "Cài ứng dụng không rõ nguồn gốc" → Cài đặt. Có bản mới thì tải lại và cài đè (không mất đăng nhập). Mỗi lần đẩy code, GitHub Actions (`.github/workflows/android.yml`) tự build bản mới, khoảng 15–20 phút.
 
 ## Cho người dùng thử (Expo Go), link cố định, luôn là bản mới nhất
 

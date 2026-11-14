@@ -11,6 +11,7 @@ import { Hero, HeroStat } from "../../src/detail"
 import { Notice } from "../../src/form"
 import { Text, TextInput } from "../../src/text"
 import { shadow } from "../../src/theme"
+import { prompt } from "../../src/prompt"
 
 type Withdrawal = { id: string; amount: number; tax?: number; net?: number; status: "pending" | "paid" | "rejected" | "cancelled"; bank?: string; note?: string; requested_at: string; decided_at?: string | null }
 type Credit = { id: string; period: string; gross?: number; tax?: number; amount: number; note: string; created_at: string; release_at?: string | null }
@@ -59,7 +60,7 @@ export default function WalletScreen() {
   const why = n <= 0 ? "" : n < min ? `Số tiền tối thiểu là ${vnd(min)}.` : n > b.available ? "Vượt quá số dư có thể rút." : ""
   const ok = !blocked && n > 0 && !why
   const confirm = () => Alert.alert("Xác nhận rút tiền", `Rút ${vnd(n)} về ${w.bank?.bank_name} ${w.bank?.bank_account_number}?`, [{ text: "Hủy", style: "cancel" }, { text: "Rút tiền", onPress: () => withdraw.mutate(n) }])
-  const askCancel = (x: Withdrawal) => Alert.prompt("Hủy yêu cầu rút", `Hủy yêu cầu rút ${vnd(x.amount)}? Nhập lý do:`, (reason) => { if (reason?.trim()) cancel.mutate({ id: x.id, reason: reason.trim() }) })
+  const askCancel = (x: Withdrawal) => void prompt({ title: "Hủy yêu cầu rút", message: `Hủy yêu cầu rút ${vnd(x.amount)}? Nhập lý do:`, ok: "Hủy yêu cầu" }).then((reason) => { if (reason?.trim()) cancel.mutate({ id: x.id, reason: reason.trim() }) })
   const outs = w.withdrawals ?? [], ins = w.credits ?? []
 
   return (

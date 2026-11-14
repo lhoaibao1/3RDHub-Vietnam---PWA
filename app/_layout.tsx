@@ -13,6 +13,7 @@ import { useUnread } from "../src/hooks"
 import { useAutoUpdate } from "../src/autoupdate"
 import { t } from "../src/theme"
 import { FetchBar } from "../src/fetchbar"
+import { PromptHost } from "../src/prompt"
 
 void SplashScreen.preventAutoHideAsync().catch(() => {})
 // Quay lại app (từ nền hoặc màn khoá) = "focus": dữ liệu cũ hơn 30 giây tự tải lại, nên chiến dịch / đơn mới trên web
@@ -112,6 +113,7 @@ function Gate() {
         </Stack>
       ) : null}
       <FetchBar />
+      <PromptHost />
       <BrandSplash done={ready} />
     </View>
   )

@@ -12,23 +12,23 @@ export default function TabsLayout() {
   return (
     <NativeTabs tintColor={t.navy} minimizeBehavior="onScrollDown" labelStyle={{ fontWeight: "600" }}>
       <NativeTabs.Trigger name="index" disableAutomaticContentInsets>
-        <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} />
+        <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
         <NativeTabs.Trigger.Label>Trang chủ</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="campaigns" disableAutomaticContentInsets>
-        <NativeTabs.Trigger.Icon sf={{ default: "megaphone", selected: "megaphone.fill" }} />
+        <NativeTabs.Trigger.Icon sf={{ default: "megaphone", selected: "megaphone.fill" }} md="campaign" />
         <NativeTabs.Trigger.Label>Chiến dịch</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="orders" disableAutomaticContentInsets>
-        <NativeTabs.Trigger.Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
+        <NativeTabs.Trigger.Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} md="receipt_long" />
         <NativeTabs.Trigger.Label>Đơn hàng</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="wallet" disableAutomaticContentInsets>
-        <NativeTabs.Trigger.Icon sf={{ default: "wallet.bifold", selected: "wallet.bifold.fill" }} />
+        <NativeTabs.Trigger.Icon sf={{ default: "wallet.bifold", selected: "wallet.bifold.fill" }} md="account_balance_wallet" />
         <NativeTabs.Trigger.Label>Ví</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="account" disableAutomaticContentInsets>
-        <NativeTabs.Trigger.Icon sf={{ default: "person.crop.circle", selected: "person.crop.circle.fill" }} />
+        <NativeTabs.Trigger.Icon sf={{ default: "person.crop.circle", selected: "person.crop.circle.fill" }} md="account_circle" />
         <NativeTabs.Trigger.Label>Tôi</NativeTabs.Trigger.Label>
         {n > 0 ? <NativeTabs.Trigger.Badge>{String(Math.min(n, 99))}</NativeTabs.Trigger.Badge> : null}
       </NativeTabs.Trigger>

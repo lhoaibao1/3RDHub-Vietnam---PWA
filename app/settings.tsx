@@ -14,6 +14,7 @@ import { openPrivacy, openTerms, ZALO_SUPPORT } from "../src/links"
 import { registerPush } from "../src/push"
 import { t } from "../src/ui"
 import { shadow } from "../src/theme"
+import { prompt } from "../src/prompt"
 
 type RowProps = { icon: keyof typeof Ionicons.glyphMap; color: string; label: string; sub?: string; value?: string; right?: React.ReactNode; onPress?: () => void; danger?: boolean }
 function SRow({ icon, color, label, sub, value, right, onPress, danger }: RowProps) {
@@ -63,7 +64,7 @@ export default function Settings() {
       setBioOn(true)
       Alert.alert("Đã bật", `Lần sau bấm "Đăng nhập bằng ${bio?.label}" ở màn đăng nhập.`)
     }
-    Alert.prompt(`Bật đăng nhập bằng ${bio?.label}`, "Nhập mật khẩu đăng nhập của bạn để lưu vào máy (khoá bằng " + bio?.label + "). Tài khoản đăng nhập bằng Google/Microsoft chưa có mật khẩu thì không dùng được.", (pw) => void save(pw), "secure-text")
+    void prompt({ title: `Bật đăng nhập bằng ${bio?.label}`, message: "Nhập mật khẩu đăng nhập của bạn để lưu vào máy (khoá bằng " + bio?.label + "). Tài khoản đăng nhập bằng Google/Microsoft chưa có mật khẩu thì không dùng được.", secure: true, ok: "Bật" }).then((pw) => { if (pw) void save(pw) })
   }
   const askPush = async () => {
     if (push === "denied") { void Linking.openSettings(); return }

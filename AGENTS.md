@@ -1,4 +1,4 @@
-This is the **iOS** app (Expo/React Native, `platforms: ["ios"]`). The Android app is a separate native Kotlin project in `android-app/` (see `android-app/AGENTS.md`): do not edit it from here and share no code with it.
+This is the **iOS + Android** app (one Expo/React Native codebase, `platforms: ["ios", "android"]`, owner 2026-11-14). iOS ships to testers through Expo Go (EAS Update, `.github/workflows/update.yml`). Android ships as an **APK** built by `.github/workflows/android.yml` and published on GitHub Releases (stable link: `https://github.com/lhoaibao1/3RDHub-Vietnam---PWA/releases/latest/download/3RDHub-Vietnam.apk`); the APK has Expo Updates turned off. Anything platform-specific must work on both (e.g. `Alert.prompt` is iOS-only: use `src/prompt.tsx`). `android-app/` holds only the old spec and design files.
 
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 
