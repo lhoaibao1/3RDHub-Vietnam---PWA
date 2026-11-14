@@ -30,7 +30,7 @@
       "expo-secure-store"
     ],
     "extra": {
-      "apiUrl": "https://uat-app.3rdvn.io.vn",
+      "apiUrl": "https://app.3rdvn.io.vn",
       "eas": {
         "projectId": "0e659853-5785-40fb-b2c3-e27a66165604"
       }
