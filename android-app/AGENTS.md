@@ -29,13 +29,14 @@ Logo và mascot nằm ở `android-app/design/` (đã copy sẵn, dùng trực t
 
 | File | Dùng cho |
 |---|---|
-| `logo.png` | Logo chữ "3RDVN" + khối số 3 (navy + vàng). Đăng nhập, splash |
+| `logo.png` | Logo ngang **"3RDHub Vietnam" + "Powered by"** (navy + cam, tỉ lệ ~5,3:1). Đăng nhập, splash |
+| `mark.png` | Biểu tượng robot (đầu robot, navy) dùng làm icon nhỏ |
 | `mascot-wave.png`, `mascot-check.png`, `mascot-wait.png`, `mascot-alert.png`, `mascot-cheer.png` | Chú robot: đăng nhập, trạng thái rỗng/lỗi/thành công |
-| `icon.png` | Icon app 1024×1024 (mascot trên nền trắng) |
+| `icon.png` | Icon app 1024×1024 (đầu robot navy trên nền trắng) |
 | `android-icon-foreground.png` / `-background.png` / `-monochrome.png` | Adaptive icon (1024×1024, vùng an toàn đã chừa) |
 | `splash-icon.png` | Ảnh cho Splash Screen API (logo, nền trong suốt) |
 
-> Lưu ý: chủ dự án đang cân nhắc **đổi logo**. Logo trong `design/` có thể được thay sau. Hãy đặt tên resource ổn định (`R.drawable.logo`, `ic_launcher_*`) để thay file là xong, **đừng hardcode kích thước theo ảnh**.
+> Logo trong `design/` là bản **dự phòng nằm trong app**. Logo chính thức lấy từ API công khai `GET /api/v1/appearance` (`data.app.splash_url` → `logo_url` → `topbar_logo_url` → `sidebar_logo_url`; icon nhỏ: `data.app.icon_url` hoặc `sidebar_mark_url`; tên: `product_name`). Ảnh nằm ở `/api/v1/brand-assets/<tên>` (public, nối với base URL). Hiển thị logo từ API, cache lại, dùng bản trong `design/` khi chưa tải được. Chủ dự án sẽ đổi logo ở phía server, nên **đừng hardcode kích thước theo ảnh**; icon launcher và splash hệ điều hành thì cố định lúc build.
 
 Màu (Material 3 `ColorScheme`, chỉ light theme):
 
@@ -43,8 +44,8 @@ Màu (Material 3 `ColorScheme`, chỉ light theme):
 navy      #0B2A6F   primary
 navy2     #1B3F94   gradient cuối / primaryContainer đậm
 navySoft  #E8EDF9   nền chip, icon
-gold      #B8892F   accent (số tiền hoa hồng, CTA phụ)
-goldSoft  #F8EFD9
+orange    #FF6A2B   accent (số tiền hoa hồng, CTA phụ, cột cuối biểu đồ)
+orangeSoft #FFEDE4
 bg        #F4F6FB   nền màn hình
 card      #FFFFFF   thẻ, bo góc 16dp, bóng nhẹ
 text      #0F1B3D
@@ -55,14 +56,14 @@ ok #15803D (nền #E3F5E8)  warn #B45309 (nền #FDF0DC)  bad #B91C1C (nền #FB
 
 Phong cách: thẻ trắng bo 16dp, "hero" gradient navy→navy2 bo góc dưới 28dp ở Trang chủ/Tôi, chip bo tròn, số tiền chữ đậm. Sạch, nhiều khoảng trắng. Tiền định dạng `1.234.567đ` (`vi-VN`, không phần thập phân).
 
-**Màn hình mở app (splash)**: Splash Screen API (`androidx.core:core-splashscreen`) hiện logo; sau đó một màn in-app: nền trắng, logo hiện dần + scale nhẹ, mascot-wave bên dưới, dòng "Dành cho Publisher" màu vàng ở đáy; giữ tối thiểu ~1,6 s và chỉ biến mất khi đã biết trạng thái đăng nhập, rồi mờ dần ~350 ms.
+**Màn hình mở app (splash)**: Splash Screen API (`androidx.core:core-splashscreen`) hiện logo; sau đó một màn in-app: nền trắng, logo hiện dần + scale nhẹ, mascot-wave bên dưới, dòng "Dành cho Publisher" màu cam ở đáy; giữ tối thiểu ~1,6 s và chỉ biến mất khi đã biết trạng thái đăng nhập, rồi mờ dần ~350 ms.
 
 ## 4. Màn hình và tính năng
 
 Bottom navigation 5 tab: **Trang chủ · Chiến dịch · Đơn hàng · Ví · Tôi** (Tôi có badge số thông báo chưa đọc). Chưa đăng nhập → màn Đăng nhập.
 
 1. **Đăng nhập**: logo, ô email + mật khẩu (nút hiện/ẩn), nút Đăng nhập, link "Quên mật khẩu" (mở trình duyệt `{API}/forgot-password`), "Đăng ký" (mở `{API}/signup`). Hỗ trợ **2FA**: nếu server trả `two_factor`, hiện ô nhập mã rồi gọi bước 2FA.
-2. **Trang chủ**: hero gradient có avatar + lời chào theo giờ + chuông thông báo (badge); chip khoảng thời gian *Hôm nay / 7 ngày / 30 ngày*; số **hoa hồng** lớn kèm % so với kỳ trước; biểu đồ cột hoa hồng theo ngày (tự vẽ bằng Canvas, cột cuối màu vàng); lưới 4 ô: Click, Đơn, Đơn đã duyệt, Doanh số; hàng lối tắt (Link của tôi, Chiến dịch, Rút tiền); **carousel banner** (chạm → mở chiến dịch hoặc link ngoài); **Chiến dịch nổi bật** (cuộn ngang, ảnh + tên + danh mục); **Đơn gần đây** (5 đơn). Kéo để làm mới.
+2. **Trang chủ**: hero gradient có avatar + lời chào theo giờ + chuông thông báo (badge); chip khoảng thời gian *Hôm nay / 7 ngày / 30 ngày*; số **hoa hồng** lớn kèm % so với kỳ trước; biểu đồ cột hoa hồng theo ngày (tự vẽ bằng Canvas, cột cuối màu cam); lưới 4 ô: Click, Đơn, Đơn đã duyệt, Doanh số; hàng lối tắt (Link của tôi, Chiến dịch, Rút tiền); **carousel banner** (chạm → mở chiến dịch hoặc link ngoài); **Chiến dịch nổi bật** (cuộn ngang, ảnh + tên + danh mục); **Đơn gần đây** (5 đơn). Kéo để làm mới.
 3. **Chiến dịch**: ô tìm kiếm; chip lọc *Tất cả / Đã tham gia / từng danh mục*; danh sách thẻ **có ảnh banner** (150dp), tên, "Đến X%" (mức hoa hồng cao nhất), tag (Hot, Nổi bật, Hoa hồng cao, Mới, Lên đơn nhanh, Duyệt nhanh, Trả nhanh), badge "Đã tham gia", số publisher.
 4. **Chi tiết chiến dịch**: gallery ảnh vuốt ngang (chấm trang), tên, chip danh mục/chu kỳ đối soát/lịch trả, **bảng hoa hồng**, khối link giới thiệu (Sao chép / Chia sẻ), các mục có thể xổ ra: Giới thiệu, Chính sách hoa hồng, Điều kiện, Cookie, Lý do hủy đơn, Quy định traffic. Thanh dưới cố định: *Đăng ký tham gia* (chưa tham gia) / *Đang chờ duyệt* / *Lấy link giới thiệu* hoặc *Tạo link mới* (đã duyệt).
 5. **Đơn hàng**: chip lọc theo trạng thái; dòng tóm tắt "N đơn · Hoa hồng X"; thẻ: tên chiến dịch, mã đơn, thời gian, chấm màu + tên trạng thái, hoa hồng, doanh số.
@@ -70,7 +71,7 @@ Bottom navigation 5 tab: **Trang chủ · Chiến dịch · Đơn hàng · Ví �
 7. **Tôi**: avatar lớn, tên, email, vai trò, **Mã Publisher** (sao chép), menu: Thông tin cá nhân, Link giới thiệu của tôi, Thông báo, Mở bản web, Đăng xuất (có xác nhận), hiện phiên bản app.
 8. **Thông tin cá nhân**: **đổi / xóa ảnh đại diện** (Photo Picker, crop vuông, upload), hiển thị họ tên, email, SĐT, địa chỉ, MST, ngân hàng, STK, chủ TK, trạng thái hợp đồng (chỉ xem; sửa trên web).
 9. **Link của tôi**: danh sách link tracking: tên, ngày tạo, số click, bật/tắt, URL, Sao chép / Chia sẻ / Bật-Tắt.
-10. **Thông báo**: tab lọc *Tất cả / Đơn hàng / Ví / Thư / Hệ thống*, chưa đọc có viền vàng, chạm để đánh dấu đã đọc và điều hướng theo `link`, nút "Đọc hết".
+10. **Thông báo**: tab lọc *Tất cả / Đơn hàng / Ví / Thư / Hệ thống*, chưa đọc có viền cam, chạm để đánh dấu đã đọc và điều hướng theo `link`, nút "Đọc hết".
 
 Mọi danh sách: kéo để làm mới, trạng thái rỗng (kèm mascot), trạng thái lỗi có nút Thử lại, không treo giao diện khi mất mạng (thông báo "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.").
 
