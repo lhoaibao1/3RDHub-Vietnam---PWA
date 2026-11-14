@@ -7,6 +7,7 @@ import { api, ApiError } from "../../src/api"
 import { orderStatus, useCampaigns, useMembers, useOrders } from "../../src/hooks"
 import { vnd, when } from "../../src/format"
 import { Card, Empty, ErrorBox, Loading, Row, SectionTitle, t } from "../../src/ui"
+import { TopBar } from "../../src/chrome"
 
 type Step = { at: string; source?: string; status?: string; biz_status?: string; partner_status?: string; sale_amount?: number }
 
@@ -32,6 +33,8 @@ export default function OrderDetail() {
   const steps = [...(hist.data ?? [])].sort((a, b) => b.at.localeCompare(a.at))
 
   return (
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <TopBar title="Chi tiết đơn" />
     <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }}>
       <Card style={{ alignItems: "center", gap: 8, paddingVertical: 20 }}>
         <View style={{ backgroundColor: st.soft, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5 }}><Text style={{ color: st.color, fontWeight: "900" }}>{st.label}</Text></View>
@@ -75,8 +78,8 @@ export default function OrderDetail() {
           })}
         </Card>
       ) : <Text style={{ color: t.sub }}>Chưa có bước xử lý nào.</Text>}
-      <Pressable onPress={() => router.back()} style={{ alignSelf: "center", padding: 8 }}><Text style={{ color: t.navy2, fontWeight: "700" }}>← Quay lại danh sách đơn</Text></Pressable>
     </ScrollView>
+    </View>
   )
 }
 const s = StyleSheet.create({

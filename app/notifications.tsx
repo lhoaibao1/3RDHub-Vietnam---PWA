@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react"
 import { FlatList, Pressable, RefreshControl, ScrollView, Text, View } from "react-native"
-import { Stack, useRouter } from "expo-router"
+import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../src/api"
 import { when } from "../src/format"
-import { Card, Chip, Empty, ErrorBox, Loading, PageFooter, t } from "../src/ui"
-import { usePaged } from "../src/paged"
+import { Card, Chip, Empty, ErrorBox, Loading, t } from "../src/ui"
+import { Pager, TopBar, usePager } from "../src/chrome"
 
 type Note = { id: string; title: string; body: string; link: string; kind: string; created_at: string; read_at: string | null }
 const cat = (k: string) => (k.startsWith("order_") || k === "mgr_order_new" || k === "mgr_lost_order" ? "order" : k === "wallet_credited" || k === "payout_created" || k.startsWith("withdraw_") ? "wallet" : /^(contract_|join_|kyc_)/.test(k) || k === "comment_reply" ? "mail" : "system")
@@ -22,7 +22,7 @@ export default function Notifications() {
   const readAll = useMutation({ mutationFn: () => api("/api/v1/tenant/notifications/read-all", { method: "POST" }), onSuccess: done })
   const read = useMutation({ mutationFn: (id: string) => api(`/api/v1/tenant/notifications/${id}/read`, { method: "POST" }), onSuccess: done })
   const rows = useMemo(() => (q.data ?? []).filter((n) => !f || cat(n.kind) === f), [q.data, f])
-  const paged = usePaged(rows, 20, f)
+  const pg = usePager(rows, 20, f)
   const open = (n: Note) => {
     if (!n.read_at) read.mutate(n.id)
     const m = n.link.match(/\/campaigns\/([^/?#]+)/)
@@ -32,7 +32,7 @@ export default function Notifications() {
   }
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <Stack.Screen options={{ title: "Thông báo", headerRight: () => <Pressable onPress={() => readAll.mutate()}><Text style={{ color: t.navy2, fontWeight: "700" }}>Đọc hết</Text></Pressable> }} />
+      <TopBar title="Thông báo" right={<Pressable onPress={() => readAll.mutate()} hitSlop={8}><Text style={{ color: t.navy2, fontWeight: "800" }}>Đọc hết</Text></Pressable>} />
       <View style={{ height: 50 }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: "center" }}>
           {TABS.map(([k, l]) => <Chip key={k} label={l} on={f === k} onPress={() => setF(k)} />)}
@@ -40,10 +40,8 @@ export default function Notifications() {
       </View>
       {q.isPending ? <Loading /> : q.isError ? <ErrorBox error={q.error} retry={() => q.refetch()} /> : (
         <FlatList
-          data={paged.page}
-          onEndReached={paged.more}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={<PageFooter shown={paged.shown} total={paged.total} onMore={paged.more} unit="thông báo" />}
+          data={pg.rows}
+          ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="thông báo" onPage={pg.setPage} />}
           keyExtractor={(n) => n.id}
           contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}
           refreshControl={<RefreshControl refreshing={q.isFetching} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}

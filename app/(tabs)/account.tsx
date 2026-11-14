@@ -13,6 +13,7 @@ import { BrandLogo } from "../../src/brand"
 import { useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
 import { num, vndShort } from "../../src/format"
 import { Avatar, t } from "../../src/ui"
+import { GlassButton, tap } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
 type Item = { icon: keyof typeof Ionicons.glyphMap; color: string; label: string; value?: string; badge?: number; onPress: () => void }
@@ -23,7 +24,7 @@ function Group({ title, items }: { title: string; items: Item[] }) {
       <Text style={s.groupTitle}>{title}</Text>
       <View style={s.group}>
         {items.map((it, i) => (
-          <Pressable key={it.label} onPress={it.onPress} style={({ pressed }) => [s.item, i > 0 && s.itemLine, pressed && { backgroundColor: t.bg }]}>
+          <Pressable key={it.label} onPress={() => { tap(); it.onPress() }} style={({ pressed }) => [s.item, i > 0 && s.itemLine, pressed && { backgroundColor: t.bg }]}>
             <View style={[s.icon, { backgroundColor: it.color + "1A" }]}><Ionicons name={it.icon} size={19} color={it.color} /></View>
             <Text style={s.itemText}>{it.label}</Text>
             {it.badge ? <View style={s.badge}><Text style={{ color: "#fff", fontSize: 11, fontWeight: "800" }}>{it.badge}</Text></View> : null}
@@ -60,7 +61,8 @@ export default function Account() {
       <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 20 }]}>
         <View style={[s.ring, { width: 240, height: 240, top: -90, right: -80 }]} />
         <View style={[s.ring, { width: 140, height: 140, bottom: -40, left: -50, borderColor: "rgba(255,106,43,0.35)" }]} />
-        <Pressable onPress={() => router.push("/profile")} style={s.avatarWrap}>
+        <View style={{ position: "absolute", right: 14, top: insets.top + 6 }}><GlassButton icon="settings-outline" label="Cài đặt" onPress={() => router.push("/settings")} /></View>
+        <Pressable onPress={() => { tap(); router.push("/profile") }} style={s.avatarWrap}>
           <Avatar url={user?.avatar_url} name={name} size={88} />
           <View style={s.cam}><Ionicons name="camera" size={14} color="#fff" /></View>
         </Pressable>
@@ -93,6 +95,7 @@ export default function Account() {
         ]} />
         <Group title="Ứng dụng" items={[
           { icon: "notifications", color: "#D97706", label: "Thông báo", badge: unread.data || 0, onPress: () => router.push("/notifications") },
+          { icon: "settings", color: "#475569", label: "Cài đặt", onPress: () => router.push("/settings") },
           { icon: "globe", color: t.navy2, label: "Mở bản web", onPress: () => void Linking.openURL(API_URL) },
         ]} />
         <Pressable onPress={askLogout} style={({ pressed }) => [s.logout, pressed && { opacity: 0.8 }]}>

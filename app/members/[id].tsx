@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 import { kycOf, memberState, orderStatus, useMembers, useOrders } from "../../src/hooks"
 import { day, num, vnd, vndShort, when } from "../../src/format"
 import { Avatar, Card, Empty, Loading, Pill, Row, SectionTitle, t } from "../../src/ui"
+import { TopBar } from "../../src/chrome"
 
 export default function MemberDetail() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -17,6 +18,8 @@ export default function MemberDetail() {
   const ok = mine.filter((o) => o.status === "approved" || o.status === "paid")
   const k = kycOf(m.kyc_status)
   return (
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <TopBar title={m.name} />
     <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }}>
       <Card style={{ alignItems: "center", gap: 8, paddingVertical: 20 }}>
         <Avatar url={m.avatar_url} name={m.name} size={84} />
@@ -65,5 +68,6 @@ export default function MemberDetail() {
       })}
       {!mine.length ? <Text style={{ color: t.sub }}>Thành viên này chưa có đơn.</Text> : null}
     </ScrollView>
+    </View>
   )
 }

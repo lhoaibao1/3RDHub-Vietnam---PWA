@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { Dimensions, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -6,8 +6,8 @@ import { LinearGradient } from "expo-linear-gradient"
 import { type Campaign, useCampaigns, useMemberships } from "../../src/hooks"
 import { num, rateText, vnd } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Art, Empty, ErrorBox, Loading, PageFooter, t } from "../../src/ui"
-import { usePaged } from "../../src/paged"
+import { Art, Empty, ErrorBox, Loading, t } from "../../src/ui"
+import { LargeTitle, Pager, tap, usePager } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
 const W = Dimensions.get("window").width
@@ -93,7 +93,8 @@ export default function Campaigns() {
     return [...r].sort(by[sort])
   }, [q.data, mem.data, term, cat, tab, sort])
 
-  const paged = usePaged(rows, 20, `${tab}|${cat}|${sort}|${term}`)
+  const pg = usePager(rows, 20, `${tab}|${cat}|${sort}|${term}`)
+  const list = useRef<FlatList<Campaign>>(null)
   if (q.isPending) return <Loading image rows={2} />
   if (q.isError) return <ErrorBox error={q.error} retry={() => q.refetch()} />
   const joinedCount = Object.values(mem.data ?? {}).filter((v) => v === "approved").length
@@ -117,19 +118,19 @@ export default function Campaigns() {
   )
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
+      <LargeTitle title="Chiến dịch" sub={`${num(q.data.length)} chiến dịch đang có`} />
       <FlatList
-        data={paged.page}
+        ref={list}
+        data={pg.rows}
         numColumns={2}
         columnWrapperStyle={{ gap: 12 }}
-        onEndReached={paged.more}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={<PageFooter shown={paged.shown} total={paged.total} onMore={paged.more} unit="chiến dịch" />}
+        ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="chiến dịch" onPage={(p) => { pg.setPage(p); list.current?.scrollToOffset({ offset: 0, animated: true }) }} />}
         keyExtractor={(c) => c.id}
         ListHeaderComponent={header}
-        contentContainerStyle={{ padding: 16, gap: 12, flexGrow: 1 }}
+        contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 12, flexGrow: 1 }}
         refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch(); void mem.refetch() }} tintColor={t.navy} />}
         ListEmptyComponent={<Empty text={tab === "joined" ? "Bạn chưa tham gia chiến dịch nào." : "Không có chiến dịch phù hợp."} icon="megaphone-outline" />}
-        renderItem={({ item }) => <CampaignCard c={item} status={status(item.id)} onPress={() => router.push(`/campaign/${item.id}`)} />}
+        renderItem={({ item }) => <CampaignCard c={item} status={status(item.id)} onPress={() => { tap(); router.push(`/campaign/${item.id}`) }} />}
       />
       <PickerSheet open={sheet === "cat"} title="Ngành hàng" options={[{ value: "", label: "Mọi ngành hàng" }, ...cats.map(([c, n]) => ({ value: c, label: c, sub: `${n} chiến dịch` }))]} value={cat} onPick={setCat} onClose={() => setSheet("")} />
       <PickerSheet open={sheet === "sort"} title="Sắp xếp" options={SORTS} value={sort} onPick={setSort} onClose={() => setSheet("")} />

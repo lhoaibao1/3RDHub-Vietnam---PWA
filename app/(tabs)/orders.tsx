@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -6,10 +6,10 @@ import { ORDER_STATUS, orderStatus, useCampaigns, useMembers, useOrders, type Or
 import { RANGES, rangeOf, type RangeKey } from "../../src/dates"
 import { num, vnd, vndShort, when } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Card, Empty, ErrorBox, Loading, PageFooter, t } from "../../src/ui"
+import { Art, Card, Empty, ErrorBox, Loading, t } from "../../src/ui"
+import { LargeTitle, Pager, tap, usePager } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
-const PAGE = 30
 const SORTS = [{ value: "new", label: "Mới nhất" }, { value: "old", label: "Cũ nhất" }, { value: "comm", label: "Hoa hồng cao nhất" }, { value: "sale", label: "Doanh số cao nhất" }]
 
 export default function Orders() {
@@ -24,9 +24,9 @@ export default function Orders() {
   const [member, setMember] = useState("")
   const [sort, setSort] = useState("new")
   const [sheet, setSheet] = useState<"" | "range" | "camp" | "member" | "sort">("")
-  const [shown, setShown] = useState(PAGE)
 
   const campName = useMemo(() => new Map((camps.data ?? []).map((c) => [c.id, c.name])), [camps.data])
+  const campArt = useMemo(() => new Map((camps.data ?? []).map((c) => [c.id, c.offer?.thumb_url || c.offer?.banner_url || ""])), [camps.data])
   const memberName = useMemo(() => new Map((members.data ?? []).map((m) => [m.id, m.name])), [members.data])
   const nameOf = (o: Order) => o.campaign_name || (o.campaign_id ? campName.get(o.campaign_id) : "") || "Đơn hàng"
 
@@ -51,7 +51,9 @@ export default function Orders() {
   }, [base, status, sort])
   const sum = rows.reduce((a, o) => a + (o.publisher_commission || 0), 0)
   const approved = rows.filter((o) => o.status === "approved" || o.status === "paid").reduce((a, o) => a + (o.publisher_commission || 0), 0)
-  const reset = () => { setStatus(""); setRange("30d"); setCamp(""); setMember(""); setTerm(""); setSort("new"); setShown(PAGE) }
+  const pg = usePager(rows, 20, `${status}|${range}|${camp}|${member}|${term}|${sort}`)
+  const list = useRef<FlatList<Order>>(null)
+  const reset = () => { setStatus(""); setRange("30d"); setCamp(""); setMember(""); setTerm(""); setSort("new") }
   const filtered = !!(status || range !== "30d" || camp || member || term)
 
   if (q.isPending) return <Loading />
@@ -62,7 +64,7 @@ export default function Orders() {
 
   const header = (
     <View style={{ gap: 12, paddingBottom: 4 }}>
-      <View style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tìm mã đơn hoặc chiến dịch…" placeholderTextColor={t.sub} value={term} onChangeText={(v) => { setTerm(v); setShown(PAGE) }} autoCorrect={false} />{term ? <Pressable onPress={() => setTerm("")} hitSlop={10}><Ionicons name="close-circle" size={18} color={t.sub} /></Pressable> : null}</View>
+      <View style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tìm mã đơn hoặc chiến dịch…" placeholderTextColor={t.sub} value={term} onChangeText={(v) => setTerm} autoCorrect={false} />{term ? <Pressable onPress={() => setTerm("")} hitSlop={10}><Ionicons name="close-circle" size={18} color={t.sub} /></Pressable> : null}</View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
         <FilterButton label="Thời gian" value={RANGES.find((r) => r.value === range)?.label} active onPress={() => setSheet("range")} />
         <FilterButton label="Chiến dịch" value={campName.get(camp)} active={!!camp} onPress={() => setSheet("camp")} />
@@ -73,7 +75,7 @@ export default function Orders() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
         <Pressable onPress={() => setStatus("")} style={[s.st, !status && s.stOn]}><Text style={[s.stText, !status && { color: "#fff" }]}>Tất cả · {num(base.length)}</Text></Pressable>
         {Object.entries(ORDER_STATUS).map(([k, v]) => (
-          <Pressable key={k} onPress={() => { setStatus(status === k ? "" : k); setShown(PAGE) }} style={[s.st, status === k && { backgroundColor: v.color, borderColor: v.color }]}>
+          <Pressable key={k} onPress={() => { setStatus(status === k ? "" : k) }} style={[s.st, status === k && { backgroundColor: v.color, borderColor: v.color }]}>
             <View style={[s.dot, { backgroundColor: status === k ? "#fff" : v.color }]} />
             <Text style={[s.stText, status === k && { color: "#fff" }]}>{v.label} · {num(counts[k] ?? 0)}</Text>
           </Pressable>
@@ -89,21 +91,24 @@ export default function Orders() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
+      <LargeTitle title="Đơn hàng" sub={`${num(q.data.length)} đơn của bạn`} />
       <FlatList
-        data={rows.slice(0, shown)}
+        ref={list}
+        data={pg.rows}
         keyExtractor={(o) => o.id}
         ListHeaderComponent={header}
-        contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}
+        contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 10, flexGrow: 1 }}
         refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}
         ListEmptyComponent={<Empty text={filtered ? "Không có đơn nào khớp bộ lọc." : "Chưa có đơn hàng."} icon="receipt-outline" />}
-        onEndReached={() => setShown((n) => (n < rows.length ? n + PAGE : n))}
-        onEndReachedThreshold={0.4}
-        ListFooterComponent={<PageFooter shown={Math.min(shown, rows.length)} total={rows.length} onMore={() => setShown((n) => n + PAGE)} unit="đơn" />}
+        ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="đơn" onPage={(p) => { pg.setPage(p); list.current?.scrollToOffset({ offset: 0, animated: true }) }} />}
         renderItem={({ item: o }) => {
           const st = orderStatus(o.status)
           return (
-            <Pressable onPress={() => router.push(`/order/${o.id}`)} style={({ pressed }) => [s.row, pressed && { opacity: 0.85 }]}>
-              <View style={[s.bar, { backgroundColor: st.color }]} />
+            <Pressable onPress={() => { tap(); router.push(`/order/${o.id}`) }} style={({ pressed }) => [s.row, pressed && { opacity: 0.85 }]}>
+              <View>
+                <Art url={o.campaign_id ? campArt.get(o.campaign_id) : ""} name={nameOf(o)} style={s.thumb} />
+                <View style={[s.sdot, { backgroundColor: st.color }]} />
+              </View>
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={{ fontWeight: "800", color: t.text }} numberOfLines={1}>{nameOf(o)}</Text>
                 <Text style={{ color: t.sub, fontSize: 12 }} numberOfLines={1}>{o.external_order_id ? `#${o.external_order_id}` : "Không có mã"} · {when(o.created_at)}</Text>
@@ -119,9 +124,9 @@ export default function Orders() {
           )
         }}
       />
-      <PickerSheet open={sheet === "range"} title="Thời gian" options={RANGES} value={range} onPick={(v) => { setRange(v as RangeKey); setShown(PAGE) }} onClose={() => setSheet("")} />
-      <PickerSheet open={sheet === "camp"} title="Chiến dịch" options={campOpts} value={camp} onPick={(v) => { setCamp(v); setShown(PAGE) }} onClose={() => setSheet("")} />
-      <PickerSheet open={sheet === "member"} title="Thành viên" options={memberOpts} value={member} onPick={(v) => { setMember(v); setShown(PAGE) }} onClose={() => setSheet("")} />
+      <PickerSheet open={sheet === "range"} title="Thời gian" options={RANGES} value={range} onPick={(v) => { setRange(v as RangeKey) }} onClose={() => setSheet("")} />
+      <PickerSheet open={sheet === "camp"} title="Chiến dịch" options={campOpts} value={camp} onPick={setCamp} onClose={() => setSheet("")} />
+      <PickerSheet open={sheet === "member"} title="Thành viên" options={memberOpts} value={member} onPick={setMember} onClose={() => setSheet("")} />
       <PickerSheet open={sheet === "sort"} title="Sắp xếp" options={SORTS} value={sort} onPick={setSort} onClose={() => setSheet("")} />
     </View>
   )
@@ -136,7 +141,8 @@ const s = StyleSheet.create({
   sum: { flex: 1, paddingVertical: 10, paddingHorizontal: 10, gap: 2 },
   sumK: { color: t.sub, fontSize: 11 },
   sumV: { color: t.text, fontWeight: "900", fontSize: 15 },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 14, paddingLeft: 0, overflow: "hidden", ...shadow },
-  bar: { width: 4, alignSelf: "stretch", borderTopRightRadius: 4, borderBottomRightRadius: 4 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 12, ...shadow },
+  thumb: { width: 52, height: 52, borderRadius: 12, overflow: "hidden" },
+  sdot: { position: "absolute", right: -3, bottom: -3, width: 16, height: 16, borderRadius: 8, borderWidth: 3, borderColor: "#fff" },
   pill: { alignSelf: "flex-start", borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2, marginTop: 2 },
 })

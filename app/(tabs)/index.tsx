@@ -65,7 +65,7 @@ export default function Home() {
     <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 24 }} refreshControl={<RefreshControl refreshing={ov.isFetching && !ov.isPending} onRefresh={refresh} tintColor={t.navy} />}>
       <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 12 }]}>
         <View style={s.heroTop}>
-          <View style={s.logoPill}><BrandLogo width={150} height={28} /></View>
+          <BrandLogo light width={170} height={32} />
           <View style={{ flex: 1 }} />
           <Pressable onPress={() => router.push("/notifications")} style={s.bell}>
             <Ionicons name="notifications-outline" size={22} color="#fff" />
@@ -166,7 +166,6 @@ export default function Home() {
 const s = StyleSheet.create({
   hero: { paddingHorizontal: 16, paddingBottom: 18, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   heroTop: { flexDirection: "row", alignItems: "center", gap: 10 },
-  logoPill: { backgroundColor: "#fff", borderRadius: 14, paddingHorizontal: 12, paddingVertical: 7 },
   bell: { width: 42, height: 42, borderRadius: 21, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
   dot: { position: "absolute", top: -2, right: -2, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: t.bad, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
   bars: { flexDirection: "row", alignItems: "flex-end", gap: 4, height: 60, marginTop: 12 },

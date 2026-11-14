@@ -3,7 +3,7 @@ import { api } from "./api"
 
 export type Me = { role_name?: string; role_code?: string; scope?: string; can_refer?: boolean; me?: { rd_code?: string; name?: string }; permissions?: Record<string, boolean> | string[]; tenant?: { name?: string } }
 export const useMe = () => useQuery({ queryKey: ["me"], queryFn: () => api<{ data: Me }>("/api/v1/tenant/context").then((r) => r.data), staleTime: 5 * 60_000 })
-export const useUnread = () => useQuery({ queryKey: ["unread"], queryFn: () => api<{ data: { count: number } }>("/api/v1/tenant/notifications/unread").then((r) => r.data.count), refetchInterval: 60_000 })
+export const useUnread = () => useQuery({ queryKey: ["unread"], queryFn: () => api<{ data: { count: number } }>("/api/v1/tenant/notifications/unread").then((r) => r.data.count), refetchInterval: 30_000 })
 
 export type Campaign = {
   id: string; name: string; status?: string; participants?: number; position?: number; created_at?: string; rating?: { avg: number; count: number }

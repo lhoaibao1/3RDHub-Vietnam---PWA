@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../../src/api"
 import { day, vnd, when } from "../../src/format"
 import { Button, Card, ErrorBox, Loading, Pill, SectionTitle, t } from "../../src/ui"
+import { LargeTitle } from "../../src/chrome"
 
 type Wallet = {
   member: boolean
@@ -34,7 +35,9 @@ export default function WalletScreen() {
   const ok = !blocked && n > 0 && n <= b.available && n >= (w.min_amount ?? 0)
   const confirm = () => Alert.alert("Xác nhận rút tiền", `Rút ${vnd(n)} về ${w.bank?.bank_name} ${w.bank?.bank_account_number}?`, [{ text: "Hủy", style: "cancel" }, { text: "Rút", onPress: () => withdraw.mutate(n) }])
   return (
-    <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ padding: 16, gap: 14 }} refreshControl={<RefreshControl refreshing={q.isFetching} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}>
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <LargeTitle title="Ví" />
+    <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 14 }} refreshControl={<RefreshControl refreshing={q.isFetching} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}>
       <LinearGradient colors={[t.navy, t.navy2]} style={s.hero}>
         <Text style={{ color: "#C9D6F5" }}>Số dư có thể rút</Text>
         <Text style={{ color: "#fff", fontSize: 34, fontWeight: "900" }}>{vnd(b.available)}</Text>
@@ -71,6 +74,7 @@ export default function WalletScreen() {
         </Card>
       ))}
     </ScrollView>
+    </View>
   )
 }
 const s = StyleSheet.create({

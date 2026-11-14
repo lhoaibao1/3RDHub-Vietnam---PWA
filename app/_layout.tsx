@@ -6,6 +6,7 @@ import * as SplashScreen from "expo-splash-screen"
 import * as Notifications from "expo-notifications"
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query"
 import { AuthProvider, useAuth } from "../src/auth"
+import { api } from "../src/api"
 import { BrandLogo, BrandProvider, useBrand } from "../src/brand"
 import { registerPush, setBadge } from "../src/push"
 import { useUnread } from "../src/hooks"
@@ -65,7 +66,7 @@ function Gate() {
   const segments = useSegments()
   const router = useRouter()
   const qc = useQueryClient()
-  const inLogin = segments[0] === "login"
+  const inLogin = ["login", "signup", "forgot"].includes(String(segments[0] ?? ""))
   const unread = useUnread()
   useAutoUpdate()
 
@@ -78,6 +79,20 @@ function Gate() {
   // Sau khi đăng nhập: bật thông báo đẩy.
   useEffect(() => { if (user) void registerPush(true) }, [user])
   useEffect(() => { if (user && unread.data != null) setBadge(unread.data) }, [user, unread.data])
+  // Có thông báo mới khi app đang mở: hiện ngay trên máy (push từ server cần backend mới, xem push_mobile.go).
+  const seen = useRef<number | null>(null)
+  useEffect(() => {
+    const n = unread.data
+    if (!user || n == null) return
+    const before = seen.current
+    seen.current = n
+    if (before == null || n <= before) return
+    void api<{ data: { title: string; body: string; link: string; read_at: string | null }[] }>("/api/v1/tenant/notifications").then((r) => {
+      const fresh = r.data.filter((x) => !x.read_at).slice(0, n - before)
+      for (const x of fresh) void Notifications.scheduleNotificationAsync({ content: { title: x.title, body: x.body, data: { link: x.link } }, trigger: null })
+      void qc.invalidateQueries({ queryKey: ["notes"] })
+    }).catch(() => {})
+  }, [user, unread.data, qc])
 
   // Bấm vào thông báo → mở màn Thông báo.
   useEffect(() => {
@@ -88,16 +103,9 @@ function Gate() {
   return (
     <View style={{ flex: 1 }}>
       {ready ? (
-        <Stack screenOptions={{ animation: "slide_from_right", headerBackButtonDisplayMode: "minimal", headerTintColor: t.navy, headerTitleStyle: { fontWeight: "800", fontSize: 16, color: t.navy }, headerShadowVisible: false, headerStyle: { backgroundColor: t.bg }, contentStyle: { backgroundColor: t.bg } }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "fade" }} />
-          <Stack.Screen name="login" options={{ headerShown: false, animation: "fade" }} />
-          <Stack.Screen name="campaign/[id]" options={{ title: "Chiến dịch" }} />
-          <Stack.Screen name="order/[id]" options={{ title: "Chi tiết đơn" }} />
-          <Stack.Screen name="members/index" options={{ title: "Thành viên" }} />
-          <Stack.Screen name="members/[id]" options={{ title: "Thành viên" }} />
-          <Stack.Screen name="notifications" options={{ title: "Thông báo" }} />
-          <Stack.Screen name="links" options={{ title: "Link của tôi" }} />
-          <Stack.Screen name="profile" options={{ title: "Thông tin cá nhân" }} />
+        <Stack screenOptions={{ headerShown: false, animation: "slide_from_right", gestureEnabled: true, contentStyle: { backgroundColor: t.bg } }}>
+          <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+          <Stack.Screen name="login" options={{ animation: "fade" }} />
         </Stack>
       ) : null}
       <FetchBar />

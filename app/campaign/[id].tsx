@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Alert, Dimensions, Linking, Pressable, ScrollView, Share, Text, View } from "react-native"
-import { Stack, useLocalSearchParams } from "expo-router"
+import { useLocalSearchParams } from "expo-router"
 import { Image } from "expo-image"
 import * as Clipboard from "expo-clipboard"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { abs, api } from "../../src/api"
 import { OfferRate, plain, rateText } from "../../src/format"
 import { Art, Button, Card, ErrorBox, Loading, Pill, t } from "../../src/ui"
+import { GlassButton, TopBar } from "../../src/chrome"
 
 type Detail = {
   id: string; name: string; status?: string; content?: string
@@ -40,7 +41,7 @@ export default function CampaignDetail() {
   })
 
   if (camp.isPending) return <Loading />
-  if (camp.isError) return <ErrorBox error={camp.error} retry={() => camp.refetch()} />
+  if (camp.isError) return <View style={{ flex: 1 }}><TopBar title="Chiến dịch" /><ErrorBox error={camp.error} retry={() => camp.refetch()} /></View>
   const d = camp.data, o = d.offer
   const status = join.data?.status
   const mine = links.data?.find((l) => l.campaign_id === id && l.status === "active")?.url
@@ -49,7 +50,6 @@ export default function CampaignDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <Stack.Screen options={{ title: d.name }} />
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         {pics.length ? (
           <View>
@@ -104,6 +104,7 @@ export default function CampaignDetail() {
           : status === "pending" ? <Button label="Đang chờ duyệt" kind="ghost" onPress={() => {}} disabled />
           : <Button label="Đăng ký tham gia" kind="gold" onPress={() => register.mutate()} busy={register.isPending} />}
       </View>
+      <TopBar overlay title={d.name} right={<GlassButton icon="share-outline" label="Chia sẻ" onPress={() => Share.share({ message: mine || d.name })} />} />
     </View>
   )
 }

@@ -33,6 +33,7 @@ Logo nằm ở `android-app/design/` (đã copy sẵn, dùng trực tiếp):
 | `mark.png` | Biểu tượng robot (đầu robot, navy) dùng làm icon nhỏ |
 | `icon.png` | Icon app 1024×1024 (đầu robot navy trên nền trắng) |
 | `android-icon-foreground.png` / `-background.png` / `-monochrome.png` | Adaptive icon (1024×1024, vùng an toàn đã chừa) |
+| `logo-white.png` | Logo chữ trắng tách nền, dùng trên nền navy |
 | `splash-icon.png` | Ảnh cho Splash Screen API (logo, nền trong suốt) |
 
 > **Logo trong app là file `design/logo.png` (do chủ gửi), dùng nó cho splash, đăng nhập và mọi chỗ cần logo. KHÔNG lấy logo, icon hay ảnh splash từ API** (`/api/v1/brand`, `/api/v1/appearance`): ảnh trên server hiện là hình cũ (chú robot mascot) và sẽ đè lên logo đúng. Muốn đổi logo thì thay file trong `design/`. Icon launcher và splash hệ điều hành cũng lấy từ `design/`. Tên app cố định "3RDHub Vietnam".
@@ -90,6 +91,22 @@ Mọi danh sách: kéo để làm mới, trạng thái rỗng (biểu tượng �
 - **Phân trang** mọi danh sách (chiến dịch 20, đơn 30, thành viên 25, thông báo 20, link 20 mỗi lần): tự tải thêm khi cuộn gần cuối + nút "Xem thêm · x/y", hết thì "Đã hiện hết N …". Đổi bộ lọc là về trang đầu.
 - **Thanh tiêu đề gọn**: tab chính tiêu đề căn trái cỡ lớn, cao vừa đủ; màn phụ chỉ có mũi tên quay lại (không chữ) + tiêu đề nhỏ 16sp.
 - **Hiệu ứng**: chuyển màn trượt từ phải, chuyển tab mờ/trượt nhẹ; màn mở app có logo "thở" nhẹ + thanh chạy màu cam; khi đang tải hiện **khung xương nhấp nháy** (không dùng vòng xoay trống); khi mạng chậm (>350 ms) hiện **thanh mảnh màu cam chạy ở mép trên**.
+
+
+### 4c. Bổ sung đợt 3 (bắt buộc)
+
+- **Logo trên nền tối**: dùng `design/logo-white.png` (chữ trắng, giữ màu cam, nền trong suốt) ở phần đầu màu navy của Trang chủ, KHÔNG đặt trong ô trắng.
+- **Đăng ký trong app** (không mở web): họ tên, email, SĐT, mật khẩu, nhập lại, mã giới thiệu (tuỳ chọn), ô đồng ý Điều khoản + Chính sách → `POST /api/v1/auth/signup` `{email, password, display_name, phone, referral_code}` → 202 → màn "Kiểm tra email" (người dùng bấm link xác nhận trong mail). Lỗi: `403 signup_disabled`, 400 với message tiếng Anh (`email is invalid`, `name is required…`, `password must be 8 to 200 characters`, `phone number is invalid`, `referral code not found`) → dịch sang tiếng Việt; 429 = thử lại sau.
+- **Quên mật khẩu trong app**: `POST /api/v1/auth/password/forgot` `{email}` → màn "Đã gửi email"; `403 reset_disabled` = chưa bật.
+- **Đổi mật khẩu**: `POST /api/v1/tenant/account/password` `{current_password, new_password}`.
+- **Điều khoản / Chính sách**: mở `{API}/terms`, `{API}/privacy` trong Custom Tab; có link ở màn đăng nhập (dòng nhỏ cuối), đăng ký (ô đồng ý) và Cài đặt.
+- **Đăng nhập bằng vân tay / khuôn mặt** (BiometricPrompt): sau lần đăng nhập mật khẩu thành công hỏi "Đăng nhập nhanh bằng vân tay?"; bật thì lưu email + mật khẩu bằng EncryptedSharedPreferences/Keystore (khoá yêu cầu xác thực sinh trắc); màn đăng nhập có nút "Đăng nhập bằng vân tay" và tự hỏi khi mở. Có công tắc trong Cài đặt (bật = nhập mật khẩu + xác nhận vân tay). Đổi mật khẩu thì cập nhật bản lưu. (Passkey WebAuthn thật để sau.)
+- **Cài đặt** (bánh răng ở góc phải phần đầu tab Tôi + mục "Cài đặt" trong menu): Bảo mật (vân tay, đổi mật khẩu), Thông báo (trạng thái quyền, mở cài đặt hệ thống, gửi thông báo thử trên máy), Hỗ trợ & pháp lý (nhóm Zalo hỗ trợ `https://zalo.me/g/thba8hjdrcuut4hl6rue`, Điều khoản, Chính sách), Ứng dụng (phiên bản, xoá bộ nhớ đệm), Đăng xuất.
+- **Thanh tiêu đề**: màn phụ dùng nút quay lại tròn hiệu ứng kính/mờ bên trái + tiêu đề 17sp ở giữa; chi tiết chiến dịch thì nút quay lại và nút chia sẻ **nổi trên ảnh**. Tab chính dùng tiêu đề lớn 32sp căn trái (kiểu iOS).
+- **Phân trang có số** (thay "Xem thêm"): "‹ 1 2 3 … 8 ›" + dòng "21–40 trên 160 đơn · Trang 2/8", 20 mục mỗi trang, đổi trang thì cuộn lên đầu.
+- **Đơn hàng**: mỗi dòng có **ảnh chiến dịch** (thumb_url) 52dp bo góc, chấm màu trạng thái ở góc ảnh.
+- **Thông báo khi app đang mở**: hỏi số chưa đọc mỗi 30 giây; tăng lên thì hiện thông báo hệ thống cho các tin mới.
+- **Rung phản hồi nhẹ** khi chạm nút, tab, thẻ.
 
 ## 5. API — hợp đồng (đã đọc từ source backend, không đoán)
 

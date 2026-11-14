@@ -1,23 +1,34 @@
-import { Tabs } from "expo-router"
-import { Ionicons } from "@expo/vector-icons"
-import type { ColorValue } from "react-native"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { NativeTabs } from "expo-router/native-tabs"
 import { useUnread } from "../../src/hooks"
 import { t } from "../../src/theme"
 
+// Thanh tab gốc của iOS: kính Liquid Glass trên iOS 26+, thu nhỏ khi cuộn xuống (owner, 2026-11-14: "hiệu ứng iOS27").
 export default function TabsLayout() {
   const unread = useUnread()
-  const insets = useSafeAreaInsets()
   const n = unread.data || 0
-  const icon = (on: keyof typeof Ionicons.glyphMap, off: keyof typeof Ionicons.glyphMap) =>
-    ({ color, size, focused }: { color: ColorValue; size: number; focused: boolean }) => <Ionicons name={focused ? on : off} color={color as string} size={size} />
   return (
-    <Tabs screenOptions={{ animation: "shift", tabBarActiveTintColor: t.navy, tabBarInactiveTintColor: t.sub, headerTitleAlign: "left", headerTitleStyle: { fontWeight: "900", fontSize: 22, color: t.navy }, headerShadowVisible: false, headerStyle: { backgroundColor: t.bg, height: insets.top + 46 }, sceneStyle: { backgroundColor: t.bg }, tabBarLabelStyle: { fontWeight: "600", fontSize: 11 } }}>
-      <Tabs.Screen name="index" options={{ title: "Trang chủ", headerShown: false, tabBarIcon: icon("home", "home-outline") }} />
-      <Tabs.Screen name="campaigns" options={{ title: "Chiến dịch", tabBarIcon: icon("megaphone", "megaphone-outline") }} />
-      <Tabs.Screen name="orders" options={{ title: "Đơn hàng", tabBarIcon: icon("receipt", "receipt-outline") }} />
-      <Tabs.Screen name="wallet" options={{ title: "Ví", tabBarIcon: icon("wallet", "wallet-outline") }} />
-      <Tabs.Screen name="account" options={{ title: "Tôi", headerShown: false, tabBarIcon: icon("person", "person-outline"), tabBarBadge: n > 0 ? n : undefined }} />
-    </Tabs>
+    <NativeTabs tintColor={t.navy} minimizeBehavior="onScrollDown" labelStyle={{ fontWeight: "600" }}>
+      <NativeTabs.Trigger name="index">
+        <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} />
+        <NativeTabs.Trigger.Label>Trang chủ</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="campaigns">
+        <NativeTabs.Trigger.Icon sf={{ default: "megaphone", selected: "megaphone.fill" }} />
+        <NativeTabs.Trigger.Label>Chiến dịch</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="orders">
+        <NativeTabs.Trigger.Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
+        <NativeTabs.Trigger.Label>Đơn hàng</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="wallet">
+        <NativeTabs.Trigger.Icon sf={{ default: "wallet.bifold", selected: "wallet.bifold.fill" }} />
+        <NativeTabs.Trigger.Label>Ví</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="account">
+        <NativeTabs.Trigger.Icon sf={{ default: "person.crop.circle", selected: "person.crop.circle.fill" }} />
+        <NativeTabs.Trigger.Label>Tôi</NativeTabs.Trigger.Label>
+        {n > 0 ? <NativeTabs.Trigger.Badge>{String(Math.min(n, 99))}</NativeTabs.Trigger.Badge> : null}
+      </NativeTabs.Trigger>
+    </NativeTabs>
   )
 }

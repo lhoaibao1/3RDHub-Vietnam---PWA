@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { kycOf, memberState, type Member, useMembers, useOrders } from "../../src/hooks"
 import { num, vnd } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Avatar, Empty, ErrorBox, Loading, PageFooter, t } from "../../src/ui"
-import { usePaged } from "../../src/paged"
+import { Avatar, Empty, ErrorBox, Loading, t } from "../../src/ui"
+import { Pager, TopBar, tap, usePager } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
 const SORTS = [{ value: "name", label: "Tên A → Z" }, { value: "new", label: "Mới tham gia" }, { value: "comm", label: "Hoa hồng cao nhất" }, { value: "orders", label: "Nhiều đơn nhất" }]
@@ -53,7 +53,8 @@ export default function Members() {
     return [...r].sort(by[sort])
   }, [q.data, term, role, team, kyc, sort, stats])
 
-  const paged = usePaged(rows, 25, `${term}|${role}|${team}|${kyc}|${sort}`)
+  const pg = usePager(rows, 20, `${term}|${role}|${team}|${kyc}|${sort}`)
+  const list = useRef<FlatList<Member>>(null)
   if (!q.on) return <Empty text="Bạn không có quyền xem danh sách thành viên." icon="lock-closed-outline" />
   if (q.isPending) return <Loading />
   if (q.isError) return <ErrorBox error={q.error} retry={() => q.refetch()} />
@@ -74,11 +75,11 @@ export default function Members() {
   )
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
+      <TopBar title="Thành viên" />
       <FlatList
-        data={paged.page}
-        onEndReached={paged.more}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={<PageFooter shown={paged.shown} total={paged.total} onMore={paged.more} unit="thành viên" />}
+        ref={list}
+        data={pg.rows}
+        ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="thành viên" onPage={(p) => { pg.setPage(p); list.current?.scrollToOffset({ offset: 0, animated: true }) }} />}
         keyExtractor={(m) => m.id}
         ListHeaderComponent={header}
         contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}
@@ -88,7 +89,7 @@ export default function Members() {
           const k = kycOf(m.kyc_status)
           const st = stats.get(m.id)
           return (
-            <Pressable onPress={() => router.push(`/members/${m.id}`)} style={({ pressed }) => [s.row, pressed && { opacity: 0.85 }]}>
+            <Pressable onPress={() => { tap(); router.push(`/members/${m.id}`) }} style={({ pressed }) => [s.row, pressed && { opacity: 0.85 }]}>
               <Avatar url={m.avatar_url} name={m.name} size={46} />
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={{ fontWeight: "800", color: t.text }} numberOfLines={1}>{m.name}</Text>

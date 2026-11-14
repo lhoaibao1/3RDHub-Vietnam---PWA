@@ -1,5 +1,5 @@
 import { Alert, ScrollView, Text, View } from "react-native"
-import { Stack } from "expo-router"
+import { TopBar } from "../src/chrome"
 import * as ImagePicker from "expo-image-picker"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { api, upload } from "../src/api"
@@ -31,9 +31,10 @@ export default function Profile() {
   if (q.isError) return <ErrorBox error={q.error} retry={() => q.refetch()} />
   const a = q.data
   return (
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <TopBar title="Thông tin cá nhân" />
     <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ padding: 16, gap: 14 }}>
-      <Stack.Screen options={{ title: "Thông tin cá nhân" }} />
-      <View style={{ alignItems: "center", gap: 12 }}>
+            <View style={{ alignItems: "center", gap: 12 }}>
         <Avatar url={user?.avatar_url} name={a.display_name || a.email} size={104} />
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Button label="Đổi ảnh" icon="camera-outline" onPress={() => pick.mutate()} busy={pick.isPending} />
@@ -55,5 +56,6 @@ export default function Profile() {
       </Card>
       <Text style={{ color: t.sub, textAlign: "center", fontSize: 12 }}>Để sửa thông tin hoặc tài khoản nhận tiền, vui lòng dùng bản web.</Text>
     </ScrollView>
+    </View>
   )
 }
