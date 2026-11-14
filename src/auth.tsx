@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { api, loadToken, saveToken, setUnauthorizedHandler } from "./api"
+import { unregisterPush } from "./push"
 
-export type User = { id: string; email: string; display_name?: string }
+export type User = { id: string; email: string; display_name?: string; avatar_url?: string }
 type LoginResult = { done: true } | { done: false; ticket: string }
 type Ctx = {
   ready: boolean
@@ -10,6 +11,7 @@ type Ctx = {
   login: (email: string, password: string) => Promise<LoginResult>
   login2fa: (ticket: string, code: string) => Promise<void>
   logout: () => Promise<void>
+  patchUser: (p: Partial<User>) => void
 }
 const AuthCtx = createContext<Ctx>(null as never)
 export const useAuth = () => useContext(AuthCtx)
@@ -52,9 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await finish(data)
     },
     async logout() {
+      await unregisterPush()
       try { await api("/api/v1/auth/logout", { method: "POST" }) } catch {}
       await reset()
     },
+    patchUser: (p) => setUser((u) => (u ? { ...u, ...p } : u)),
   }), [ready, user, reset])
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>

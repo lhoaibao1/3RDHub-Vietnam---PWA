@@ -1,3 +1,5 @@
+This is the **iOS** app (Expo/React Native, `platforms: ["ios"]`). The Android app is a separate native Kotlin project in `android-app/` (see `android-app/AGENTS.md`): do not edit it from here and share no code with it.
+
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 
 ## Expo has changed — do not trust your training data

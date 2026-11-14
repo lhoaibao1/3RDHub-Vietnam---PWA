@@ -2,6 +2,7 @@ import * as SecureStore from "expo-secure-store"
 import Constants from "expo-constants"
 
 export const API_URL: string = (process.env.EXPO_PUBLIC_API_URL || (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl || "").replace(/\/$/, "")
+export const PROJECT_ID: string | undefined = (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId
 
 const TOKEN_KEY = "hub_token"
 let token: string | null = null
@@ -19,10 +20,12 @@ export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message) }
 }
 
-/** Ảnh/đường dẫn tương đối của server → URL đầy đủ. */
+/** Đường dẫn tương đối của server → URL đầy đủ. */
 export const abs = (u?: string | null) => (!u ? "" : /^https?:/.test(u) ? u : `${API_URL}${u.startsWith("/") ? "" : "/"}${u}`)
+/** Nguồn ảnh cho expo-image: ảnh avatar cần Bearer, ảnh chiến dịch là public. */
+export const img = (u?: string | null) => (u ? { uri: abs(u), headers: token ? { Authorization: `Bearer ${token}` } : undefined } : undefined)
 
-export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+async function call<T>(path: string, init: { method?: string; body?: unknown; form?: FormData }): Promise<T> {
   const headers: Record<string, string> = { Accept: "application/json" }
   if (token) headers.Authorization = `Bearer ${token}`
   // Backend chỉ trả token trong body khi header này là "zalo" (client không giữ được cookie). App mobile dùng chung đường đó.
@@ -30,7 +33,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   if (init.body !== undefined) headers["Content-Type"] = "application/json"
   let res: Response
   try {
-    res = await fetch(`${API_URL}${path}`, { method: init.method ?? "GET", headers, body: init.body === undefined ? undefined : JSON.stringify(init.body) })
+    res = await fetch(`${API_URL}${path}`, { method: init.method ?? "GET", headers, body: init.form ?? (init.body === undefined ? undefined : JSON.stringify(init.body)) })
   } catch {
     throw new ApiError(0, "network", "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.")
   }
@@ -41,3 +44,5 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   }
   return payload
 }
+export const api = <T,>(path: string, init: { method?: string; body?: unknown } = {}) => call<T>(path, init)
+export const upload = <T,>(path: string, form: FormData) => call<T>(path, { method: "POST", form })

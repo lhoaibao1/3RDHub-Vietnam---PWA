@@ -3,12 +3,6 @@
     "version": ">= 16.0.0"
   },
   "build": {
-    "apk": {
-      "android": {
-        "buildType": "apk"
-      },
-      "distribution": "internal"
-    },
     "ipa-internal": {
       "ios": {
         "simulator": false

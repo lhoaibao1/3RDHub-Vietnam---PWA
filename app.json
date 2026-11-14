@@ -1,24 +1,17 @@
 {
   "expo": {
-    "name": "3RDHub Vietnam",
+    "name": "3RDVN Hub",
     "slug": "3rdhub-vietnam",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "vn.threerdhub.app"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false,
-      "package": "vn.threerdhub.app"
+      "bundleIdentifier": "vn.threerdhub.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -27,7 +20,29 @@
     "scheme": "threerdhub",
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 240,
+          "backgroundColor": "#FFFFFF",
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0B2A6F"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Cho phép 3RDVN Hub truy cập ảnh để bạn đổi ảnh đại diện.",
+          "cameraPermission": "Cho phép 3RDVN Hub dùng camera để chụp ảnh đại diện."
+        }
+      ]
     ],
     "extra": {
       "apiUrl": "https://app.3rdvn.io.vn",
@@ -41,6 +56,9 @@
     },
     "updates": {
       "url": "https://u.expo.dev/0e659853-5785-40fb-b2c3-e27a66165604"
-    }
+    },
+    "platforms": [
+      "ios"
+    ]
   }
 }
