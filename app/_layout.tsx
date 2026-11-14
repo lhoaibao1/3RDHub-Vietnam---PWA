@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react"
-import { Animated, Easing, StyleSheet, View } from "react-native"
+import { Animated, AppState, Easing, StyleSheet, View } from "react-native"
 import { Stack, useRouter, useSegments } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import * as SplashScreen from "expo-splash-screen"
 import * as Notifications from "expo-notifications"
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query"
+import { focusManager, QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query"
 import { AuthProvider, useAuth } from "../src/auth"
 import { api } from "../src/api"
 import { BrandLogo, BrandProvider, useBrand } from "../src/brand"
@@ -15,6 +15,9 @@ import { t } from "../src/theme"
 import { FetchBar } from "../src/fetchbar"
 
 void SplashScreen.preventAutoHideAsync().catch(() => {})
+// Quay lại app (từ nền hoặc màn khoá) = "focus": dữ liệu cũ hơn 30 giây tự tải lại, nên chiến dịch / đơn mới trên web
+// hiện ra mà không cần kéo để làm mới.
+AppState.addEventListener("change", (st) => focusManager.setFocused(st === "active"))
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } })
 
 /** Màn hình mở app: logo hiện dần + tagline, giữ tối thiểu ~1,6s rồi mờ đi. */
