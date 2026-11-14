@@ -35,7 +35,7 @@ Logo nằm ở `android-app/design/` (đã copy sẵn, dùng trực tiếp):
 | `android-icon-foreground.png` / `-background.png` / `-monochrome.png` | Adaptive icon (1024×1024, vùng an toàn đã chừa) |
 | `splash-icon.png` | Ảnh cho Splash Screen API (logo, nền trong suốt) |
 
-> Logo trong `design/` là bản **dự phòng nằm trong app**. Logo chính thức lấy từ API công khai **`GET /api/v1/brand`** (không cần đăng nhập, cache 5 phút; `data.version` đổi khi logo/màu đổi → tải lại): `data.logo.wide` (logo ngang) / `logo.full` / `logo.mark` (vuông), `data.icon["512"]`, `data.name`, `data.tagline`, `data.colors`, `data.splash.*`. Nếu `/brand` chưa có (404) thì dùng `GET /api/v1/appearance` (`data.app.splash_url` → `logo_url` → `topbar_logo_url`; icon `data.app.icon_url`). Ảnh nằm ở `/api/v1/brand-assets/<tên>` (public, nối với base URL). Hiển thị logo từ API, cache lại, dùng bản trong `design/` khi chưa tải được. Chủ dự án sẽ đổi logo ở phía server, nên **đừng hardcode kích thước theo ảnh**; icon launcher và splash hệ điều hành thì cố định lúc build.
+> **Logo trong app là file `design/logo.png` (do chủ gửi), dùng nó cho splash, đăng nhập và mọi chỗ cần logo. KHÔNG lấy logo, icon hay ảnh splash từ API** (`/api/v1/brand`, `/api/v1/appearance`): ảnh trên server hiện là hình cũ (chú robot mascot) và sẽ đè lên logo đúng. Muốn đổi logo thì thay file trong `design/`. Icon launcher và splash hệ điều hành cũng lấy từ `design/`. Tên app cố định "3RDVN Hub".
 
 Màu (Material 3 `ColorScheme`, chỉ light theme):
 
