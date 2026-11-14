@@ -30,7 +30,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "build:apk": "eas build -p android --profile apk",
-    "build:ipa": "eas build -p ios --profile ipa-internal"
+    "build:ipa": "eas build -p ios --profile ipa-internal",
+    "publish:preview": "eas update --branch preview --message \"Ban thu\""
   },
   "private": true
 }
