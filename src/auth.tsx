@@ -11,6 +11,7 @@ type Ctx = {
   user: User | null
   login: (email: string, password: string) => Promise<LoginResult>
   login2fa: (ticket: string, code: string) => Promise<void>
+  loginWithToken: (token: string) => Promise<void>
   logout: () => Promise<void>
   patchUser: (p: Partial<User>) => void
 }
@@ -59,6 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async login2fa(ticket, code) {
       const { data } = await api<{ data: LoginData }>("/api/v1/auth/login/2fa", { method: "POST", body: { ticket, code } })
       await finish(data)
+    },
+    async loginWithToken(token) {
+      await saveToken(token)
+      try { adopt((await api<{ data: Me }>("/api/v1/auth/me")).data) } catch (e) { await saveToken(null); throw e }
     },
     async logout() {
       await unregisterPush()

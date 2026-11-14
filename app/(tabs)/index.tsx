@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useQuery } from "@tanstack/react-query"
 import { abs, api } from "../../src/api"
 import { useAuth } from "../../src/auth"
+import { BrandLogo } from "../../src/brand"
 import { useCampaigns, useMembers, useUnread } from "../../src/hooks"
 import { compact, num, vnd, when, ymd } from "../../src/format"
 import { Art, Avatar, Card, Chip, ErrorBox, Pill, SectionTitle, t } from "../../src/ui"
@@ -64,18 +65,20 @@ export default function Home() {
     <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 24 }} refreshControl={<RefreshControl refreshing={ov.isFetching && !ov.isPending} onRefresh={refresh} tintColor={t.navy} />}>
       <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 12 }]}>
         <View style={s.heroTop}>
-          <Pressable onPress={() => router.push("/(tabs)/account")} style={{ flexDirection: "row", alignItems: "center", gap: 12, flex: 1 }}>
-            <Avatar url={user?.avatar_url} name={name} size={46} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: "#C9D6F5", fontSize: 13 }}>{hello}</Text>
-              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "800" }} numberOfLines={1}>{name}</Text>
-            </View>
-          </Pressable>
+          <View style={s.logoPill}><BrandLogo width={150} height={28} /></View>
+          <View style={{ flex: 1 }} />
           <Pressable onPress={() => router.push("/notifications")} style={s.bell}>
             <Ionicons name="notifications-outline" size={22} color="#fff" />
             {(unread.data || 0) > 0 ? <View style={s.dot}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>{Math.min(unread.data || 0, 99)}</Text></View> : null}
           </Pressable>
         </View>
+        <Pressable onPress={() => router.push("/(tabs)/account")} style={{ flexDirection: "row", alignItems: "center", gap: 12, marginTop: 16 }}>
+          <Avatar url={user?.avatar_url} name={name} size={46} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: "#C9D6F5", fontSize: 13 }}>{hello}</Text>
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "800" }} numberOfLines={1}>{name}</Text>
+          </View>
+        </Pressable>
         <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
           {RANGES.map((r) => <Chip key={r.k} label={r.label} on={range === r.k} onPress={() => setRange(r.k)} />)}
         </View>
@@ -163,6 +166,7 @@ export default function Home() {
 const s = StyleSheet.create({
   hero: { paddingHorizontal: 16, paddingBottom: 18, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   heroTop: { flexDirection: "row", alignItems: "center", gap: 10 },
+  logoPill: { backgroundColor: "#fff", borderRadius: 14, paddingHorizontal: 12, paddingVertical: 7 },
   bell: { width: 42, height: 42, borderRadius: 21, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
   dot: { position: "absolute", top: -2, right: -2, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: t.bad, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
   bars: { flexDirection: "row", alignItems: "flex-end", gap: 4, height: 60, marginTop: 12 },

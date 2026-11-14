@@ -2,10 +2,11 @@ import { useMemo, useState } from "react"
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { kycOf, type Member, useMembers, useOrders } from "../../src/hooks"
+import { kycOf, memberState, type Member, useMembers, useOrders } from "../../src/hooks"
 import { num, vnd } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Avatar, Empty, ErrorBox, Loading, t } from "../../src/ui"
+import { Avatar, Empty, ErrorBox, Loading, PageFooter, t } from "../../src/ui"
+import { usePaged } from "../../src/paged"
 import { shadow } from "../../src/theme"
 
 const SORTS = [{ value: "name", label: "Tên A → Z" }, { value: "new", label: "Mới tham gia" }, { value: "comm", label: "Hoa hồng cao nhất" }, { value: "orders", label: "Nhiều đơn nhất" }]
@@ -52,6 +53,7 @@ export default function Members() {
     return [...r].sort(by[sort])
   }, [q.data, term, role, team, kyc, sort, stats])
 
+  const paged = usePaged(rows, 25, `${term}|${role}|${team}|${kyc}|${sort}`)
   if (!q.on) return <Empty text="Bạn không có quyền xem danh sách thành viên." icon="lock-closed-outline" />
   if (q.isPending) return <Loading />
   if (q.isError) return <ErrorBox error={q.error} retry={() => q.refetch()} />
@@ -73,7 +75,10 @@ export default function Members() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <FlatList
-        data={rows}
+        data={paged.page}
+        onEndReached={paged.more}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={<PageFooter shown={paged.shown} total={paged.total} onMore={paged.more} unit="thành viên" />}
         keyExtractor={(m) => m.id}
         ListHeaderComponent={header}
         contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}
@@ -90,7 +95,7 @@ export default function Members() {
                 <Text style={{ color: t.sub, fontSize: 12 }} numberOfLines={1}>{[m.rd_code, m.role, m.team].filter(Boolean).join(" · ") || m.email}</Text>
                 <View style={{ flexDirection: "row", gap: 6 }}>
                   <View style={[s.pill, { backgroundColor: k[2] }]}><Text style={{ color: k[1], fontSize: 11, fontWeight: "800" }}>{k[0]}</Text></View>
-                  {m.status && m.status !== "active" ? <View style={[s.pill, { backgroundColor: t.badSoft }]}><Text style={{ color: t.bad, fontSize: 11, fontWeight: "800" }}>Ngừng hoạt động</Text></View> : null}
+                  {memberState(m.status) ? <View style={[s.pill, { backgroundColor: memberState(m.status)!.tone === "bad" ? t.badSoft : t.warnSoft }]}><Text style={{ color: memberState(m.status)!.tone === "bad" ? t.bad : t.warn, fontSize: 11, fontWeight: "800" }}>{memberState(m.status)!.label}</Text></View> : null}
                 </View>
               </View>
               <View style={{ alignItems: "flex-end" }}>

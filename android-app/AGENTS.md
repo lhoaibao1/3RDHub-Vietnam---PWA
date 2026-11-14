@@ -78,6 +78,19 @@ Bottom navigation 5 tab: **Trang chủ · Chiến dịch · Đơn hàng · Ví �
 
 Mọi danh sách: kéo để làm mới, trạng thái rỗng (biểu tượng đơn giản + dòng chữ, không dùng hình mascot), trạng thái lỗi có nút Thử lại, không treo giao diện khi mất mạng (thông báo "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.").
 
+
+### 4b. Bổ sung theo góp ý của chủ (bắt buộc)
+
+- **Trạng thái thành viên** (`/publishers` → `status`): `approved` = bình thường (KHÔNG hiện nhãn), `pending` = "Chờ duyệt" (cam), còn lại (`disabled`…) = "Ngừng hoạt động" (đỏ).
+- **Trang chủ**: logo (`design/logo.png`) trên nền trắng bo góc ở góc trái trên cùng của phần đầu màu navy, chuông thông báo bên phải; lời chào và avatar ở dòng dưới.
+- **Đăng nhập**: nền nửa trên gradient navy có vòng tròn trang trí, thẻ trắng nổi (logo, email, mật khẩu, quên mật khẩu, nút đăng nhập), đường kẻ "hoặc", nút **"Tiếp tục với Google" / "Tiếp tục với Microsoft"** (chỉ hiện nhà cung cấp đang bật: `GET /api/v1/auth/oauth/providers` → `{google, microsoft, zalo}`), dòng "Chưa có tài khoản? Đăng ký Publisher". Hiệu ứng thẻ trượt lên khi mở.
+- **Đăng nhập Google/Microsoft không cần sửa backend** (dùng luồng của Zalo Mini App): tạo mã ngẫu nhiên an toàn 64 ký tự `[A-Za-z0-9_-]`, mở Custom Tab tới `{API}/api/v1/auth/oauth/{google|microsoft}/start?mini=<mã>`, đồng thời mỗi 1,5 giây gọi `GET /api/v1/auth/oauth/mini/<mã>`: 404 = đang chờ; `{"data":{"token":"…"}}` = xong (lưu token, gọi `/auth/me`, đóng Custom Tab); `{"data":{"error":"no_account"}}` = "Tài khoản này chưa gắn với thành viên 3RDHub Vietnam…". Hết 10 phút hoặc người dùng đóng tab quá 5 giây thì dừng.
+- **Tab Tôi**: phần đầu gradient có vòng trang trí, avatar viền trắng + nút máy ảnh (mở Thông tin cá nhân), tên, email, nhãn vai trò (cam) và "Mã RDxxxx" (chạm để sao chép); thẻ nổi đè lên mép dưới với 3 số: Số dư ví (`/wallet` → `balance.available`), Hoa hồng tháng này, Đơn tháng này (tính từ danh sách đơn); menu chia nhóm **Tài khoản / Kinh doanh / Ứng dụng**, mỗi dòng có icon màu riêng; nút Đăng xuất nền đỏ nhạt; cuối trang logo + phiên bản.
+- **Chiến dịch**: lưới **2 thẻ mỗi hàng**: ảnh (tỉ lệ ~4:3) có nhãn nổi bật góc trái, dấu tick xanh (đã tham gia) / đồng hồ cam (chờ duyệt) góc phải, nhãn "Tạm dừng" nếu không active; dưới ảnh: ngành hàng (cam), tên 2 dòng, "Hoa hồng đến" + số tiền/% cam, số publisher, điểm sao.
+- **Phân trang** mọi danh sách (chiến dịch 20, đơn 30, thành viên 25, thông báo 20, link 20 mỗi lần): tự tải thêm khi cuộn gần cuối + nút "Xem thêm · x/y", hết thì "Đã hiện hết N …". Đổi bộ lọc là về trang đầu.
+- **Thanh tiêu đề gọn**: tab chính tiêu đề căn trái cỡ lớn, cao vừa đủ; màn phụ chỉ có mũi tên quay lại (không chữ) + tiêu đề nhỏ 16sp.
+- **Hiệu ứng**: chuyển màn trượt từ phải, chuyển tab mờ/trượt nhẹ; màn mở app có logo "thở" nhẹ + thanh chạy màu cam; khi đang tải hiện **khung xương nhấp nháy** (không dùng vòng xoay trống); khi mạng chậm (>350 ms) hiện **thanh mảnh màu cam chạy ở mép trên**.
+
 ## 5. API — hợp đồng (đã đọc từ source backend, không đoán)
 
 **Base URL**: cấu hình bằng `BuildConfig.API_URL`. Mặc định **UAT** `https://uat-app.3rdvn.io.vn`. Prod là `https://app.3rdvn.io.vn` (dữ liệu và tiền THẬT).

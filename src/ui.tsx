@@ -1,4 +1,5 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native"
+import { useEffect, useRef } from "react"
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, type DimensionValue, type StyleProp, type ViewStyle } from "react-native"
 import { Image } from "expo-image"
 import { Ionicons } from "@expo/vector-icons"
 import type { ReactNode } from "react"
@@ -63,7 +64,43 @@ export function SectionTitle({ title, action, onAction }: { title: string; actio
   )
 }
 export function Center({ children }: { children: ReactNode }) { return <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24, gap: 10 }}>{children}</View> }
-export function Loading() { return <Center><ActivityIndicator color={t.navy} /></Center> }
+/** Khối "xương" nhấp nháy thay cho nội dung đang tải. */
+export function Bone({ w = "100%", h = 14, r = 8, style }: { w?: DimensionValue; h?: number; r?: number; style?: StyleProp<ViewStyle> }) {
+  const a = useRef(new Animated.Value(0.45)).current
+  useEffect(() => {
+    const loop = Animated.loop(Animated.sequence([Animated.timing(a, { toValue: 1, duration: 650, useNativeDriver: true }), Animated.timing(a, { toValue: 0.45, duration: 650, useNativeDriver: true })]))
+    loop.start()
+    return () => loop.stop()
+  }, [a])
+  return <Animated.View style={[{ width: w, height: h, borderRadius: r, backgroundColor: "#DDE3EF", opacity: a }, style]} />
+}
+/** Màn đang tải: vài thẻ xương giống danh sách thật (không còn vòng xoay trống trơn). */
+export function Loading({ rows = 4, image }: { rows?: number; image?: boolean }) {
+  return (
+    <View style={{ flex: 1, padding: 16, gap: 12, backgroundColor: t.bg }}>
+      <Bone h={44} r={14} />
+      {Array.from({ length: rows }, (_, i) => (
+        <View key={i} style={[s.card, { gap: 10 }]}>
+          {image ? <Bone h={120} r={12} /> : null}
+          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+            <Bone w={44} h={44} r={22} />
+            <View style={{ flex: 1, gap: 8 }}><Bone w="70%" /><Bone w="45%" h={11} /></View>
+            <Bone w={70} h={16} />
+          </View>
+        </View>
+      ))}
+    </View>
+  )
+}
+/** Chân danh sách khi phân trang: đang hiện x / y, nút tải thêm. */
+export function PageFooter({ shown, total, onMore, unit = "mục" }: { shown: number; total: number; onMore: () => void; unit?: string }) {
+  if (total <= shown) return total > 0 ? <Text style={{ textAlign: "center", color: t.sub, fontSize: 12, paddingVertical: 14 }}>Đã hiện hết {total} {unit}</Text> : null
+  return (
+    <Pressable onPress={onMore} style={({ pressed }) => [{ alignSelf: "center", marginVertical: 12, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20, backgroundColor: t.navySoft }, pressed && { opacity: 0.7 }]}>
+      <Text style={{ color: t.navy, fontWeight: "800", fontSize: 13 }}>Xem thêm · {shown}/{total} {unit}</Text>
+    </Pressable>
+  )
+}
 export function ErrorBox({ error, retry }: { error: unknown; retry?: () => void }) {
   return (
     <Center>

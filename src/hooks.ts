@@ -61,3 +61,7 @@ export const KYC: Record<string, [string, string, string]> = {
   submitted: ["Chờ duyệt eKYC", "#B45309", "#FDF0DC"], rejected: ["eKYC bị từ chối", "#B91C1C", "#FBE6E6"], exempt: ["Miễn eKYC", "#0F766E", "#DDF4F1"], none: ["Chưa eKYC", "#6B7280", "#EEF0F5"],
 }
 export const kycOf = (k?: string) => KYC[k || "none"] ?? [k || "Chưa eKYC", "#6B7280", "#EEF0F5"]
+
+/** Trạng thái hồ sơ thành viên ở backend: approved (bình thường), pending (chờ duyệt), disabled (đã khoá). */
+export const memberState = (s?: string): { label: string; tone: "warn" | "bad" } | null =>
+  !s || s === "approved" || s === "active" ? null : s === "pending" ? { label: "Chờ duyệt", tone: "warn" } : { label: "Ngừng hoạt động", tone: "bad" }

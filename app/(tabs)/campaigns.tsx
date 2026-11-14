@@ -6,7 +6,8 @@ import { LinearGradient } from "expo-linear-gradient"
 import { type Campaign, useCampaigns, useMemberships } from "../../src/hooks"
 import { num, rateText, vnd } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Art, Empty, ErrorBox, Loading, t } from "../../src/ui"
+import { Art, Empty, ErrorBox, Loading, PageFooter, t } from "../../src/ui"
+import { usePaged } from "../../src/paged"
 import { shadow } from "../../src/theme"
 
 const W = Dimensions.get("window").width
@@ -23,35 +24,32 @@ export function bestRate(c: Campaign): { text: string; score: number } | null {
   return pct ? { text: rateText(pct), score: (pct.rate_bps ?? 0) * 100 } : null
 }
 
+const CW = (W - 32 - 12) / 2
+
+/** Thẻ chiến dịch dạng lưới 2 cột. */
 export function CampaignCard({ c, status, onPress }: { c: Campaign; status?: string; onPress: () => void }) {
   const best = bestRate(c)
   const off = c.status && c.status !== "active"
-  const tags = (c.offer?.highlights ?? []).filter((h) => TAGS[h]).slice(0, 2)
+  const tag = (c.offer?.highlights ?? []).find((h) => TAGS[h])
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [s.card, pressed && { transform: [{ scale: 0.99 }] }]}>
+    <Pressable onPress={onPress} style={({ pressed }) => [s.card, pressed && { transform: [{ scale: 0.98 }] }, off && { opacity: 0.75 }]}>
       <View>
-        <Art url={c.offer?.banner_url || c.offer?.thumb_url} name={c.name} style={{ width: "100%", height: (W - 32) * 0.5 }} />
-        <LinearGradient colors={["transparent", "rgba(8,20,55,0.85)"]} style={s.shade} />
-        <View style={s.tags}>{tags.map((h) => <View key={h} style={[s.tag, { backgroundColor: TAGS[h]![1] }]}><Text style={s.tagText}>{TAGS[h]![0]}</Text></View>)}</View>
-        {status === "approved" ? <View style={[s.state, { backgroundColor: t.ok }]}><Ionicons name="checkmark" size={12} color="#fff" /><Text style={s.tagText}>Đã tham gia</Text></View>
-          : status === "pending" ? <View style={[s.state, { backgroundColor: t.warn }]}><Text style={s.tagText}>Chờ duyệt</Text></View>
-          : off ? <View style={[s.state, { backgroundColor: "#6B7280" }]}><Text style={s.tagText}>{c.status === "paused" ? "Tạm dừng" : "Ngừng"}</Text></View> : null}
-        <View style={s.over}>
-          {c.offer?.category ? <Text style={s.cat}>{c.offer.category}</Text> : null}
-          <Text style={s.name} numberOfLines={2}>{c.name}</Text>
-        </View>
+        <Art url={c.offer?.thumb_url || c.offer?.banner_url} name={c.name} style={{ width: CW, height: CW * 0.72 }} />
+        <LinearGradient colors={["transparent", "rgba(8,20,55,0.55)"]} style={s.shade} />
+        {tag ? <View style={[s.tag, { backgroundColor: TAGS[tag]![1] }]}><Text style={s.tagText} numberOfLines={1}>{TAGS[tag]![0]}</Text></View> : null}
+        {status === "approved" ? <View style={[s.state, { backgroundColor: t.ok }]}><Ionicons name="checkmark" size={12} color="#fff" /></View>
+          : status === "pending" ? <View style={[s.state, { backgroundColor: t.warn }]}><Ionicons name="time" size={12} color="#fff" /></View> : null}
+        {off ? <View style={s.offBadge}><Text style={s.tagText}>{c.status === "paused" ? "Tạm dừng" : "Ngừng"}</Text></View> : null}
       </View>
-      <View style={s.foot}>
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: t.sub, fontSize: 11 }}>Hoa hồng đến</Text>
-          <Text style={{ color: t.gold, fontSize: 20, fontWeight: "900" }}>{best ? best.text : "Xem chi tiết"}</Text>
-        </View>
-        <View style={{ alignItems: "flex-end", gap: 4 }}>
-          {c.participants ? <Text style={s.meta}><Ionicons name="people-outline" size={12} /> {num(c.participants)} publisher</Text> : null}
-          {c.rating?.count ? <Text style={s.meta}><Ionicons name="star" size={12} color="#F59E0B" /> {c.rating.avg.toFixed(1)} ({num(c.rating.count)})</Text> : null}
-        </View>
-        <View style={[s.cta, status === "approved" ? { backgroundColor: t.navy } : { backgroundColor: t.gold }]}>
-          <Text style={{ color: "#fff", fontWeight: "800", fontSize: 12 }}>{status === "approved" ? "Lấy link" : status === "pending" ? "Xem" : "Tham gia"}</Text>
+      <View style={{ padding: 10, gap: 4, flex: 1 }}>
+        {c.offer?.category ? <Text style={s.cat} numberOfLines={1}>{c.offer.category}</Text> : null}
+        <Text style={s.name} numberOfLines={2}>{c.name}</Text>
+        <View style={{ flex: 1 }} />
+        <Text style={{ color: t.sub, fontSize: 10 }}>Hoa hồng đến</Text>
+        <Text style={{ color: t.gold, fontSize: 16, fontWeight: "900" }} numberOfLines={1}>{best ? best.text : "Xem chi tiết"}</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={s.meta} numberOfLines={1}><Ionicons name="people-outline" size={11} /> {num(c.participants ?? 0)}</Text>
+          {c.rating?.count ? <Text style={s.meta}><Ionicons name="star" size={11} color="#F59E0B" /> {c.rating.avg.toFixed(1)}</Text> : null}
         </View>
       </View>
     </Pressable>
@@ -95,7 +93,8 @@ export default function Campaigns() {
     return [...r].sort(by[sort])
   }, [q.data, mem.data, term, cat, tab, sort])
 
-  if (q.isPending) return <Loading />
+  const paged = usePaged(rows, 20, `${tab}|${cat}|${sort}|${term}`)
+  if (q.isPending) return <Loading image rows={2} />
   if (q.isError) return <ErrorBox error={q.error} retry={() => q.refetch()} />
   const joinedCount = Object.values(mem.data ?? {}).filter((v) => v === "approved").length
 
@@ -119,10 +118,15 @@ export default function Campaigns() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <FlatList
-        data={rows}
+        data={paged.page}
+        numColumns={2}
+        columnWrapperStyle={{ gap: 12 }}
+        onEndReached={paged.more}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={<PageFooter shown={paged.shown} total={paged.total} onMore={paged.more} unit="chiến dịch" />}
         keyExtractor={(c) => c.id}
         ListHeaderComponent={header}
-        contentContainerStyle={{ padding: 16, gap: 16, flexGrow: 1 }}
+        contentContainerStyle={{ padding: 16, gap: 12, flexGrow: 1 }}
         refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch(); void mem.refetch() }} tintColor={t.navy} />}
         ListEmptyComponent={<Empty text={tab === "joined" ? "Bạn chưa tham gia chiến dịch nào." : "Không có chiến dịch phù hợp."} icon="megaphone-outline" />}
         renderItem={({ item }) => <CampaignCard c={item} status={status(item.id)} onPress={() => router.push(`/campaign/${item.id}`)} />}
@@ -137,16 +141,13 @@ const s = StyleSheet.create({
   seg: { flexDirection: "row", backgroundColor: "#E7EBF4", borderRadius: 12, padding: 3 },
   segItem: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 10 },
   segOn: { backgroundColor: "#fff", ...shadow },
-  card: { backgroundColor: "#fff", borderRadius: 18, overflow: "hidden", ...shadow },
-  shade: { position: "absolute", left: 0, right: 0, bottom: 0, height: "70%" },
-  tags: { position: "absolute", top: 10, left: 10, flexDirection: "row", gap: 6 },
-  tag: { borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3 },
-  tagText: { color: "#fff", fontSize: 11, fontWeight: "800" },
-  state: { position: "absolute", top: 10, right: 10, flexDirection: "row", alignItems: "center", gap: 3, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3 },
-  over: { position: "absolute", left: 14, right: 14, bottom: 12 },
-  cat: { color: "#FFD3BF", fontSize: 12, fontWeight: "700", marginBottom: 2 },
-  name: { color: "#fff", fontSize: 18, fontWeight: "900" },
-  foot: { flexDirection: "row", alignItems: "center", gap: 10, padding: 14 },
-  meta: { color: t.sub, fontSize: 12 },
-  cta: { borderRadius: 12, paddingHorizontal: 14, paddingVertical: 9 },
+  card: { width: CW, backgroundColor: "#fff", borderRadius: 16, overflow: "hidden", ...shadow },
+  shade: { position: "absolute", left: 0, right: 0, bottom: 0, height: "50%" },
+  tag: { position: "absolute", top: 8, left: 8, borderRadius: 20, paddingHorizontal: 7, paddingVertical: 3, maxWidth: CW - 50 },
+  tagText: { color: "#fff", fontSize: 10, fontWeight: "800" },
+  state: { position: "absolute", top: 8, right: 8, width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" },
+  offBadge: { position: "absolute", bottom: 8, left: 8, backgroundColor: "#6B7280", borderRadius: 20, paddingHorizontal: 7, paddingVertical: 3 },
+  cat: { color: t.gold, fontSize: 11, fontWeight: "700" },
+  name: { color: t.text, fontSize: 14, fontWeight: "800", lineHeight: 18, minHeight: 36 },
+  meta: { color: t.sub, fontSize: 11 },
 })

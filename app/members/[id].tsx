@@ -1,6 +1,6 @@
 import { Linking, Pressable, ScrollView, Text, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { kycOf, orderStatus, useMembers, useOrders } from "../../src/hooks"
+import { kycOf, memberState, orderStatus, useMembers, useOrders } from "../../src/hooks"
 import { day, num, vnd, vndShort, when } from "../../src/format"
 import { Avatar, Card, Empty, Loading, Pill, Row, SectionTitle, t } from "../../src/ui"
 
@@ -24,7 +24,7 @@ export default function MemberDetail() {
         <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
           {m.role ? <Pill label={m.role} tone="navy" /> : null}
           <View style={{ backgroundColor: k[2], borderRadius: 20, paddingHorizontal: 9, paddingVertical: 3 }}><Text style={{ color: k[1], fontSize: 11, fontWeight: "700" }}>{k[0]}</Text></View>
-          {m.status && m.status !== "active" ? <Pill label="Ngừng hoạt động" tone="bad" /> : null}
+          {memberState(m.status) ? <Pill label={memberState(m.status)!.label} tone={memberState(m.status)!.tone} /> : null}
         </View>
       </Card>
       <View style={{ flexDirection: "row", gap: 10 }}>

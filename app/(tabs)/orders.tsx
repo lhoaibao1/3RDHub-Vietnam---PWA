@@ -6,7 +6,7 @@ import { ORDER_STATUS, orderStatus, useCampaigns, useMembers, useOrders, type Or
 import { RANGES, rangeOf, type RangeKey } from "../../src/dates"
 import { num, vnd, vndShort, when } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Card, Empty, ErrorBox, Loading, t } from "../../src/ui"
+import { Card, Empty, ErrorBox, Loading, PageFooter, t } from "../../src/ui"
 import { shadow } from "../../src/theme"
 
 const PAGE = 30
@@ -98,7 +98,7 @@ export default function Orders() {
         ListEmptyComponent={<Empty text={filtered ? "Không có đơn nào khớp bộ lọc." : "Chưa có đơn hàng."} icon="receipt-outline" />}
         onEndReached={() => setShown((n) => (n < rows.length ? n + PAGE : n))}
         onEndReachedThreshold={0.4}
-        ListFooterComponent={rows.length > shown ? <Text style={{ textAlign: "center", color: t.sub, paddingVertical: 12 }}>Đang hiện {num(shown)} / {num(rows.length)} đơn</Text> : undefined}
+        ListFooterComponent={<PageFooter shown={Math.min(shown, rows.length)} total={rows.length} onMore={() => setShown((n) => n + PAGE)} unit="đơn" />}
         renderItem={({ item: o }) => {
           const st = orderStatus(o.status)
           return (

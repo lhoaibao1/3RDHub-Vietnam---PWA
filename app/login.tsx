@@ -1,43 +1,80 @@
-import { useState } from "react"
-import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { useEffect, useRef, useState } from "react"
+import { ActivityIndicator, Animated, Dimensions, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useAuth } from "../src/auth"
-import { BrandLogo } from "../src/brand"
 import { API_URL } from "../src/api"
+import { BrandLogo } from "../src/brand"
+import { fetchProviders, oauthSignIn, providerName, type Provider } from "../src/oauth"
 import { Button, t } from "../src/ui"
 import { shadow } from "../src/theme"
 
+const H = Dimensions.get("window").height
+
+function ProviderButton({ p, busy, onPress }: { p: Provider; busy: boolean; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} disabled={busy} style={({ pressed }) => [s.prov, pressed && { backgroundColor: t.bg }, busy && { opacity: 0.6 }]}>
+      {busy ? <ActivityIndicator color={t.navy} /> : <Ionicons name={p === "google" ? "logo-google" : "logo-microsoft"} size={18} color={p === "google" ? "#EA4335" : "#00A4EF"} />}
+      <Text style={{ fontWeight: "700", color: t.text }}>Tiếp tục với {providerName[p]}</Text>
+    </Pressable>
+  )
+}
+
 export default function Login() {
-  const { login, login2fa } = useAuth()
+  const { login, login2fa, loginWithToken } = useAuth()
+  const insets = useSafeAreaInsets()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [show, setShow] = useState(false)
   const [ticket, setTicket] = useState("")
   const [code, setCode] = useState("")
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy] = useState<"" | "pass" | Provider>("")
   const [error, setError] = useState("")
+  const [providers, setProviders] = useState<Provider[]>([])
+  const rise = useRef(new Animated.Value(40)).current
+  const fade = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    Animated.parallel([Animated.spring(rise, { toValue: 0, friction: 8, useNativeDriver: true }), Animated.timing(fade, { toValue: 1, duration: 450, useNativeDriver: true })]).start()
+    void fetchProviders().then((p) => setProviders((["google", "microsoft"] as Provider[]).filter((k) => p[k])))
+  }, [rise, fade])
 
   const submit = async () => {
-    setBusy(true); setError("")
+    setBusy("pass"); setError("")
     try {
       if (ticket) await login2fa(ticket, code.trim())
       else { const r = await login(email.trim(), password); if (!r.done) setTicket(r.ticket) }
-    } catch (e) { setError(e instanceof Error ? e.message : "Đăng nhập không được") } finally { setBusy(false) }
+    } catch (e) { setError(e instanceof Error ? e.message : "Đăng nhập không được") } finally { setBusy("") }
+  }
+  const social = async (p: Provider) => {
+    setBusy(p); setError("")
+    try {
+      const token = await oauthSignIn(p)
+      if (token) await loginWithToken(token)
+    } catch (e) { setError(e instanceof Error ? e.message : "Đăng nhập không được") } finally { setBusy("") }
   }
 
   return (
-    <LinearGradient colors={["#FFFFFF", "#EEF2FB", "#E3EAF8"]} style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+      <LinearGradient colors={[t.navy, t.navy2]} style={[s.top, { height: H * 0.42 }]}>
+        <View style={[s.ring, { width: 260, height: 260, top: -80, right: -90 }]} />
+        <View style={[s.ring, { width: 180, height: 180, top: 90, left: -70, borderColor: "rgba(255,106,43,0.35)" }]} />
+        <View style={[s.dot, { top: 70, right: 60 }]} />
+        <View style={[s.dot, { top: 150, right: 130, width: 8, height: 8, backgroundColor: "rgba(255,255,255,0.4)" }]} />
+        <View style={{ paddingTop: insets.top + 36, paddingHorizontal: 28 }}>
+          <Text style={s.hello}>Chào mừng trở lại 👋</Text>
+          <Text style={s.sub}>Theo dõi chiến dịch, đơn hàng và hoa hồng của bạn mọi lúc.</Text>
+        </View>
+      </LinearGradient>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={s.wrap} keyboardShouldPersistTaps="handled">
-          <BrandLogo width={250} height={47} style={{ alignSelf: "center" }} />
-          <Text style={s.title}>Chào mừng trở lại</Text>
-          <Text style={s.sub}>Đăng nhập để theo dõi chiến dịch, đơn hàng và hoa hồng của bạn.</Text>
-          <View style={s.card}>
+        <ScrollView contentContainerStyle={{ paddingTop: H * 0.24, paddingHorizontal: 20, paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
+          <Animated.View style={[s.card, { opacity: fade, transform: [{ translateY: rise }] }]}>
+            <BrandLogo width={230} height={44} style={{ alignSelf: "center", marginBottom: 6 }} />
             {ticket ? (
               <>
-                <Text style={{ color: t.sub }}>Nhập mã xác thực 2 bước (hoặc mã khôi phục).</Text>
-                <View style={s.field}><Ionicons name="shield-checkmark-outline" size={18} color={t.sub} /><TextInput style={s.input} placeholder="Mã 6 số" keyboardType="number-pad" autoFocus value={code} onChangeText={setCode} /></View>
+                <Text style={{ color: t.sub, textAlign: "center" }}>Nhập mã xác thực 2 bước (hoặc mã khôi phục).</Text>
+                <View style={s.field}><Ionicons name="shield-checkmark-outline" size={18} color={t.sub} /><TextInput style={s.input} placeholder="Mã 6 số" placeholderTextColor={t.sub} keyboardType="number-pad" autoFocus value={code} onChangeText={setCode} /></View>
               </>
             ) : (
               <>
@@ -47,30 +84,41 @@ export default function Login() {
                   <TextInput style={s.input} placeholder="Mật khẩu" placeholderTextColor={t.sub} secureTextEntry={!show} autoComplete="password" value={password} onChangeText={setPassword} onSubmitEditing={submit} />
                   <Pressable onPress={() => setShow((v) => !v)} hitSlop={10}><Ionicons name={show ? "eye-off-outline" : "eye-outline"} size={20} color={t.sub} /></Pressable>
                 </View>
+                <Pressable onPress={() => Linking.openURL(`${API_URL}/forgot-password`)} style={{ alignSelf: "flex-end" }}><Text style={s.link}>Quên mật khẩu?</Text></Pressable>
               </>
             )}
-            {error ? <Text style={{ color: t.bad }}>{error}</Text> : null}
-            <Button label={ticket ? "Xác nhận" : "Đăng nhập"} onPress={submit} busy={busy} disabled={ticket ? !code : !email || !password} />
-            {ticket ? <Pressable onPress={() => { setTicket(""); setCode("") }}><Text style={s.link}>Quay lại</Text></Pressable> : (
-              <Pressable onPress={() => Linking.openURL(`${API_URL}/forgot-password`)}><Text style={s.link}>Quên mật khẩu?</Text></Pressable>
-            )}
-          </View>
+            {error ? <View style={s.err}><Ionicons name="alert-circle" size={16} color={t.bad} /><Text style={{ color: t.bad, flex: 1 }}>{error}</Text></View> : null}
+            <Button label={ticket ? "Xác nhận" : "Đăng nhập"} onPress={submit} busy={busy === "pass"} disabled={!!busy || (ticket ? !code : !email || !password)} />
+            {ticket ? <Pressable onPress={() => { setTicket(""); setCode("") }}><Text style={[s.link, { textAlign: "center" }]}>Quay lại</Text></Pressable> : providers.length ? (
+              <>
+                <View style={s.or}><View style={s.orLine} /><Text style={{ color: t.sub, fontSize: 12 }}>hoặc</Text><View style={s.orLine} /></View>
+                {providers.map((p) => <ProviderButton key={p} p={p} busy={busy === p} onPress={() => social(p)} />)}
+                {busy === "google" || busy === "microsoft" ? <Text style={{ color: t.sub, fontSize: 12, textAlign: "center" }}>Hoàn tất đăng nhập trong trình duyệt, app sẽ tự vào tài khoản.</Text> : null}
+              </>
+            ) : null}
+          </Animated.View>
           {!ticket ? (
-            <Pressable onPress={() => Linking.openURL(`${API_URL}/signup`)} style={{ alignItems: "center", gap: 6 }}>
-              <Text style={{ color: t.sub }}>Chưa có tài khoản? <Text style={{ color: t.navy, fontWeight: "800" }}>Đăng ký Publisher</Text></Text>
+            <Pressable onPress={() => Linking.openURL(`${API_URL}/signup`)} style={{ alignItems: "center", marginTop: 22 }}>
+              <Text style={{ color: t.sub }}>Chưa có tài khoản? <Text style={{ color: t.gold, fontWeight: "800" }}>Đăng ký Publisher</Text></Text>
             </Pressable>
           ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   )
 }
 const s = StyleSheet.create({
-  wrap: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 14 },
-  title: { fontSize: 26, fontWeight: "800", color: t.navy, textAlign: "center", marginTop: 8 },
-  sub: { color: t.sub, textAlign: "center", marginBottom: 6, lineHeight: 20 },
-  card: { backgroundColor: "#fff", borderRadius: 20, padding: 18, gap: 12, ...shadow },
-  field: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: t.bg, borderRadius: 12, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
-  input: { flex: 1, paddingVertical: 14, fontSize: 16, color: t.text },
-  link: { color: t.navy2, textAlign: "center", fontWeight: "700" },
+  top: { position: "absolute", left: 0, right: 0, top: 0, borderBottomLeftRadius: 36, borderBottomRightRadius: 36, overflow: "hidden" },
+  ring: { position: "absolute", borderRadius: 999, borderWidth: 2, borderColor: "rgba(255,255,255,0.12)" },
+  dot: { position: "absolute", width: 12, height: 12, borderRadius: 6, backgroundColor: t.gold },
+  hello: { color: "#fff", fontSize: 28, fontWeight: "900" },
+  sub: { color: "#C9D6F5", marginTop: 6, lineHeight: 20, maxWidth: 300 },
+  card: { backgroundColor: "#fff", borderRadius: 24, padding: 20, gap: 12, ...shadow, shadowOpacity: 0.14, shadowRadius: 24 },
+  field: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: t.bg, borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
+  input: { flex: 1, minWidth: 0, paddingVertical: 14, fontSize: 16, color: t.text },
+  link: { color: t.navy2, fontWeight: "700" },
+  err: { flexDirection: "row", gap: 6, alignItems: "center", backgroundColor: t.badSoft, borderRadius: 10, padding: 10 },
+  or: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 2 },
+  orLine: { flex: 1, height: 1, backgroundColor: t.line },
+  prov: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, borderWidth: 1, borderColor: t.line, borderRadius: 14, paddingVertical: 13 },
 })

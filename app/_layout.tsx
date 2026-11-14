@@ -11,6 +11,7 @@ import { registerPush, setBadge } from "../src/push"
 import { useUnread } from "../src/hooks"
 import { useAutoUpdate } from "../src/autoupdate"
 import { t } from "../src/theme"
+import { FetchBar } from "../src/fetchbar"
 
 void SplashScreen.preventAutoHideAsync().catch(() => {})
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } })
@@ -24,6 +25,14 @@ function BrandSplash({ done }: { done: boolean }) {
   const [minTime, setMinTime] = useState(false)
   const brand = useBrand()
   const [late, setLate] = useState(false)
+  const run = useRef(new Animated.Value(0)).current
+  const pulse = useRef(new Animated.Value(1)).current
+  useEffect(() => {
+    const a = Animated.loop(Animated.timing(run, { toValue: 1, duration: 1200, easing: Easing.inOut(Easing.cubic), useNativeDriver: true }))
+    const b = Animated.loop(Animated.sequence([Animated.timing(pulse, { toValue: 1.04, duration: 700, useNativeDriver: true }), Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true })]))
+    a.start(); b.start()
+    return () => { a.stop(); b.stop() }
+  }, [run, pulse])
   useEffect(() => {
     void SplashScreen.hideAsync().catch(() => {})
     Animated.parallel([
@@ -40,8 +49,11 @@ function BrandSplash({ done }: { done: boolean }) {
   if (gone) return null
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, s.splash, { opacity: out }]}>
-      <Animated.View style={{ opacity: fade, transform: [{ scale: pop }], alignItems: "center" }}>
+      <Animated.View style={{ opacity: fade, transform: [{ scale: Animated.multiply(pop, pulse) }], alignItems: "center" }}>
         <BrandLogo width={290} height={55} />
+      </Animated.View>
+      <Animated.View style={[s.track, { opacity: fade }]}>
+        <Animated.View style={[s.run, { transform: [{ translateX: run.interpolate({ inputRange: [0, 1], outputRange: [-70, 180] }) }] }]} />
       </Animated.View>
       <Animated.Text style={[s.tag, { opacity: fade }]}>{brand.tagline}</Animated.Text>
     </Animated.View>
@@ -76,9 +88,9 @@ function Gate() {
   return (
     <View style={{ flex: 1 }}>
       {ready ? (
-        <Stack screenOptions={{ headerBackTitle: "Quay lại", headerTintColor: t.navy, headerTitleStyle: { fontWeight: "800", color: t.navy }, headerShadowVisible: false, headerStyle: { backgroundColor: t.bg }, contentStyle: { backgroundColor: t.bg } }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack screenOptions={{ animation: "slide_from_right", headerBackButtonDisplayMode: "minimal", headerTintColor: t.navy, headerTitleStyle: { fontWeight: "800", fontSize: 16, color: t.navy }, headerShadowVisible: false, headerStyle: { backgroundColor: t.bg }, contentStyle: { backgroundColor: t.bg } }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: "fade" }} />
+          <Stack.Screen name="login" options={{ headerShown: false, animation: "fade" }} />
           <Stack.Screen name="campaign/[id]" options={{ title: "Chiến dịch" }} />
           <Stack.Screen name="order/[id]" options={{ title: "Chi tiết đơn" }} />
           <Stack.Screen name="members/index" options={{ title: "Thành viên" }} />
@@ -88,6 +100,7 @@ function Gate() {
           <Stack.Screen name="profile" options={{ title: "Thông tin cá nhân" }} />
         </Stack>
       ) : null}
+      <FetchBar />
       <BrandSplash done={ready} />
     </View>
   )
@@ -108,4 +121,6 @@ export default function Root() {
 const s = StyleSheet.create({
   splash: { backgroundColor: "#fff", alignItems: "center", justifyContent: "center", zIndex: 99 },
   tag: { position: "absolute", bottom: 56, color: t.gold, fontWeight: "700", letterSpacing: 1 },
+  track: { width: 180, height: 4, borderRadius: 2, backgroundColor: t.navySoft, overflow: "hidden", marginTop: 34 },
+  run: { width: 70, height: 4, borderRadius: 2, backgroundColor: t.gold },
 })

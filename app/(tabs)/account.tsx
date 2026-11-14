@@ -1,13 +1,40 @@
-import { Alert, Linking, ScrollView, Text, View } from "react-native"
+import { useMemo } from "react"
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { useRouter } from "expo-router"
 import * as Clipboard from "expo-clipboard"
 import Constants from "expo-constants"
+import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../../src/auth"
-import { API_URL } from "../../src/api"
-import { useMe, useMembers, useUnread } from "../../src/hooks"
-import { Avatar, Button, Card, Pill, Row, t } from "../../src/ui"
+import { api, API_URL } from "../../src/api"
+import { BrandLogo } from "../../src/brand"
+import { useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
+import { num, vndShort } from "../../src/format"
+import { Avatar, t } from "../../src/ui"
+import { shadow } from "../../src/theme"
+
+type Item = { icon: keyof typeof Ionicons.glyphMap; color: string; label: string; value?: string; badge?: number; onPress: () => void }
+
+function Group({ title, items }: { title: string; items: Item[] }) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Text style={s.groupTitle}>{title}</Text>
+      <View style={s.group}>
+        {items.map((it, i) => (
+          <Pressable key={it.label} onPress={it.onPress} style={({ pressed }) => [s.item, i > 0 && s.itemLine, pressed && { backgroundColor: t.bg }]}>
+            <View style={[s.icon, { backgroundColor: it.color + "1A" }]}><Ionicons name={it.icon} size={19} color={it.color} /></View>
+            <Text style={s.itemText}>{it.label}</Text>
+            {it.badge ? <View style={s.badge}><Text style={{ color: "#fff", fontSize: 11, fontWeight: "800" }}>{it.badge}</Text></View> : null}
+            {it.value ? <Text style={s.itemVal} numberOfLines={1}>{it.value}</Text> : null}
+            <Ionicons name="chevron-forward" size={16} color={t.sub} />
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  )
+}
 
 export default function Account() {
   const router = useRouter()
@@ -16,34 +43,91 @@ export default function Account() {
   const me = useMe()
   const unread = useUnread()
   const members = useMembers()
+  const orders = useOrders()
+  const wallet = useQuery({ queryKey: ["wallet"], queryFn: () => api<{ data: { balance?: { available: number } } }>("/api/v1/wallet").then((r) => r.data), retry: false })
   const name = user?.display_name || user?.email || ""
   const code = me.data?.me?.rd_code
+  const month = useMemo(() => {
+    const d = new Date(), from = new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+    const rows = (orders.data ?? []).filter((o) => new Date(o.created_at).getTime() >= from)
+    return { n: rows.length, comm: rows.reduce((a, o) => a + (o.publisher_commission || 0), 0) }
+  }, [orders.data])
+  const copyCode = () => { if (code) { void Clipboard.setStringAsync(code); Alert.alert("Đã sao chép mã", code) } }
+  const askLogout = () => Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [{ text: "Hủy", style: "cancel" }, { text: "Đăng xuất", style: "destructive", onPress: () => void logout() }])
+
   return (
-    <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 30 }}>
-      <LinearGradient colors={[t.navy, t.navy2]} style={{ paddingTop: insets.top + 24, paddingBottom: 28, alignItems: "center", gap: 8, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
-        <Avatar url={user?.avatar_url} name={name} size={84} />
-        <Text style={{ color: "#fff", fontSize: 20, fontWeight: "900" }}>{name}</Text>
-        {user?.display_name ? <Text style={{ color: "#C9D6F5" }}>{user.email}</Text> : null}
-        {me.data?.role_name ? <View><Pill label={me.data.role_name} tone="gold" /></View> : null}
+    <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 36 }}>
+      <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 20 }]}>
+        <View style={[s.ring, { width: 240, height: 240, top: -90, right: -80 }]} />
+        <View style={[s.ring, { width: 140, height: 140, bottom: -40, left: -50, borderColor: "rgba(255,106,43,0.35)" }]} />
+        <Pressable onPress={() => router.push("/profile")} style={s.avatarWrap}>
+          <Avatar url={user?.avatar_url} name={name} size={88} />
+          <View style={s.cam}><Ionicons name="camera" size={14} color="#fff" /></View>
+        </Pressable>
+        <Text style={s.name} numberOfLines={1}>{name}</Text>
+        {user?.display_name ? <Text style={{ color: "#C9D6F5" }} numberOfLines={1}>{user.email}</Text> : null}
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+          {me.data?.role_name ? <View style={s.chipGold}><Ionicons name="ribbon" size={12} color="#fff" /><Text style={s.chipText}>{me.data.role_name}</Text></View> : null}
+          {code ? <Pressable onPress={copyCode} style={s.chipGlass}><Text style={s.chipText}>Mã {code}</Text><Ionicons name="copy-outline" size={12} color="#fff" /></Pressable> : null}
+        </View>
       </LinearGradient>
-      <View style={{ padding: 16, gap: 14 }}>
-        {code ? (
-          <Card style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <View><Text style={{ color: t.sub, fontSize: 12 }}>Mã Publisher</Text><Text style={{ fontSize: 20, fontWeight: "900", color: t.navy, letterSpacing: 1 }}>{code}</Text></View>
-            <Button label="Sao chép" kind="ghost" onPress={() => { void Clipboard.setStringAsync(code); Alert.alert("Đã sao chép mã") }} />
-          </Card>
-        ) : null}
-        <Card style={{ paddingVertical: 6 }}>
-          <Row icon="person-outline" label="Thông tin cá nhân" onPress={() => router.push("/profile")} />
-          <Row icon="link-outline" label="Link giới thiệu của tôi" onPress={() => router.push("/links")} />
-          {members.on ? <Row icon="people-outline" label="Thành viên" value={members.data ? `${members.data.length} người` : ""} onPress={() => router.push("/members")} /> : null}
-          <Row icon="notifications-outline" label="Thông báo" value={(unread.data || 0) > 0 ? `${unread.data} chưa đọc` : ""} onPress={() => router.push("/notifications")} />
-          <Row icon="globe-outline" label="Mở bản web" onPress={() => Linking.openURL(API_URL)} />
-        </Card>
-        <Button label="Đăng xuất" kind="ghost" icon="log-out-outline" onPress={() => Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [{ text: "Hủy", style: "cancel" }, { text: "Đăng xuất", style: "destructive", onPress: () => void logout() }])} />
-        <Text style={{ color: t.sub, textAlign: "center", fontSize: 12 }}>3RDHub Vietnam · v{Constants.expoConfig?.version}</Text>
-        <Text selectable style={{ color: t.sub, textAlign: "center", fontSize: 12 }}>Bản cập nhật: {(process.env.EXPO_PUBLIC_BUILD_SHA || "chạy thử trên máy").slice(0, 7)}{process.env.EXPO_PUBLIC_BUILD_AT ? ` · ${new Date(process.env.EXPO_PUBLIC_BUILD_AT).toLocaleString("vi-VN")}` : ""}</Text>
+
+      <View style={s.stats}>
+        <Pressable onPress={() => router.push("/(tabs)/wallet")} style={s.stat}><Text style={s.statK}>Số dư ví</Text><Text style={[s.statV, { color: t.navy }]} numberOfLines={1}>{wallet.data?.balance ? vndShort(wallet.data.balance.available) : "—"}</Text></Pressable>
+        <View style={s.statLine} />
+        <Pressable onPress={() => router.push("/(tabs)/orders")} style={s.stat}><Text style={s.statK}>HH tháng này</Text><Text style={[s.statV, { color: t.gold }]} numberOfLines={1}>{vndShort(month.comm)}</Text></Pressable>
+        <View style={s.statLine} />
+        <Pressable onPress={() => router.push("/(tabs)/orders")} style={s.stat}><Text style={s.statK}>Đơn tháng này</Text><Text style={s.statV}>{num(month.n)}</Text></Pressable>
+      </View>
+
+      <View style={{ paddingHorizontal: 16, gap: 18 }}>
+        <Group title="Tài khoản" items={[
+          { icon: "person", color: "#2563EB", label: "Thông tin cá nhân", onPress: () => router.push("/profile") },
+          { icon: "wallet", color: "#15803D", label: "Ví & rút tiền", onPress: () => router.push("/(tabs)/wallet") },
+          ...(code ? [{ icon: "qr-code" as const, color: "#7C3AED", label: "Mã Publisher", value: code, onPress: copyCode }] : []),
+        ]} />
+        <Group title="Kinh doanh" items={[
+          { icon: "link", color: t.gold, label: "Link giới thiệu của tôi", onPress: () => router.push("/links") },
+          { icon: "receipt", color: "#0F766E", label: "Đơn hàng", onPress: () => router.push("/(tabs)/orders") },
+          ...(members.on ? [{ icon: "people" as const, color: "#DB2777", label: "Thành viên", value: members.data ? `${members.data.length} người` : "", onPress: () => router.push("/members") }] : []),
+        ]} />
+        <Group title="Ứng dụng" items={[
+          { icon: "notifications", color: "#D97706", label: "Thông báo", badge: unread.data || 0, onPress: () => router.push("/notifications") },
+          { icon: "globe", color: t.navy2, label: "Mở bản web", onPress: () => void Linking.openURL(API_URL) },
+        ]} />
+        <Pressable onPress={askLogout} style={({ pressed }) => [s.logout, pressed && { opacity: 0.8 }]}>
+          <Ionicons name="log-out-outline" size={19} color={t.bad} /><Text style={{ color: t.bad, fontWeight: "800" }}>Đăng xuất</Text>
+        </Pressable>
+        <View style={{ alignItems: "center", gap: 6, marginTop: 4 }}>
+          <BrandLogo width={150} height={28} style={{ opacity: 0.85 }} />
+          <Text style={{ color: t.sub, fontSize: 12 }}>v{Constants.expoConfig?.version}</Text>
+          <Text selectable style={{ color: t.sub, fontSize: 11 }}>Bản cập nhật: {(process.env.EXPO_PUBLIC_BUILD_SHA || "chạy thử trên máy").slice(0, 7)}{process.env.EXPO_PUBLIC_BUILD_AT ? ` · ${new Date(process.env.EXPO_PUBLIC_BUILD_AT).toLocaleString("vi-VN")}` : ""}</Text>
+        </View>
       </View>
     </ScrollView>
   )
 }
+const s = StyleSheet.create({
+  hero: { alignItems: "center", paddingBottom: 56, paddingHorizontal: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: "hidden" },
+  ring: { position: "absolute", borderRadius: 999, borderWidth: 2, borderColor: "rgba(255,255,255,0.12)" },
+  avatarWrap: { padding: 4, borderRadius: 60, backgroundColor: "rgba(255,255,255,0.25)" },
+  cam: { position: "absolute", right: 2, bottom: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: t.gold, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" },
+  name: { color: "#fff", fontSize: 22, fontWeight: "900", marginTop: 12 },
+  chipGold: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: t.gold, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
+  chipGlass: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
+  chipText: { color: "#fff", fontWeight: "800", fontSize: 12 },
+  stats: { flexDirection: "row", marginHorizontal: 16, marginTop: -34, marginBottom: 18, backgroundColor: "#fff", borderRadius: 20, paddingVertical: 14, ...shadow, shadowOpacity: 0.12 },
+  stat: { flex: 1, alignItems: "center", gap: 3, paddingHorizontal: 6 },
+  statLine: { width: 1, backgroundColor: t.line },
+  statK: { color: t.sub, fontSize: 11 },
+  statV: { color: t.text, fontWeight: "900", fontSize: 16 },
+  groupTitle: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6, marginLeft: 6 },
+  group: { backgroundColor: "#fff", borderRadius: 18, overflow: "hidden", ...shadow },
+  item: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 13, paddingHorizontal: 14 },
+  itemLine: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.line },
+  icon: { width: 36, height: 36, borderRadius: 11, alignItems: "center", justifyContent: "center" },
+  itemText: { flex: 1, fontWeight: "700", color: t.text },
+  itemVal: { color: t.sub, maxWidth: 140 },
+  badge: { minWidth: 20, height: 20, borderRadius: 10, backgroundColor: t.bad, alignItems: "center", justifyContent: "center", paddingHorizontal: 5 },
+  logout: { flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: t.badSoft, borderRadius: 16, paddingVertical: 14 },
+})

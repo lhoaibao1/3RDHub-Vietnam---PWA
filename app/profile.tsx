@@ -32,7 +32,7 @@ export default function Profile() {
   const a = q.data
   return (
     <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ padding: 16, gap: 14 }}>
-      <Stack.Screen options={{ title: "Thông tin cá nhân", headerBackTitle: "Quay lại" }} />
+      <Stack.Screen options={{ title: "Thông tin cá nhân" }} />
       <View style={{ alignItems: "center", gap: 12 }}>
         <Avatar url={user?.avatar_url} name={a.display_name || a.email} size={104} />
         <View style={{ flexDirection: "row", gap: 10 }}>
