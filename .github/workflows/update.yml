@@ -1,0 +1,19 @@
+name: Publish preview update
+# Mỗi lần đẩy code lên GitHub → tự đăng bản mới lên Expo; user mở lại Expo Go là có bản mới.
+on:
+  push:
+    branches: [main, claude/nifty-wozniak-y6il87]
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - uses: expo/expo-github-action@v8
+        with: { eas-version: latest, token: "${{ secrets.EXPO_TOKEN }}" }
+      - run: eas update --branch preview --message "${{ github.sha }}" --non-interactive
