@@ -4,6 +4,7 @@ import { Image } from "expo-image"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { useAuth } from "../src/auth"
+import { BrandLogo } from "../src/brand"
 import { API_URL } from "../src/api"
 import { Button, t } from "../src/ui"
 import { shadow } from "../src/theme"
@@ -30,7 +31,7 @@ export default function Login() {
     <LinearGradient colors={["#FFFFFF", "#EEF2FB", "#E3EAF8"]} style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={s.wrap} keyboardShouldPersistTaps="handled">
-          <Image source={require("../assets/logo.png")} style={{ width: 230, height: 103, alignSelf: "center" }} contentFit="contain" />
+          <BrandLogo width={230} height={103} style={{ alignSelf: "center" }} />
           <Text style={s.title}>Chào mừng trở lại</Text>
           <Text style={s.sub}>Đăng nhập để theo dõi chiến dịch, đơn hàng và hoa hồng của bạn.</Text>
           <View style={s.card}>

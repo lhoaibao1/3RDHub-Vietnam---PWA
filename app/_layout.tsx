@@ -7,6 +7,7 @@ import * as Notifications from "expo-notifications"
 import { Image } from "expo-image"
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query"
 import { AuthProvider, useAuth } from "../src/auth"
+import { BrandLogo, BrandProvider, useBrand } from "../src/brand"
 import { registerPush, setBadge } from "../src/push"
 import { useUnread } from "../src/hooks"
 import { t } from "../src/theme"
@@ -21,6 +22,8 @@ function BrandSplash({ done }: { done: boolean }) {
   const out = useRef(new Animated.Value(1)).current
   const [gone, setGone] = useState(false)
   const [minTime, setMinTime] = useState(false)
+  const brand = useBrand()
+  const [late, setLate] = useState(false)
   useEffect(() => {
     void SplashScreen.hideAsync().catch(() => {})
     Animated.parallel([
@@ -28,19 +31,20 @@ function BrandSplash({ done }: { done: boolean }) {
       Animated.spring(pop, { toValue: 1, friction: 6, useNativeDriver: true }),
     ]).start()
     const id = setTimeout(() => setMinTime(true), 1600)
-    return () => clearTimeout(id)
+    const id2 = setTimeout(() => setLate(true), 2500)
+    return () => { clearTimeout(id); clearTimeout(id2) }
   }, [fade, pop])
   useEffect(() => {
-    if (done && minTime) Animated.timing(out, { toValue: 0, duration: 350, easing: Easing.out(Easing.quad), useNativeDriver: true }).start(() => setGone(true))
-  }, [done, minTime, out])
+    if (done && minTime && (brand.ready || late)) Animated.timing(out, { toValue: 0, duration: 350, easing: Easing.out(Easing.quad), useNativeDriver: true }).start(() => setGone(true))
+  }, [done, minTime, brand.ready, late, out])
   if (gone) return null
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, s.splash, { opacity: out }]}>
       <Animated.View style={{ opacity: fade, transform: [{ scale: pop }], alignItems: "center", gap: 18 }}>
-        <Image source={require("../assets/logo.png")} style={{ width: 260, height: 117 }} contentFit="contain" />
+        <BrandLogo width={260} height={117} />
         <Image source={require("../assets/mascot-wave.png")} style={{ width: 74, height: 78 }} contentFit="contain" />
       </Animated.View>
-      <Animated.Text style={[s.tag, { opacity: fade }]}>Dành cho Publisher</Animated.Text>
+      <Animated.Text style={[s.tag, { opacity: fade }]}>{brand.tagline}</Animated.Text>
     </Animated.View>
   )
 }
@@ -80,10 +84,12 @@ function Gate() {
 export default function Root() {
   return (
     <QueryClientProvider client={client}>
-      <AuthProvider>
-        <StatusBar style="dark" />
-        <Gate />
-      </AuthProvider>
+      <BrandProvider>
+        <AuthProvider>
+          <StatusBar style="dark" />
+          <Gate />
+        </AuthProvider>
+      </BrandProvider>
     </QueryClientProvider>
   )
 }
