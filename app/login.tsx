@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Alert, Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { ActivityIndicator, Alert, Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Text, TextInput } from "../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
@@ -47,7 +48,6 @@ export default function Login() {
     void (async () => {
       const b = await bioInfo(), on = b.available && (await bioEnabled())
       setBio(b); setBioOn(on)
-      if (on) void withBio() // đã bật thì hỏi Face ID ngay khi mở
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rise, fade])

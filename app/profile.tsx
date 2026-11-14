@@ -1,4 +1,5 @@
-import { Alert, ScrollView, Text, View } from "react-native"
+import { Alert, ScrollView, View } from "react-native"
+import { Text } from "../src/text"
 import { TopBar } from "../src/chrome"
 import * as ImagePicker from "expo-image-picker"
 import { useMutation, useQuery } from "@tanstack/react-query"

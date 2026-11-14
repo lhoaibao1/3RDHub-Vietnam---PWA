@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react"
-import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native"
+import { Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native"
+import { Text } from "./text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { BlurView } from "expo-blur"

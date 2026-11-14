@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
-import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
+import { FlatList, Modal, Pressable, StyleSheet, View } from "react-native"
+import { Text, TextInput } from "./text"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { t } from "./theme"

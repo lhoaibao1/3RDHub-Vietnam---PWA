@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
-import { FlatList, Pressable, RefreshControl, ScrollView, Text, View } from "react-native"
+import { FlatList, Pressable, RefreshControl, ScrollView, View } from "react-native"
+import { Text } from "../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"

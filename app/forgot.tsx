@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Text, View } from "react-native"
+import { View } from "react-native"
+import { Text } from "../src/text"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { api, ApiError } from "../src/api"

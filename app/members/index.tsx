@@ -1,8 +1,9 @@
 import { useMemo, useRef, useState } from "react"
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { Text, TextInput } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { kycOf, memberState, type Member, useMembers, useOrders } from "../../src/hooks"
+import { countsForCommission, kycOf, memberState, type Member, useMembers, useOrders } from "../../src/hooks"
 import { num, vnd } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
 import { Avatar, Empty, ErrorBox, Loading, t } from "../../src/ui"
@@ -27,7 +28,7 @@ export default function Members() {
     for (const o of orders.data ?? []) {
       if (!o.publisher_id) continue
       const x = m.get(o.publisher_id) ?? { n: 0, comm: 0 }
-      x.n++; x.comm += o.publisher_commission || 0
+      x.n++; if (countsForCommission(o)) x.comm += o.publisher_commission || 0
       m.set(o.publisher_id, x)
     }
     return m

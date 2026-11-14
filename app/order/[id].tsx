@@ -1,15 +1,25 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Text } from "../../src/text"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import * as Clipboard from "expo-clipboard"
 import { Ionicons } from "@expo/vector-icons"
 import { useQuery } from "@tanstack/react-query"
 import { api, ApiError } from "../../src/api"
-import { orderStatus, useCampaigns, useMembers, useOrders } from "../../src/hooks"
+import { orderCode, orderStatus, useCampaigns, useMembers, useOrders } from "../../src/hooks"
 import { vnd, when } from "../../src/format"
-import { Card, Empty, ErrorBox, Loading, Row, SectionTitle, t } from "../../src/ui"
+import { Card, Empty, ErrorBox, Loading, SectionTitle, t } from "../../src/ui"
 import { TopBar } from "../../src/chrome"
 
 type Step = { at: string; source?: string; status?: string; biz_status?: string; partner_status?: string; sale_amount?: number }
+
+function KV({ k, v, strong, onPress }: { k: string; v: string; strong?: boolean; onPress?: () => void }) {
+  return (
+    <Pressable onPress={onPress} disabled={!onPress} style={{ flexDirection: "row", justifyContent: "space-between", gap: 16 }}>
+      <Text style={{ color: t.sub }}>{k}</Text>
+      <Text style={{ flex: 1, textAlign: "right", color: onPress ? t.navy2 : strong ? t.gold : t.text, fontWeight: strong ? "800" : "600" }} numberOfLines={2}>{v}</Text>
+    </Pressable>
+  )
+}
 
 export default function OrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -28,7 +38,8 @@ export default function OrderDetail() {
   if (!o) return <Empty text="Không tìm thấy đơn này (có thể đã bị xoá hoặc ngoài phạm vi của bạn)." icon="search-outline" />
   const st = orderStatus(o.status)
   const camp = camps.data?.find((c) => c.id === o.campaign_id)
-  const memberName = members.data?.find((m) => m.id === o.publisher_id)?.name
+  const m = members.data?.find((x) => x.id === o.publisher_id)
+  const customer = [o.fields?.customer_name, o.fields?.customer_phone].filter(Boolean).join(" · ")
   const copy = (v: string) => { void Clipboard.setStringAsync(v); Alert.alert("Đã sao chép", v) }
   const steps = [...(hist.data ?? [])].sort((a, b) => b.at.localeCompare(a.at))
 
@@ -36,22 +47,38 @@ export default function OrderDetail() {
     <View style={{ flex: 1, backgroundColor: t.bg }}>
     <TopBar title="Chi tiết đơn" />
     <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }}>
-      <Card style={{ alignItems: "center", gap: 8, paddingVertical: 20 }}>
-        <View style={{ backgroundColor: st.soft, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5 }}><Text style={{ color: st.color, fontWeight: "900" }}>{st.label}</Text></View>
-        <Text style={{ color: t.sub }}>Hoa hồng của đơn</Text>
-        <Text style={{ fontSize: 32, fontWeight: "900", color: t.text }}>{vnd(o.publisher_commission)}</Text>
-        {o.sale_amount ? <Text style={{ color: t.sub }}>Doanh số {vnd(o.sale_amount)}</Text> : null}
+      <Card style={{ gap: 10 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={{ color: t.sub }}>Giá trị đơn</Text>
+          <View style={{ backgroundColor: st.soft, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}><Text style={{ color: st.color, fontWeight: "700", fontSize: 12 }}>{st.label}</Text></View>
+        </View>
+        <Text style={{ fontSize: 30, fontWeight: "800", color: t.text }}>{vnd(o.sale_amount)}</Text>
+        <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: t.line }} />
+        <KV k="Hoa hồng" v={vnd(o.publisher_commission)} strong />
+        {o.tl_commission !== undefined ? <KV k="Hoa hồng TL" v={vnd(o.tl_commission)} /> : null}
+        {o.am_commission !== undefined ? <KV k="Hoa hồng AM" v={vnd(o.am_commission)} /> : null}
       </Card>
 
-      <Card style={{ paddingVertical: 6 }}>
-        <Row icon="pricetag-outline" label="Mã đơn" value={o.external_order_id || "—"} onPress={o.external_order_id ? () => copy(o.external_order_id!) : undefined} />
-        <Row icon="megaphone-outline" label="Chiến dịch" value={o.campaign_name || camp?.name || "—"} onPress={o.campaign_id ? () => router.push(`/campaign/${o.campaign_id}`) : undefined} />
-        {memberName ? <Row icon="person-outline" label="Thành viên" value={memberName} onPress={() => router.push(`/members/${o.publisher_id}`)} /> : null}
-        <Row icon="time-outline" label="Ngày tạo" value={when(o.created_at)} />
-        {o.approved_on ? <Row icon="checkmark-done-outline" label="Ngày duyệt" value={when(o.approved_on)} /> : null}
-        {o.updated_at ? <Row icon="refresh-outline" label="Cập nhật" value={when(o.updated_at)} /> : null}
-        <Row icon="finger-print-outline" label="Mã hệ thống" value={o.id.slice(0, 8)} onPress={() => copy(o.id)} />
+      <Card style={{ gap: 10 }}>
+        <KV k="Mã đơn" v={orderCode(o) || "—"} onPress={orderCode(o) ? () => copy(orderCode(o)) : undefined} />
+        <KV k="Chiến dịch" v={o.campaign_name || camp?.name || "—"} onPress={o.campaign_id ? () => router.push(`/campaign/${o.campaign_id}`) : undefined} />
+        {o.fields?.product ? <KV k="Sản phẩm" v={o.fields.product} /> : null}
+        {customer ? <KV k="Khách hàng" v={customer} /> : null}
+        <KV k="Ngày phát sinh" v={when(o.created_at)} />
+        {o.approved_on ? <KV k="Ngày duyệt / giải ngân" v={when(o.approved_on)} /> : null}
+        {o.updated_at ? <KV k="Cập nhật" v={when(o.updated_at)} /> : null}
       </Card>
+
+      {m ? (
+        <Card style={{ gap: 10 }}>
+          <KV k="Thành viên" v={m.name} onPress={() => router.push(`/members/${m.id}`)} />
+          {m.rd_code ? <KV k="Mã RD" v={m.rd_code} /> : null}
+          {m.team ? <KV k="Nhóm" v={m.team} /> : null}
+          {m.region ? <KV k="Khu vực" v={m.region} /> : null}
+          {m.team_lead_name ? <KV k="TeamLead" v={m.team_lead_name} /> : null}
+          {m.am_name ? <KV k="AM" v={m.am_name} /> : null}
+        </Card>
+      ) : null}
 
       <SectionTitle title="Lịch sử xử lý" />
       {hist.isPending ? <Loading /> : hist.isError ? (

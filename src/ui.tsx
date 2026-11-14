@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
-import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, type DimensionValue, type StyleProp, type ViewStyle } from "react-native"
+import { ActivityIndicator, Animated, Pressable, StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from "react-native"
+import { Text } from "./text"
 import { Image } from "expo-image"
 import { Ionicons } from "@expo/vector-icons"
 import type { ReactNode } from "react"

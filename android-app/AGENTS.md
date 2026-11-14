@@ -108,6 +108,15 @@ Mọi danh sách: kéo để làm mới, trạng thái rỗng (biểu tượng �
 - **Thông báo khi app đang mở**: hỏi số chưa đọc mỗi 30 giây; tăng lên thì hiện thông báo hệ thống cho các tin mới.
 - **Rung phản hồi nhẹ** khi chạm nút, tab, thẻ.
 
+
+### 4d. Bổ sung đợt 4 (bắt buộc, liên quan tiền nên làm đúng từng chữ)
+
+- **Đơn hàng trình bày như bản web**: số to là **Giá trị đơn** (`sale_amount`, tiền giải ngân), **Hoa hồng** (`publisher_commission`) nhỏ hơn, màu cam, đặt bên phải. Mã đơn = `partner_order_id` nếu có, không thì `external_order_id`. Có nhãn **Sản phẩm** = `fields.product` (NTB / Topup / Xsell…; `fields` là các trường đối tác, server đã che theo quyền). Người có quyền `publishers.read` thấy thêm: tên thành viên · nhóm (`team`) · khu vực (`region`), và dòng "TL: … · AM: …" (lấy từ `/publishers` theo `publisher_id`). Lọc thêm theo **Nhóm**. Không dùng emoji hay icon trang trí trong dòng đơn.
+- **Chi tiết đơn**: Giá trị đơn (to) → Hoa hồng → "Hoa hồng TL" (`tl_commission`) và "Hoa hồng AM" (`am_commission`) **chỉ khi server trả về trường đó**; Mã đơn, Chiến dịch, Sản phẩm, Khách hàng (`fields.customer_name` · `fields.customer_phone` nếu có), Ngày phát sinh, Ngày duyệt / giải ngân (`approved_on`), Cập nhật; khối Thành viên: tên, mã RD, nhóm, khu vực, TeamLead, AM.
+- **Cộng hoa hồng**: mọi tổng hoa hồng do app tự cộng (ô tổng ở Đơn hàng, "HH tháng này" ở tab Tôi, tổng theo thành viên) **bỏ đơn `rejected` và `cancelled`**, và ghi chú "Hoa hồng cộng theo từng đơn… Số tiền thực nhận xem ở Ví". Không tự tính hay suy ra hoa hồng theo cách nào khác; số ở Trang chủ lấy nguyên từ `/dashboard/overview`. Ba ô tổng ở Đơn hàng: Số đơn · Giá trị đơn · Hoa hồng.
+- **Sinh trắc học**: KHÔNG tự bật hộp thoại vân tay khi mở màn đăng nhập (kể cả sau khi đăng xuất); chỉ hỏi khi người dùng bấm nút "Đăng nhập bằng vân tay".
+- **Font**: font hệ thống (Android: Roboto/mặc định máy), không nhúng font riêng; không dùng độ đậm 900 (tối đa 800). Bỏ icon trang trí ở 4 ô số liệu Trang chủ.
+
 ## 5. API — hợp đồng (đã đọc từ source backend, không đoán)
 
 **Base URL**: cấu hình bằng `BuildConfig.API_URL`. Mặc định **UAT** `https://uat-app.3rdvn.io.vn`. Prod là `https://app.3rdvn.io.vn` (dữ liệu và tiền THẬT).

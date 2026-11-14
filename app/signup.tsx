@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native"
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native"
+import { Text } from "../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { api, ApiError } from "../src/api"

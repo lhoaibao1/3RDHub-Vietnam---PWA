@@ -1,4 +1,5 @@
-import { Alert, FlatList, RefreshControl, Share, Text, View } from "react-native"
+import { Alert, FlatList, RefreshControl, Share, View } from "react-native"
+import { Text } from "../src/text"
 import * as Clipboard from "expo-clipboard"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../src/api"

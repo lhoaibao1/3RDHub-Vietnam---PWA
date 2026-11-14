@@ -42,6 +42,12 @@
           "photosPermission": "Cho phép 3RDHub Vietnam truy cập ảnh để bạn đổi ảnh đại diện.",
           "cameraPermission": "Cho phép 3RDHub Vietnam dùng camera để chụp ảnh đại diện."
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Cho phép 3RDHub Vietnam dùng Face ID để đăng nhập nhanh."
+        }
       ]
     ],
     "extra": {

@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Dimensions, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native"
+import { Dimensions, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { Text } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Image } from "expo-image"
 import { LinearGradient } from "expo-linear-gradient"
@@ -17,7 +18,7 @@ import { shadow } from "../../src/theme"
 type Totals = { clicks: number; orders: number; approved: number; commission: number; sale: number; approval_rate: number | null }
 type Overview = { buckets: string[]; totals: Totals; previous: Totals }
 type Series = { buckets: string[]; series: { values: number[] }[] }
-type Order = { id: string; campaign_name?: string; external_order_id?: string; status: string; created_at: string; publisher_commission: number }
+type Order = { id: string; campaign_name?: string; external_order_id?: string; partner_order_id?: string; status: string; created_at: string; publisher_commission: number; sale_amount?: number }
 type Banner = { id: string; image_url: string; link_url: string }
 
 const RANGES = [{ k: "today", label: "Hôm nay", days: 0 }, { k: "7d", label: "7 ngày", days: 6 }, { k: "30d", label: "30 ngày", days: 29 }] as const
@@ -62,7 +63,7 @@ export default function Home() {
   }
 
   return (
-    <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 24 }} refreshControl={<RefreshControl refreshing={ov.isFetching && !ov.isPending} onRefresh={refresh} tintColor={t.navy} />}>
+    <ScrollView contentInsetAdjustmentBehavior="never" style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 110 }} refreshControl={<RefreshControl refreshing={ov.isFetching && !ov.isPending} onRefresh={refresh} tintColor={t.navy} />}>
       <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 12 }]}>
         <View style={s.heroTop}>
           <BrandLogo light width={170} height={32} />
@@ -104,7 +105,6 @@ export default function Home() {
               { icon: "pie-chart-outline", label: "Doanh số", value: compact(t0?.sale), d: t0 && p0 ? delta(t0.sale, p0.sale) : null },
             ].map((x) => (
               <Card key={x.label} style={s.tile}>
-                <Ionicons name={x.icon as never} size={18} color={t.gold} />
                 <Text style={s.tileLabel}>{x.label}</Text>
                 <Text style={s.tileValue}>{x.value}</Text>
                 {x.d ? <Text style={{ color: x.d.up ? t.ok : t.bad, fontSize: 12, fontWeight: "700" }}>{x.d.text}</Text> : null}
@@ -149,12 +149,14 @@ export default function Home() {
         {(recent.data ?? []).map((o) => (
           <Pressable key={o.id} onPress={() => router.push(`/order/${o.id}`)}>
           <Card style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <View style={s.orderIcon}><Ionicons name="receipt-outline" size={18} color={t.navy} /></View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontWeight: "700", color: t.text }} numberOfLines={1}>{o.campaign_name || o.external_order_id || "Đơn hàng"}</Text>
               <Text style={{ color: t.sub, fontSize: 12 }}>{when(o.created_at)}</Text>
             </View>
-            <Text style={{ fontWeight: "800", color: t.ok }}>+{vnd(o.publisher_commission)}</Text>
+            <View style={{ alignItems: "flex-end" }}>
+              <Text style={{ fontWeight: "800", color: t.text }}>{vnd(o.sale_amount)}</Text>
+              <Text style={{ color: t.gold, fontSize: 12, fontWeight: "700" }}>HH {vnd(o.publisher_commission)}</Text>
+            </View>
           </Card>
           </Pressable>
         ))}
@@ -176,5 +178,4 @@ const s = StyleSheet.create({
   quick: { flex: 1, backgroundColor: "#fff", borderRadius: 16, paddingVertical: 12, alignItems: "center", gap: 6, ...shadow },
   quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.navySoft, alignItems: "center", justifyContent: "center" },
   hot: { width: 168, backgroundColor: "#fff", borderRadius: 16, overflow: "hidden", ...shadow },
-  orderIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: t.navySoft, alignItems: "center", justifyContent: "center" },
 })

@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { Alert, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { Text, TextInput } from "../../src/text"
 import { LinearGradient } from "expo-linear-gradient"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../../src/api"

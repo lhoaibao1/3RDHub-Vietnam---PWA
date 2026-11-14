@@ -1,6 +1,7 @@
-import { Linking, Pressable, ScrollView, Text, View } from "react-native"
+import { Linking, Pressable, ScrollView, View } from "react-native"
+import { Text } from "../../src/text"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { kycOf, memberState, orderStatus, useMembers, useOrders } from "../../src/hooks"
+import { commissionOf, kycOf, memberState, orderStatus, useMembers, useOrders } from "../../src/hooks"
 import { day, num, vnd, vndShort, when } from "../../src/format"
 import { Avatar, Card, Empty, Loading, Pill, Row, SectionTitle, t } from "../../src/ui"
 import { TopBar } from "../../src/chrome"
@@ -14,7 +15,7 @@ export default function MemberDetail() {
   const m = q.data?.find((x) => x.id === id)
   if (!m) return <Empty text="Không tìm thấy thành viên này." icon="person-outline" />
   const mine = (orders.data ?? []).filter((o) => o.publisher_id === id).sort((a, b) => b.created_at.localeCompare(a.created_at))
-  const comm = mine.reduce((a, o) => a + (o.publisher_commission || 0), 0)
+  const comm = commissionOf(mine)
   const ok = mine.filter((o) => o.status === "approved" || o.status === "paid")
   const k = kycOf(m.kyc_status)
   return (

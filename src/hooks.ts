@@ -27,7 +27,15 @@ export type Order = {
   id: string; campaign_id?: string; project_id?: string; publisher_id?: string; external_order_id?: string
   status: string; sale_amount?: number; advertiser_payout?: number; publisher_commission: number
   created_at: string; updated_at?: string; approved_on?: string; campaign_name?: string
+  partner_order_id?: string; tl_commission?: number; am_commission?: number
+  /** Trường của đối tác (server đã che theo quyền): product = loại sản phẩm (NTB / Topup / Xsell…). */
+  fields?: Record<string, string>
 }
+/** Mã đơn như bản web: mã của đối tác trước, rồi tới mã đơn. */
+export const orderCode = (o: Order) => o.partner_order_id || o.external_order_id || ""
+/** Đơn còn tính hoa hồng: không phải đơn bị từ chối / hủy. Mọi phép cộng hoa hồng trong app đều bỏ hai loại này. */
+export const countsForCommission = (o: Order) => o.status !== "rejected" && o.status !== "cancelled"
+export const commissionOf = (rows: Order[]) => rows.filter(countsForCommission).reduce((a, o) => a + (o.publisher_commission || 0), 0)
 /** Toàn bộ đơn trong phạm vi của tôi (không kèm ?limit nên không bị cắt 50; tên chiến dịch ghép ở app). */
 export const useOrders = () => useQuery({ queryKey: ["orders-all"], queryFn: () => api<{ data: Order[] }>("/api/v1/conversions").then((r) => r.data ?? []), staleTime: 60_000 })
 

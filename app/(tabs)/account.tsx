@@ -1,5 +1,6 @@
 import { useMemo } from "react"
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Text } from "../../src/text"
 import { useRouter } from "expo-router"
 import * as Clipboard from "expo-clipboard"
 import Constants from "expo-constants"
@@ -10,7 +11,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../../src/auth"
 import { api, API_URL } from "../../src/api"
 import { BrandLogo } from "../../src/brand"
-import { useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
+import { commissionOf, useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
 import { num, vndShort } from "../../src/format"
 import { Avatar, t } from "../../src/ui"
 import { GlassButton, tap } from "../../src/chrome"
@@ -51,13 +52,13 @@ export default function Account() {
   const month = useMemo(() => {
     const d = new Date(), from = new Date(d.getFullYear(), d.getMonth(), 1).getTime()
     const rows = (orders.data ?? []).filter((o) => new Date(o.created_at).getTime() >= from)
-    return { n: rows.length, comm: rows.reduce((a, o) => a + (o.publisher_commission || 0), 0) }
+    return { n: rows.length, comm: commissionOf(rows) }
   }, [orders.data])
   const copyCode = () => { if (code) { void Clipboard.setStringAsync(code); Alert.alert("Đã sao chép mã", code) } }
   const askLogout = () => Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [{ text: "Hủy", style: "cancel" }, { text: "Đăng xuất", style: "destructive", onPress: () => void logout() }])
 
   return (
-    <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 36 }}>
+    <ScrollView contentInsetAdjustmentBehavior="never" style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 110 }}>
       <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 20 }]}>
         <View style={[s.ring, { width: 240, height: 240, top: -90, right: -80 }]} />
         <View style={[s.ring, { width: 140, height: 140, bottom: -40, left: -50, borderColor: "rgba(255,106,43,0.35)" }]} />

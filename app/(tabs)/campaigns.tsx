@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react"
-import { Dimensions, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { Dimensions, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { Text, TextInput } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
