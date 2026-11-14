@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
-import { Image } from "expo-image"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { useAuth } from "../src/auth"
@@ -58,7 +57,6 @@ export default function Login() {
           </View>
           {!ticket ? (
             <Pressable onPress={() => Linking.openURL(`${API_URL}/signup`)} style={{ alignItems: "center", gap: 6 }}>
-              <Image source={require("../assets/mascot-wave.png")} style={{ width: 54, height: 57 }} contentFit="contain" />
               <Text style={{ color: t.sub }}>Chưa có tài khoản? <Text style={{ color: t.navy, fontWeight: "800" }}>Đăng ký Publisher</Text></Text>
             </Pressable>
           ) : null}

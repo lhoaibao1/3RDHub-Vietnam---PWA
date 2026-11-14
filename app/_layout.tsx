@@ -41,9 +41,8 @@ function BrandSplash({ done }: { done: boolean }) {
   if (gone) return null
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, s.splash, { opacity: out }]}>
-      <Animated.View style={{ opacity: fade, transform: [{ scale: pop }], alignItems: "center", gap: 18 }}>
+      <Animated.View style={{ opacity: fade, transform: [{ scale: pop }], alignItems: "center" }}>
         <BrandLogo width={290} height={55} />
-        <Image source={require("../assets/mascot-wave.png")} style={{ width: 74, height: 78 }} contentFit="contain" />
       </Animated.View>
       <Animated.Text style={[s.tag, { opacity: fade }]}>{brand.tagline}</Animated.Text>
     </Animated.View>

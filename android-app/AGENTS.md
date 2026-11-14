@@ -25,18 +25,17 @@ Bản iOS đã có đủ các tính năng này; bản Android phải **tương �
 
 ## 3. Nhận diện (đã chốt)
 
-Logo và mascot nằm ở `android-app/design/` (đã copy sẵn, dùng trực tiếp):
+Logo nằm ở `android-app/design/` (đã copy sẵn, dùng trực tiếp):
 
 | File | Dùng cho |
 |---|---|
 | `logo.png` | Logo ngang **"3RDHub Vietnam" + "Powered by"** (navy + cam, tỉ lệ ~5,3:1). Đăng nhập, splash |
 | `mark.png` | Biểu tượng robot (đầu robot, navy) dùng làm icon nhỏ |
-| `mascot-wave.png`, `mascot-check.png`, `mascot-wait.png`, `mascot-alert.png`, `mascot-cheer.png` | Chú robot: đăng nhập, trạng thái rỗng/lỗi/thành công |
 | `icon.png` | Icon app 1024×1024 (đầu robot navy trên nền trắng) |
 | `android-icon-foreground.png` / `-background.png` / `-monochrome.png` | Adaptive icon (1024×1024, vùng an toàn đã chừa) |
 | `splash-icon.png` | Ảnh cho Splash Screen API (logo, nền trong suốt) |
 
-> Logo trong `design/` là bản **dự phòng nằm trong app**. Logo chính thức lấy từ API công khai **`GET /api/v1/brand`** (không cần đăng nhập, cache 5 phút; `data.version` đổi khi logo/màu đổi → tải lại): `data.logo.wide` (logo ngang) / `logo.full` / `logo.mark` (vuông), `data.icon["512"]`, `data.name`, `data.tagline`, `data.colors`, `data.mascot.*`, `data.splash.*`. Nếu `/brand` chưa có (404) thì dùng `GET /api/v1/appearance` (`data.app.splash_url` → `logo_url` → `topbar_logo_url`; icon `data.app.icon_url`). Ảnh nằm ở `/api/v1/brand-assets/<tên>` (public, nối với base URL). Hiển thị logo từ API, cache lại, dùng bản trong `design/` khi chưa tải được. Chủ dự án sẽ đổi logo ở phía server, nên **đừng hardcode kích thước theo ảnh**; icon launcher và splash hệ điều hành thì cố định lúc build.
+> Logo trong `design/` là bản **dự phòng nằm trong app**. Logo chính thức lấy từ API công khai **`GET /api/v1/brand`** (không cần đăng nhập, cache 5 phút; `data.version` đổi khi logo/màu đổi → tải lại): `data.logo.wide` (logo ngang) / `logo.full` / `logo.mark` (vuông), `data.icon["512"]`, `data.name`, `data.tagline`, `data.colors`, `data.splash.*`. Nếu `/brand` chưa có (404) thì dùng `GET /api/v1/appearance` (`data.app.splash_url` → `logo_url` → `topbar_logo_url`; icon `data.app.icon_url`). Ảnh nằm ở `/api/v1/brand-assets/<tên>` (public, nối với base URL). Hiển thị logo từ API, cache lại, dùng bản trong `design/` khi chưa tải được. Chủ dự án sẽ đổi logo ở phía server, nên **đừng hardcode kích thước theo ảnh**; icon launcher và splash hệ điều hành thì cố định lúc build.
 
 Màu (Material 3 `ColorScheme`, chỉ light theme):
 
@@ -56,7 +55,7 @@ ok #15803D (nền #E3F5E8)  warn #B45309 (nền #FDF0DC)  bad #B91C1C (nền #FB
 
 Phong cách: thẻ trắng bo 16dp, "hero" gradient navy→navy2 bo góc dưới 28dp ở Trang chủ/Tôi, chip bo tròn, số tiền chữ đậm. Sạch, nhiều khoảng trắng. Tiền định dạng `1.234.567đ` (`vi-VN`, không phần thập phân).
 
-**Màn hình mở app (splash)**: Splash Screen API (`androidx.core:core-splashscreen`) hiện logo; sau đó một màn in-app: nền trắng, logo hiện dần + scale nhẹ, mascot-wave bên dưới, dòng "Dành cho Publisher" màu cam ở đáy; giữ tối thiểu ~1,6 s và chỉ biến mất khi đã biết trạng thái đăng nhập, rồi mờ dần ~350 ms.
+**Màn hình mở app (splash)**: Splash Screen API (`androidx.core:core-splashscreen`) hiện logo; sau đó một màn in-app: nền trắng, logo hiện dần + scale nhẹ, dòng "Dành cho Publisher" màu cam ở đáy; giữ tối thiểu ~1,6 s và chỉ biến mất khi đã biết trạng thái đăng nhập, rồi mờ dần ~350 ms.
 
 ## 4. Màn hình và tính năng
 
@@ -73,7 +72,7 @@ Bottom navigation 5 tab: **Trang chủ · Chiến dịch · Đơn hàng · Ví �
 9. **Link của tôi**: danh sách link tracking: tên, ngày tạo, số click, bật/tắt, URL, Sao chép / Chia sẻ / Bật-Tắt.
 10. **Thông báo**: tab lọc *Tất cả / Đơn hàng / Ví / Thư / Hệ thống*, chưa đọc có viền cam, chạm để đánh dấu đã đọc và điều hướng theo `link`, nút "Đọc hết".
 
-Mọi danh sách: kéo để làm mới, trạng thái rỗng (kèm mascot), trạng thái lỗi có nút Thử lại, không treo giao diện khi mất mạng (thông báo "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.").
+Mọi danh sách: kéo để làm mới, trạng thái rỗng (biểu tượng đơn giản + dòng chữ, không dùng hình mascot), trạng thái lỗi có nút Thử lại, không treo giao diện khi mất mạng (thông báo "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.").
 
 ## 5. API — hợp đồng (đã đọc từ source backend, không đoán)
 
