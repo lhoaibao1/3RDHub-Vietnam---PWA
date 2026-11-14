@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { api, loadToken, saveToken, setUnauthorizedHandler } from "./api"
+import { api, loadToken, saveToken, setTenant, setUnauthorizedHandler } from "./api"
 import { unregisterPush } from "./push"
 
+type Me = { user: User; memberships?: { tenant_id: string; status: string; tenant_status: string }[] }
 export type User = { id: string; email: string; display_name?: string; avatar_url?: string }
 type LoginResult = { done: true } | { done: false; ticket: string }
 type Ctx = {
@@ -23,22 +24,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [user, setUser] = useState<User | null>(null)
 
-  const reset = useCallback(async () => { await saveToken(null); setUser(null); qc.clear() }, [qc])
+  const reset = useCallback(async () => { await saveToken(null); setTenant(null); setUser(null); qc.clear() }, [qc])
+  // Một đơn vị thì server tự nhận; nhiều đơn vị thì phải gửi X-Tenant-ID (lấy đơn vị đang hoạt động đầu tiên).
+  const adopt = useCallback((me: Me) => {
+    const act = (me.memberships ?? []).filter((m) => m.status === "active" && m.tenant_status === "active")
+    setTenant(act.length > 1 ? act[0]!.tenant_id : null)
+    setUser(me.user)
+  }, [])
 
   useEffect(() => {
     setUnauthorizedHandler(() => { void reset() })
     ;(async () => {
       if (await loadToken()) {
-        try { setUser((await api<{ data: { user: User } }>("/api/v1/auth/me")).data.user) } catch { await saveToken(null) }
+        try { adopt((await api<{ data: Me }>("/api/v1/auth/me")).data) } catch { await saveToken(null) }
       }
       setReady(true)
     })()
-  }, [reset])
+  }, [reset, adopt])
 
   const finish = async (d: LoginData) => {
     if (!d.token || !d.user) throw new Error("Máy chủ không trả về phiên đăng nhập.")
     await saveToken(d.token)
-    setUser(d.user)
+    try { adopt((await api<{ data: Me }>("/api/v1/auth/me")).data) } catch { setUser(d.user) }
   }
 
   const value = useMemo<Ctx>(() => ({

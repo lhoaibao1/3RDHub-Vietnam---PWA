@@ -16,6 +16,8 @@ const KEY = "brand_v1"
 const Ctx = createContext<Brand>(FALLBACK)
 export const useBrand = () => useContext(Ctx)
 
+type Kit = { name?: string; tagline?: string; logo?: { full?: string; wide?: string; mark?: string }; icon?: { "512"?: string } }
+const fromKit = (k: Kit): Brand => ({ name: k.name || FALLBACK.name, tagline: k.tagline || FALLBACK.tagline, logo: abs(k.logo?.wide || k.logo?.full), mark: abs(k.logo?.mark || k.icon?.["512"]), ready: true })
 const pick = (a: Appearance): Brand => ({
   name: a.product_name || FALLBACK.name,
   tagline: FALLBACK.tagline,
@@ -30,11 +32,13 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let alive = true
     ;(async () => {
-      try { const c = await SecureStore.getItemAsync(KEY); if (c && alive) setBrand(pick(JSON.parse(c))) } catch {}
+      try { const c = await SecureStore.getItemAsync(KEY); if (c && alive) { const j = JSON.parse(c) as { kit?: Kit; app?: Appearance }; setBrand(j.kit ? fromKit(j.kit) : pick(j as Appearance)) } } catch {}
+      const get = async <T,>(path: string) => { const r = await fetch(`${API_URL}${path}`, { headers: { Accept: "application/json" } }); if (!r.ok) throw new Error(String(r.status)); return ((await r.json()) as { data?: T }).data }
       try {
-        const res = await fetch(`${API_URL}/api/v1/appearance`, { headers: { Accept: "application/json" } })
-        const a = ((await res.json()) as { data?: Appearance }).data
-        if (a && alive) { setBrand(pick(a)); void SecureStore.setItemAsync(KEY, JSON.stringify(a)).catch(() => {}) }
+        // GET /api/v1/brand: bộ nhận diện công khai (logo, icon, màu; đổi trên web là app tự nhận). Chưa có thì dùng /appearance.
+        const kit = await get<Kit>("/api/v1/brand").catch(() => undefined)
+        if (kit?.logo && alive) { setBrand(fromKit(kit)); void SecureStore.setItemAsync(KEY, JSON.stringify({ kit })).catch(() => {}) }
+        else { const a = await get<Appearance>("/api/v1/appearance"); if (a && alive) { setBrand(pick(a)); void SecureStore.setItemAsync(KEY, JSON.stringify(a)).catch(() => {}) } }
       } catch { if (alive) setBrand((b) => ({ ...b, ready: true })) }
     })()
     return () => { alive = false }

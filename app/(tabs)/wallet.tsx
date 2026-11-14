@@ -8,7 +8,7 @@ import { Button, Card, ErrorBox, Loading, Pill, SectionTitle, t } from "../../sr
 
 type Wallet = {
   member: boolean
-  balance?: { credited: number; held?: number; pending: number; withdrawn: number; available: number }
+  balance?: { credited: number; held?: number; next_release?: string | null; pending: number; withdrawn: number; available: number }
   bank?: { bank_name: string; bank_account_number: string; bank_account_name: string; ready: boolean; kyc_done: boolean }
   min_amount?: number
   credits?: { id: string; period: string; amount: number; note: string; created_at: string }[]
@@ -43,6 +43,7 @@ export default function WalletScreen() {
           <View><Text style={s.k}>Đã rút</Text><Text style={s.v}>{vnd(b.withdrawn)}</Text></View>
           <View><Text style={s.k}>Tổng ghi nhận</Text><Text style={s.v}>{vnd(b.credited)}</Text></View>
         </View>
+        {(b.held ?? 0) > 0 ? <Text style={{ color: "#C9D6F5", fontSize: 12, marginTop: 6 }}>Tạm giữ {vnd(b.held)}{b.next_release ? ` · rút được từ ${day(b.next_release)}` : ""}</Text> : null}
       </LinearGradient>
       <Card style={{ gap: 10 }}>
         <Text style={{ fontWeight: "800", fontSize: 15, color: t.text }}>Rút tiền</Text>

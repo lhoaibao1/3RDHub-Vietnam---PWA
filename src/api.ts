@@ -6,7 +6,9 @@ export const PROJECT_ID: string | undefined = (Constants.expoConfig?.extra as { 
 
 const TOKEN_KEY = "hub_token"
 let token: string | null = null
+let tenantId: string | null = null
 let onUnauthorized: () => void = () => {}
+export const setTenant = (id: string | null) => { tenantId = id }
 
 export const setUnauthorizedHandler = (fn: () => void) => { onUnauthorized = fn }
 export async function loadToken() { token = (await SecureStore.getItemAsync(TOKEN_KEY)) || null; return token }
@@ -30,6 +32,7 @@ async function call<T>(path: string, init: { method?: string; body?: unknown; fo
   if (token) headers.Authorization = `Bearer ${token}`
   // Backend chỉ trả token trong body khi header này là "zalo" (client không giữ được cookie). App mobile dùng chung đường đó.
   headers["X-Client"] = "zalo"
+  if (tenantId) headers["X-Tenant-ID"] = tenantId // chỉ cần khi người dùng thuộc nhiều đơn vị
   if (init.body !== undefined) headers["Content-Type"] = "application/json"
   let res: Response
   try {

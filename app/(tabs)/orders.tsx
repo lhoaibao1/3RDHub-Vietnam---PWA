@@ -7,11 +7,11 @@ import { vnd, when } from "../../src/format"
 import { Card, Chip, Empty, ErrorBox, Loading, t } from "../../src/ui"
 
 type Order = { id: string; campaign_name?: string; external_order_id?: string; status: string; biz_status?: string; created_at: string; publisher_commission: number; sale_amount?: number }
-const BASE: Record<string, [string, string]> = { pending: ["Chờ xử lý", t.warn], hold: ["Tạm giữ", t.warn], approved: ["Đã duyệt", t.ok], rejected: ["Từ chối", t.bad], cancelled: ["Đã hủy", t.sub] }
+const BASE: Record<string, [string, string]> = { pending: ["Chờ xử lý", t.warn], hold: ["Tạm giữ", t.warn], approved: ["Đã duyệt", t.ok], paid: ["Đã trả", t.ok], rejected: ["Từ chối", t.bad], cancelled: ["Đã hủy", t.sub] }
 
 export default function Orders() {
   const [f, setF] = useState("")
-  const q = useQuery({ queryKey: ["orders"], queryFn: () => api<{ data: Order[] }>("/api/v1/conversions?limit=200").then((r) => r.data) })
+  const q = useQuery({ queryKey: ["orders"], queryFn: () => api<{ data: Order[] }>("/api/v1/conversions?limit=50").then((r) => r.data) })
   const st = useStatuses()
   const label = (o: Order): [string, string] => {
     const u = st.data?.find((x) => x.key === o.biz_status)

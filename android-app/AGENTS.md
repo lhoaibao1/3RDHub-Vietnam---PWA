@@ -36,7 +36,7 @@ Logo và mascot nằm ở `android-app/design/` (đã copy sẵn, dùng trực t
 | `android-icon-foreground.png` / `-background.png` / `-monochrome.png` | Adaptive icon (1024×1024, vùng an toàn đã chừa) |
 | `splash-icon.png` | Ảnh cho Splash Screen API (logo, nền trong suốt) |
 
-> Logo trong `design/` là bản **dự phòng nằm trong app**. Logo chính thức lấy từ API công khai `GET /api/v1/appearance` (`data.app.splash_url` → `logo_url` → `topbar_logo_url` → `sidebar_logo_url`; icon nhỏ: `data.app.icon_url` hoặc `sidebar_mark_url`; tên: `product_name`). Ảnh nằm ở `/api/v1/brand-assets/<tên>` (public, nối với base URL). Hiển thị logo từ API, cache lại, dùng bản trong `design/` khi chưa tải được. Chủ dự án sẽ đổi logo ở phía server, nên **đừng hardcode kích thước theo ảnh**; icon launcher và splash hệ điều hành thì cố định lúc build.
+> Logo trong `design/` là bản **dự phòng nằm trong app**. Logo chính thức lấy từ API công khai **`GET /api/v1/brand`** (không cần đăng nhập, cache 5 phút; `data.version` đổi khi logo/màu đổi → tải lại): `data.logo.wide` (logo ngang) / `logo.full` / `logo.mark` (vuông), `data.icon["512"]`, `data.name`, `data.tagline`, `data.colors`, `data.mascot.*`, `data.splash.*`. Nếu `/brand` chưa có (404) thì dùng `GET /api/v1/appearance` (`data.app.splash_url` → `logo_url` → `topbar_logo_url`; icon `data.app.icon_url`). Ảnh nằm ở `/api/v1/brand-assets/<tên>` (public, nối với base URL). Hiển thị logo từ API, cache lại, dùng bản trong `design/` khi chưa tải được. Chủ dự án sẽ đổi logo ở phía server, nên **đừng hardcode kích thước theo ảnh**; icon launcher và splash hệ điều hành thì cố định lúc build.
 
 Màu (Material 3 `ColorScheme`, chỉ light theme):
 
@@ -83,9 +83,12 @@ Tạo `buildConfigField` theo flavor/`local.properties` để đổi được m�
 **Quy tắc chung**
 - Mọi response thành công: `{"data": ...}`. Lỗi: `{"error": {"code": "...", "message": "..."}}`.
 - Auth dùng **Bearer token**, không dùng cookie. Mọi request gửi `Authorization: Bearer <token>`.
-- **Quan trọng:** token chỉ có trong body login khi gửi thêm header **`X-Client: zalo`**. Hãy gửi header `X-Client: zalo` trên **mọi** request (cách backend hiện tại hỗ trợ client không giữ cookie).
+- **Quan trọng:** token chỉ có trong body login khi gửi thêm header **`X-Client`**. Prod hiện chỉ nhận giá trị **`zalo`**; backend đã được bổ sung giá trị **`mobile`** (nhánh `claude/mobile-push-backend` của repo hub, chưa lên Prod). Hãy gửi **`X-Client: zalo`** trên mọi request cho tới khi chủ báo Prod đã nhận `mobile`, rồi đổi sang `mobile` (nên để hằng số cấu hình được).
 - HTTP 401 trên endpoint không phải `/api/v1/auth/*` → xóa token, về màn đăng nhập.
-- Tenant tự nhận từ tài khoản (không cần header tenant khi chỉ thuộc một đơn vị).
+- Tenant tự nhận từ tài khoản khi chỉ thuộc **một** đơn vị (trường hợp hiện tại). Nếu `GET /api/v1/auth/me` trả `memberships` có **nhiều** đơn vị đang hoạt động thì phải gửi header `X-Tenant-ID: <tenant_id>` trên mọi request, không thì lỗi `400 tenant_required`.
+- **Body JSON phải khớp đúng tên trường**: server từ chối trường thừa (`400 invalid json`). Chỉ gửi đúng các trường trong bảng.
+- Lỗi đáng xử lý riêng: `401 session_expired` (hết phiên, về màn đăng nhập), `429` (đăng nhập quá nhiều lần: hiện thông báo, đừng tự thử lại), `403 forbidden` (thiếu quyền: ẩn màn tương ứng; dùng `GET /api/v1/tenant/context` → `permissions`), `403 email_unverified`.
+- Tiền là số nguyên đồng; thời gian là ISO 8601 UTC. Không có CORS vì app native không dùng trình duyệt.
 - Ảnh chiến dịch `/api/v1/campaign-art/<tên>` là **public** (không cần token). Ảnh **avatar** `/api/v1/avatars/<userId>` **bắt buộc có Bearer** (cấu hình Coil `ImageRequest` thêm header, hoặc OkHttp interceptor cho riêng host này). URL tương đối thì nối với base URL.
 
 **Xác thực**
@@ -112,7 +115,7 @@ Tạo `buildConfigField` theo flavor/`local.properties` để đổi được m�
 | Tạo link | `POST /api/v1/tracking-links` `{campaign_id}` | `data.url` |
 | Bật/tắt link | `PUT /api/v1/tracking-links/{id}` `{status}` | |
 | Click | `GET /api/v1/clicks` | `data:[{link_id,...}]`, đếm theo `link_id` |
-| Đơn hàng | `GET /api/v1/conversions?limit=200` | `id, campaign_name, external_order_id, status, biz_status, created_at, publisher_commission, sale_amount` |
+| Đơn hàng | `GET /api/v1/conversions?limit=50` | `?limit` **tối đa 50** (đơn mới nhất) và chỉ khi có `limit` mới có `campaign_name`; không có phân trang. Trường: `id, campaign_name, external_order_id, status, biz_status, created_at, publisher_commission, sale_amount` |
 | Trạng thái đơn của đơn vị | `GET /api/v1/tenant/order-statuses` | `data.statuses:[{key,label,base,color}]`; `biz_status` của đơn khớp `key` → dùng `label` và `color` |
 | Ví | `GET /api/v1/wallet` | `member, balance:{credited,held,pending,withdrawn,available}, bank:{bank_name,bank_account_number,bank_account_name,ready,kyc_done}, min_amount, credits[], withdrawals[]` |
 | Rút tiền | `POST /api/v1/wallet/withdraw` `{amount}` (số nguyên VND) | |
@@ -125,7 +128,7 @@ Tạo `buildConfigField` theo flavor/`local.properties` để đổi được m�
 
 **Quy ước dữ liệu**
 - `offer.commission_rates[]`: `{label, channel, kind:"percent"|"fixed", rate_bps, amount_minor, note}`. `rate_bps` là **phần trăm × 100** (245 = 2,45%). `amount_minor` là **đồng** (không chia 100). Hiển thị percent: `rate_bps/100` + "%", fixed: tiền VND.
-- Màu trạng thái đơn (`color`): `blue #2563eb, sky #0284c7, teal #0d9488, green #16a34a, amber #d97706, orange #ea580c, red #dc2626, pink #db2777, violet #7c3aed, indigo #4f46e5, gray #6b7280`. Nếu `biz_status` rỗng thì dùng `status` gốc: `pending` Chờ xử lý, `hold` Tạm giữ, `approved` Đã duyệt, `rejected` Từ chối, `cancelled` Đã hủy.
+- Màu trạng thái đơn (`color`): `blue #2563eb, sky #0284c7, teal #0d9488, green #16a34a, amber #d97706, orange #ea580c, red #dc2626, pink #db2777, violet #7c3aed, indigo #4f46e5, gray #6b7280`. Nếu `biz_status` rỗng thì dùng `status` gốc: `pending` Chờ xử lý, `hold` Tạm giữ, `approved` Đã duyệt, `paid` Đã trả, `rejected` Từ chối, `cancelled` Đã hủy.
 - Phân loại thông báo theo `kind`: bắt đầu `order_`, hoặc `mgr_order_new`, `mgr_lost_order` → Đơn hàng; `wallet_credited`, `payout_created`, bắt đầu `withdraw_` → Ví; bắt đầu `contract_`, `join_`, `kyc_`, hoặc `comment_reply` → Thư; còn lại → Hệ thống. Điều hướng theo `link`: chứa `/campaigns/<id>` → chi tiết chiến dịch; chứa `wallet|payment|withdraw` → tab Ví; chứa `order|conversion` → tab Đơn hàng.
 - Trạng thái rút: `pending` Chờ chuyển, `paid` Đã chuyển, `rejected` Bị từ chối, `cancelled` Đã hủy.
 - Luôn dùng `limit`/phân trang nếu thêm sau; đừng tải vô hạn.
@@ -139,12 +142,14 @@ Tạo `buildConfigField` theo flavor/`local.properties` để đổi được m�
 
 ## 7. Push notification (cần chốt với chủ dự án)
 
-Backend hiện **chỉ có Web Push (VAPID)** (`POST /api/v1/tenant/push/subscribe` kiểu trình duyệt) — Android native **không dùng được**. Phần backend cho push native **chưa có**. Việc của bạn:
+Web Push (VAPID, `POST /api/v1/tenant/push/subscribe`) chỉ dành cho trình duyệt — **Android native không dùng**. Backend cho push native **đã được viết** trên nhánh `claude/mobile-push-backend` của repo hub (chưa deploy; chủ sẽ đưa lên UAT/Prod theo quy trình của họ). Việc của bạn:
 
 1. Tích hợp **FCM** ở phía app: kênh thông báo `default` (importance cao, màu `#0B2A6F`), xin quyền `POST_NOTIFICATIONS` (Android 13+), lấy token, xử lý `onNewToken`, hiển thị khi app đang mở, chạm vào thông báo → mở màn Thông báo.
-2. Gọi endpoint đăng ký token theo **hợp đồng đề xuất** (backend sẽ được bổ sung sau, hiện trả 404 thì bỏ qua êm, không crash, thử lại lần mở app sau):
-   - `POST /api/v1/tenant/push/device` body `{"provider":"fcm","token":"<fcm token>","platform":"android"}`
+2. Gọi endpoint đăng ký token (đã chốt, khớp backend; hiện trên Prod trả 404 thì bỏ qua êm, không crash, thử lại lần mở app sau):
+   - `POST /api/v1/tenant/push/device` body đúng 3 trường `{"provider":"fcm","token":"<fcm token>","platform":"android"}` (token FCM 100–4096 ký tự `A-Za-z0-9:_-.`; thêm `"test":true` nếu muốn máy nhận một thông báo chào) → `{"data":{"ok":true,"provider":"fcm","sent":0}}`.
    - `POST /api/v1/tenant/push/device/unsubscribe` body `{"token":"..."}` khi đăng xuất.
+   - Thông báo FCM tới app có `notification{title,body}` và `data{link,id,tag,unread}` (giá trị đều là chuỗi), kênh `default`. Chạm vào → mở màn Thông báo / điều hướng theo `data.link` (quy tắc như mục 5).
+   - Backend chỉ gửi khi chủ đặt file service account Firebase (`FCM_SERVICE_ACCOUNT_FILE`); UAT không gửi gì.
 3. Ghi trong README `android-app/` đúng các bước chủ cần làm: tạo project Firebase, tải `google-services.json` đặt vào `android-app/app/`, thêm khóa server cho backend.
 4. App phải **chạy bình thường khi chưa có `google-services.json`** (build debug không lỗi): bọc khởi tạo FCM, hoặc dùng plugin google-services có điều kiện.
 
