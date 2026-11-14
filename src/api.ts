@@ -11,6 +11,8 @@ export const API_URL: string = (process.env.EXPO_PUBLIC_API_URL || (Constants.ex
 export const PROJECT_ID: string | undefined = (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId
 
 const TOKEN_KEY = "hub_token"
+/** Kho lưu nhỏ của app (Keychain trên máy, localStorage trên web). */
+export const store = SecureStore
 let token: string | null = null
 let tenantId: string | null = null
 let onUnauthorized: () => void = () => {}

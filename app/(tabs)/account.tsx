@@ -11,7 +11,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../../src/auth"
 import { api, API_URL } from "../../src/api"
 import { BrandLogo } from "../../src/brand"
-import { commissionOf, useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
+import { commissionOf, useCan, useKycAdmin, useLost, useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
+import { ZALO_SUPPORT } from "../../src/links"
 import { num, vndShort } from "../../src/format"
 import { Avatar, t } from "../../src/ui"
 import { GlassButton, tap } from "../../src/chrome"
@@ -45,6 +46,11 @@ export default function Account() {
   const me = useMe()
   const unread = useUnread()
   const members = useMembers()
+  const can = useCan()
+  const lost = useLost()
+  const kyc = useKycAdmin()
+  const line = me.data?.me
+  const pendingKyc = kyc.data?.filter((x) => x.kyc.status === "pending").length || 0
   const orders = useOrders()
   const wallet = useQuery({ queryKey: ["wallet"], queryFn: () => api<{ data: { balance?: { available: number } } }>("/api/v1/wallet").then((r) => r.data), retry: false })
   const name = user?.display_name || user?.email || ""
@@ -92,10 +98,36 @@ export default function Account() {
         <Group title="Kinh doanh" items={[
           { icon: "link", color: t.gold, label: "Link giới thiệu của tôi", onPress: () => router.push("/links") },
           { icon: "receipt", color: "#0F766E", label: "Đơn hàng", onPress: () => router.push("/(tabs)/orders") },
+          ...(can("clicks.read") ? [{ icon: "analytics" as const, color: "#2563EB", label: "Báo cáo click", onPress: () => router.push("/clicks") }] : []),
+          ...(lost.on ? [{ icon: "alert-circle" as const, color: "#B45309", label: "Báo đơn thất lạc", value: lost.data?.length ? `${lost.data.length} phiếu` : "", onPress: () => router.push("/lost") }] : []),
           ...(members.on ? [{ icon: "people" as const, color: "#DB2777", label: "Thành viên", value: members.data ? `${members.data.length} người` : "", onPress: () => router.push("/members") }] : []),
+          ...(kyc.on ? [{ icon: "shield-checkmark" as const, color: "#15803D", label: "Duyệt định danh", badge: pendingKyc, onPress: () => router.push("/kyc") }] : []),
         ]} />
-        <Group title="Ứng dụng" items={[
+        {line?.team_lead_name || line?.am_name ? (
+          <View style={{ gap: 8 }}>
+            <Text style={s.groupTitle}>Quản lý của tôi</Text>
+            <View style={s.group}>
+              {([["TeamLead", line.team_lead_name, line.team_lead_phone], ["AM", line.am_name, line.am_phone]] as const).filter((x) => x[1]).map(([role, n, phone], i) => (
+                <View key={role} style={[s.item, i > 0 && s.itemLine]}>
+                  <Avatar name={n} size={40} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontWeight: "700", color: t.text }} numberOfLines={1}>{n}</Text>
+                    <Text style={{ color: t.sub, fontSize: 12 }}>{role}{phone ? ` · ${phone}` : ""}</Text>
+                  </View>
+                  {phone ? (
+                    <>
+                      <Pressable onPress={() => { tap(); void Linking.openURL(`tel:${phone}`) }} style={[s.round, { backgroundColor: t.okSoft }]}><Ionicons name="call" size={17} color={t.ok} /></Pressable>
+                      <Pressable onPress={() => { tap(); void Linking.openURL(`https://zalo.me/${phone.replace(/\D/g, "")}`) }} style={[s.round, { backgroundColor: "#E3ECFD" }]}><Ionicons name="chatbubble-ellipses" size={17} color="#0068FF" /></Pressable>
+                    </>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : null}
+        <Group title="Hỗ trợ & ứng dụng" items={[
           { icon: "notifications", color: "#D97706", label: "Thông báo", badge: unread.data || 0, onPress: () => router.push("/notifications") },
+          { icon: "chatbubbles", color: "#0068FF", label: "Nhóm Zalo hỗ trợ", onPress: () => void Linking.openURL(ZALO_SUPPORT) },
           { icon: "settings", color: "#475569", label: "Cài đặt", onPress: () => router.push("/settings") },
           { icon: "globe", color: t.navy2, label: "Mở bản web", onPress: () => void Linking.openURL(API_URL) },
         ]} />
@@ -133,5 +165,6 @@ const s = StyleSheet.create({
   itemText: { flex: 1, fontWeight: "700", color: t.text },
   itemVal: { color: t.sub, maxWidth: 140 },
   badge: { minWidth: 20, height: 20, borderRadius: 10, backgroundColor: t.bad, alignItems: "center", justifyContent: "center", paddingHorizontal: 5 },
+  round: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   logout: { flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: t.badSoft, borderRadius: 16, paddingVertical: 14 },
 })

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { api } from "./api"
 
-export type Me = { role_name?: string; role_code?: string; scope?: string; can_refer?: boolean; me?: { rd_code?: string; name?: string }; permissions?: Record<string, boolean> | string[]; tenant?: { name?: string } }
+export type Me = { role_name?: string; role_code?: string; scope?: string; can_refer?: boolean; me?: { rd_code?: string; name?: string; team_lead_name?: string; team_lead_phone?: string; am_name?: string; am_phone?: string; team_size?: number }; permissions?: Record<string, boolean> | string[]; tenant?: { name?: string } }
 export const useMe = () => useQuery({ queryKey: ["me"], queryFn: () => api<{ data: Me }>("/api/v1/tenant/context").then((r) => r.data), staleTime: 5 * 60_000 })
 export const useUnread = () => useQuery({ queryKey: ["unread"], queryFn: () => api<{ data: { count: number } }>("/api/v1/tenant/notifications/unread").then((r) => r.data.count), refetchInterval: 30_000 })
 
@@ -73,3 +73,41 @@ export const kycOf = (k?: string) => KYC[k || "none"] ?? [k || "Chưa eKYC", "#6
 /** Trạng thái hồ sơ thành viên ở backend: approved (bình thường), pending (chờ duyệt), disabled (đã khoá). */
 export const memberState = (s?: string): { label: string; tone: "warn" | "bad" } | null =>
   !s || s === "approved" || s === "active" ? null : s === "pending" ? { label: "Chờ duyệt", tone: "warn" } : { label: "Ngừng hoạt động", tone: "bad" }
+
+// ---- Báo đơn thất lạc (GET/POST /lost-orders, quyền leads.read) ----
+export type LostStep = { status?: string; label?: string; by?: string; at?: string; note?: string }
+export type LostTicket = {
+  id: string; code: string; order_code: string; customer_phone?: string; campaign_name?: string; occurred_at?: string; sale_amount?: number
+  description?: string; status: string; status_label?: string; created_at: string; updated_at?: string; publisher_id?: string
+  reporter_name?: string; reporter_code?: string; history?: LostStep[]; files?: string[]
+}
+export const LOST_STATUS: Record<string, { label: string; color: string; soft: string }> = {
+  received: { label: "3RD tiếp nhận", color: "#B45309", soft: "#FDF0DC" },
+  adv_confirmed: { label: "ADV xác nhận", color: "#2563EB", soft: "#E3ECFD" },
+  recorded: { label: "Ghi nhận thành công", color: "#15803D", soft: "#E3F5E8" },
+  rejected: { label: "Đã từ chối", color: "#B91C1C", soft: "#FBE6E6" },
+}
+export const lostStatus = (x: { status: string; status_label?: string }) => LOST_STATUS[x.status] ?? { label: x.status_label || x.status, color: "#6B7280", soft: "#EEF0F5" }
+export function useLost() {
+  const can = useCan()
+  const on = can("leads.read") || can("lost_orders.manage")
+  return { on, ...useQuery({ queryKey: ["lost"], queryFn: () => api<{ data: LostTicket[] }>("/api/v1/lost-orders").then((r) => r.data ?? []), enabled: on }) }
+}
+
+// ---- Duyệt định danh (GET /tenant/kyc, chỉ Admin / Sale Admin: quyền publishers.manage + phạm vi cả đơn vị) ----
+export type KycRow = {
+  kyc: { user_id: string; status: string; id_number?: string; old_id_number?: string; full_name?: string; date_of_birth?: string; gender?: string; address?: string; issue_date?: string; issue_place?: string; note?: string; submitted_at?: number; reviewed_at?: number; device?: string; ip?: string }
+  email?: string; display_name?: string; rd_code?: string; uid_code?: string
+}
+export const KYC_STATE: Record<string, { label: string; color: string; soft: string }> = {
+  pending: { label: "Chờ duyệt", color: "#B45309", soft: "#FDF0DC" },
+  approved: { label: "Đã duyệt", color: "#15803D", soft: "#E3F5E8" },
+  rejected: { label: "Từ chối", color: "#B91C1C", soft: "#FBE6E6" },
+  requested: { label: "Yêu cầu làm lại", color: "#2563EB", soft: "#E3ECFD" },
+  none: { label: "Chưa gửi", color: "#6B7280", soft: "#EEF0F5" },
+}
+export function useKycAdmin() {
+  const can = useCan(), me = useMe()
+  const on = can("publishers.manage") && me.data?.scope === "TENANT"
+  return { on, ...useQuery({ queryKey: ["kyc-admin"], queryFn: () => api<{ data: KycRow[] }>("/api/v1/tenant/kyc").then((r) => r.data ?? []), enabled: on }) }
+}

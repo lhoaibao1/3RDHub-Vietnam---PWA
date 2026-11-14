@@ -10,7 +10,10 @@ import { useQuery } from "@tanstack/react-query"
 import { abs, api } from "../../src/api"
 import { useAuth } from "../../src/auth"
 import { BrandLogo } from "../../src/brand"
-import { useCampaigns, useMembers, useUnread } from "../../src/hooks"
+import { useCampaigns, useCan, useKycAdmin, useLost, useMembers, useUnread } from "../../src/hooks"
+import { tap } from "../../src/chrome"
+import { ZALO_SUPPORT } from "../../src/links"
+import { PromoPopup } from "../../src/promo"
 import { compact, num, vnd, when, ymd } from "../../src/format"
 import { Art, Avatar, Card, Chip, ErrorBox, Pill, SectionTitle, t } from "../../src/ui"
 import { shadow } from "../../src/theme"
@@ -18,7 +21,7 @@ import { shadow } from "../../src/theme"
 type Totals = { clicks: number; orders: number; approved: number; commission: number; sale: number; approval_rate: number | null }
 type Overview = { buckets: string[]; totals: Totals; previous: Totals }
 type Series = { buckets: string[]; series: { values: number[] }[] }
-type Order = { id: string; campaign_name?: string; external_order_id?: string; partner_order_id?: string; status: string; created_at: string; publisher_commission: number; sale_amount?: number }
+type Order = { id: string; campaign_id?: string; campaign_name?: string; external_order_id?: string; partner_order_id?: string; status: string; created_at: string; publisher_commission: number; sale_amount?: number }
 type Banner = { id: string; image_url: string; link_url: string }
 
 const RANGES = [{ k: "today", label: "Hôm nay", days: 0 }, { k: "7d", label: "7 ngày", days: 6 }, { k: "30d", label: "30 ngày", days: 29 }] as const
@@ -44,6 +47,9 @@ export default function Home() {
   const banners = useQuery({ queryKey: ["banners"], queryFn: () => api<{ data: Banner[] }>("/api/v1/catalog-banners").then((r) => r.data ?? []) })
   const camps = useCampaigns()
   const members = useMembers()
+  const can = useCan()
+  const lost = useLost()
+  const kyc = useKycAdmin()
 
   const name = user?.display_name || user?.email?.split("@")[0] || ""
   const hour = new Date().getHours()
@@ -66,8 +72,11 @@ export default function Home() {
     <ScrollView contentInsetAdjustmentBehavior="never" style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 110 }} refreshControl={<RefreshControl refreshing={ov.isFetching && !ov.isPending} onRefresh={refresh} tintColor={t.navy} />}>
       <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 12 }]}>
         <View style={s.heroTop}>
-          <BrandLogo light width={170} height={32} />
+          <BrandLogo light width={112} height={21} />
           <View style={{ flex: 1 }} />
+          <Pressable onPress={() => { tap(); void Linking.openURL(ZALO_SUPPORT) }} style={s.bell} accessibilityLabel="Nhóm hỗ trợ">
+            <Ionicons name="headset-outline" size={21} color="#fff" />
+          </Pressable>
           <Pressable onPress={() => router.push("/notifications")} style={s.bell}>
             <Ionicons name="notifications-outline" size={22} color="#fff" />
             {(unread.data || 0) > 0 ? <View style={s.dot}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>{Math.min(unread.data || 0, 99)}</Text></View> : null}
@@ -105,7 +114,7 @@ export default function Home() {
               { icon: "pie-chart-outline", label: "Doanh số", value: compact(t0?.sale), d: t0 && p0 ? delta(t0.sale, p0.sale) : null },
             ].map((x) => (
               <Card key={x.label} style={s.tile}>
-                <Text style={s.tileLabel}>{x.label}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Ionicons name={x.icon as never} size={16} color={t.gold} /><Text style={s.tileLabel}>{x.label}</Text></View>
                 <Text style={s.tileValue}>{x.value}</Text>
                 {x.d ? <Text style={{ color: x.d.up ? t.ok : t.bad, fontSize: 12, fontWeight: "700" }}>{x.d.text}</Text> : null}
               </Card>
@@ -113,11 +122,20 @@ export default function Home() {
           </View>
         )}
 
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          {[{ icon: "link", label: "Link của tôi", to: "/links" }, { icon: "megaphone", label: "Chiến dịch", to: "/(tabs)/campaigns" }, ...(members.on ? [{ icon: "people", label: "Thành viên", to: "/members" }] : []), { icon: "wallet", label: "Rút tiền", to: "/(tabs)/wallet" }].map((a) => (
-            <Pressable key={a.label} onPress={() => router.push(a.to as never)} style={s.quick}>
-              <View style={s.quickIcon}><Ionicons name={a.icon as never} size={20} color={t.navy} /></View>
-              <Text style={{ fontWeight: "700", fontSize: 12, color: t.text }}>{a.label}</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+          {[
+            { icon: "link", label: "Link của tôi", to: "/links", on: true },
+            { icon: "analytics", label: "Báo cáo click", to: "/clicks", on: can("clicks.read") },
+            { icon: "alert-circle", label: "Đơn thất lạc", to: "/lost", on: lost.on },
+            { icon: "people", label: "Thành viên", to: "/members", on: members.on },
+            { icon: "shield-checkmark", label: "Duyệt định danh", to: "/kyc", on: kyc.on, badge: kyc.data?.filter((x) => x.kyc.status === "pending").length },
+            { icon: "wallet", label: "Rút tiền", to: "/(tabs)/wallet", on: true },
+            { icon: "megaphone", label: "Chiến dịch", to: "/(tabs)/campaigns", on: true },
+            { icon: "headset", label: "Hỗ trợ", to: "zalo", on: true },
+          ].filter((a) => a.on).map((a) => (
+            <Pressable key={a.label} onPress={() => { tap(); if (a.to === "zalo") void Linking.openURL(ZALO_SUPPORT); else router.push(a.to as never) }} style={({ pressed }) => [s.quick, pressed && { opacity: 0.8 }]}>
+              <View style={s.quickIcon}><Ionicons name={a.icon as never} size={20} color={t.navy} />{a.badge ? <View style={s.qbadge}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>{a.badge}</Text></View> : null}</View>
+              <Text style={{ fontWeight: "600", fontSize: 11, color: t.text, textAlign: "center" }} numberOfLines={1}>{a.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -149,6 +167,7 @@ export default function Home() {
         {(recent.data ?? []).map((o) => (
           <Pressable key={o.id} onPress={() => router.push(`/order/${o.id}`)}>
           <Card style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Art url={camps.data?.find((c) => c.id === o.campaign_id)?.offer?.thumb_url} name={o.campaign_name} style={{ width: 40, height: 40, borderRadius: 10, overflow: "hidden" }} />
             <View style={{ flex: 1 }}>
               <Text style={{ fontWeight: "700", color: t.text }} numberOfLines={1}>{o.campaign_name || o.external_order_id || "Đơn hàng"}</Text>
               <Text style={{ color: t.sub, fontSize: 12 }}>{when(o.created_at)}</Text>
@@ -162,6 +181,7 @@ export default function Home() {
         ))}
         {recent.data && !recent.data.length ? <Text style={{ color: t.sub }}>Chưa có đơn hàng nào.</Text> : null}
       </View>
+      <PromoPopup />
     </ScrollView>
   )
 }
@@ -175,7 +195,8 @@ const s = StyleSheet.create({
   tile: { flexGrow: 1, flexBasis: "46%", gap: 3 },
   tileLabel: { color: t.sub, fontSize: 12 },
   tileValue: { fontSize: 22, fontWeight: "900", color: t.text },
-  quick: { flex: 1, backgroundColor: "#fff", borderRadius: 16, paddingVertical: 12, alignItems: "center", gap: 6, ...shadow },
+  quick: { width: (W - 32 - 30) / 4, backgroundColor: "#fff", borderRadius: 16, paddingVertical: 12, paddingHorizontal: 2, alignItems: "center", gap: 6, ...shadow },
+  qbadge: { position: "absolute", top: -4, right: -6, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: t.bad, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
   quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.navySoft, alignItems: "center", justifyContent: "center" },
   hot: { width: 168, backgroundColor: "#fff", borderRadius: 16, overflow: "hidden", ...shadow },
 })

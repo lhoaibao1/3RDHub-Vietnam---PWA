@@ -1,25 +1,15 @@
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native"
-import { Text } from "../../src/text"
+import { ScrollView, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import * as Clipboard from "expo-clipboard"
-import { Ionicons } from "@expo/vector-icons"
 import { useQuery } from "@tanstack/react-query"
 import { api, ApiError } from "../../src/api"
 import { orderCode, orderStatus, useCampaigns, useMembers, useOrders } from "../../src/hooks"
 import { vnd, when } from "../../src/format"
-import { Card, Empty, ErrorBox, Loading, SectionTitle, t } from "../../src/ui"
+import { Art, Empty, ErrorBox, Loading, t } from "../../src/ui"
 import { TopBar } from "../../src/chrome"
+import { Chip2, copyText, Hero, HeroStat, InfoGroup, InfoRow, Timeline } from "../../src/detail"
+import { Text } from "../../src/text"
 
 type Step = { at: string; source?: string; status?: string; biz_status?: string; partner_status?: string; sale_amount?: number }
-
-function KV({ k, v, strong, onPress }: { k: string; v: string; strong?: boolean; onPress?: () => void }) {
-  return (
-    <Pressable onPress={onPress} disabled={!onPress} style={{ flexDirection: "row", justifyContent: "space-between", gap: 16 }}>
-      <Text style={{ color: t.sub }}>{k}</Text>
-      <Text style={{ flex: 1, textAlign: "right", color: onPress ? t.navy2 : strong ? t.gold : t.text, fontWeight: strong ? "800" : "600" }} numberOfLines={2}>{v}</Text>
-    </Pressable>
-  )
-}
 
 export default function OrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -32,85 +22,82 @@ export default function OrderDetail() {
     queryFn: () => api<{ data: Step[] }>(`/api/v1/conversions/${id}/history`).then((r) => r.data ?? []),
     retry: (n, e) => !(e instanceof ApiError && e.status < 500) && n < 1,
   })
-  if (orders.isPending) return <Loading />
-  if (orders.isError) return <ErrorBox error={orders.error} retry={() => orders.refetch()} />
+  if (orders.isPending) return <View style={{ flex: 1 }}><TopBar title="Chi tiết đơn" /><Loading rows={3} /></View>
+  if (orders.isError) return <View style={{ flex: 1 }}><TopBar title="Chi tiết đơn" /><ErrorBox error={orders.error} retry={() => orders.refetch()} /></View>
   const o = orders.data.find((x) => x.id === id)
-  if (!o) return <Empty text="Không tìm thấy đơn này (có thể đã bị xoá hoặc ngoài phạm vi của bạn)." icon="search-outline" />
+  if (!o) return <View style={{ flex: 1 }}><TopBar title="Chi tiết đơn" /><Empty text="Không tìm thấy đơn này (có thể đã bị xoá hoặc ngoài phạm vi của bạn)." icon="search-outline" /></View>
   const st = orderStatus(o.status)
   const camp = camps.data?.find((c) => c.id === o.campaign_id)
   const m = members.data?.find((x) => x.id === o.publisher_id)
   const customer = [o.fields?.customer_name, o.fields?.customer_phone].filter(Boolean).join(" · ")
-  const copy = (v: string) => { void Clipboard.setStringAsync(v); Alert.alert("Đã sao chép", v) }
+  const code = orderCode(o)
+  const name = o.campaign_name || camp?.name || "Đơn hàng"
   const steps = [...(hist.data ?? [])].sort((a, b) => b.at.localeCompare(a.at))
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-    <TopBar title="Chi tiết đơn" />
-    <ScrollView style={{ backgroundColor: t.bg }} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }}>
-      <Card style={{ gap: 10 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={{ color: t.sub }}>Giá trị đơn</Text>
-          <View style={{ backgroundColor: st.soft, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}><Text style={{ color: st.color, fontWeight: "700", fontSize: 12 }}>{st.label}</Text></View>
+      <TopBar title="Chi tiết đơn" />
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
+        <Hero>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <Art url={camp?.offer?.thumb_url || camp?.offer?.banner_url} name={name} style={{ width: 46, height: 46, borderRadius: 12, overflow: "hidden" }} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }} numberOfLines={2}>{name}</Text>
+              <Text style={{ color: "#C9D6F5", fontSize: 12, marginTop: 2 }} numberOfLines={1}>{code || "Không có mã"}</Text>
+            </View>
+          </View>
+          <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+            <Chip2 label={st.label} color={st.color} bg="#fff" />
+            {o.fields?.product ? <Chip2 label={o.fields.product} /> : null}
+          </View>
+          <View>
+            <Text style={{ color: "#C9D6F5", fontSize: 12 }}>Giá trị đơn</Text>
+            <Text style={{ color: "#fff", fontSize: 32, fontWeight: "800" }} numberOfLines={1} adjustsFontSizeToFit>{vnd(o.sale_amount)}</Text>
+          </View>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <HeroStat k="Hoa hồng" v={vnd(o.publisher_commission)} accent />
+            {o.tl_commission !== undefined ? <HeroStat k="Hoa hồng TL" v={vnd(o.tl_commission)} /> : null}
+            {o.am_commission !== undefined ? <HeroStat k="Hoa hồng AM" v={vnd(o.am_commission)} /> : null}
+          </View>
+        </Hero>
+
+        <InfoGroup title="Thông tin đơn">
+          <InfoRow first icon="pricetag-outline" color="#7C3AED" label="Mã đơn" value={code} copy />
+          <InfoRow icon="megaphone-outline" color={t.gold} label="Chiến dịch" value={name} onPress={o.campaign_id ? () => router.push(`/campaign/${o.campaign_id}`) : undefined} />
+          {o.fields?.product ? <InfoRow icon="cube-outline" color="#0F766E" label="Sản phẩm" value={o.fields.product} /> : null}
+          {customer ? <InfoRow icon="person-circle-outline" color="#2563EB" label="Khách hàng" value={customer} /> : null}
+        </InfoGroup>
+
+        <InfoGroup title="Thời gian">
+          <InfoRow first icon="calendar-outline" color="#2563EB" label="Ngày phát sinh" value={when(o.created_at)} />
+          {o.approved_on ? <InfoRow icon="checkmark-done-outline" color="#15803D" label="Ngày duyệt / giải ngân" value={when(o.approved_on)} /> : null}
+          {o.updated_at ? <InfoRow icon="refresh-outline" color="#6B7280" label="Cập nhật gần nhất" value={when(o.updated_at)} /> : null}
+        </InfoGroup>
+
+        {m ? (
+          <InfoGroup title="Người phụ trách">
+            <InfoRow first icon="person-outline" color="#DB2777" label="Thành viên" value={m.name} sub={m.rd_code} onPress={() => router.push(`/members/${m.id}`)} />
+            {m.team || m.region ? <InfoRow icon="people-outline" color="#0F766E" label="Nhóm · Khu vực" value={[m.team, m.region].filter(Boolean).join(" · ")} /> : null}
+            {m.team_lead_name ? <InfoRow icon="shield-outline" color="#B45309" label="TeamLead" value={m.team_lead_name} /> : null}
+            {m.am_name ? <InfoRow icon="briefcase-outline" color={t.navy2} label="AM" value={m.am_name} /> : null}
+          </InfoGroup>
+        ) : null}
+
+        <View style={{ gap: 8 }}>
+          <Text style={{ color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6, marginLeft: 6 }}>Lịch sử xử lý</Text>
+          {hist.isPending ? <Loading rows={1} /> : hist.isError ? (
+            <Text style={{ color: t.sub, marginLeft: 6 }}>{hist.error instanceof ApiError && hist.error.status === 403 ? "Bạn chưa có quyền xem lịch sử đơn." : "Chưa xem được lịch sử đơn."}</Text>
+          ) : steps.length ? (
+            <Timeline steps={steps.map((x) => ({
+              title: x.status ? orderStatus(x.status).label : x.biz_status || x.partner_status || "Cập nhật",
+              color: x.status ? orderStatus(x.status).color : undefined,
+              note: [x.partner_status && x.status ? `Đối tác: ${x.partner_status}` : "", x.sale_amount != null ? `Giá trị đơn ${vnd(x.sale_amount)}` : ""].filter(Boolean).join(" · ") || undefined,
+              sub: `${x.source === "partner" ? "Đối tác" : "Hệ thống"} · ${when(x.at)}`,
+            }))} />
+          ) : <Text style={{ color: t.sub, marginLeft: 6 }}>Chưa có bước xử lý nào.</Text>}
         </View>
-        <Text style={{ fontSize: 30, fontWeight: "800", color: t.text }}>{vnd(o.sale_amount)}</Text>
-        <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: t.line }} />
-        <KV k="Hoa hồng" v={vnd(o.publisher_commission)} strong />
-        {o.tl_commission !== undefined ? <KV k="Hoa hồng TL" v={vnd(o.tl_commission)} /> : null}
-        {o.am_commission !== undefined ? <KV k="Hoa hồng AM" v={vnd(o.am_commission)} /> : null}
-      </Card>
-
-      <Card style={{ gap: 10 }}>
-        <KV k="Mã đơn" v={orderCode(o) || "—"} onPress={orderCode(o) ? () => copy(orderCode(o)) : undefined} />
-        <KV k="Chiến dịch" v={o.campaign_name || camp?.name || "—"} onPress={o.campaign_id ? () => router.push(`/campaign/${o.campaign_id}`) : undefined} />
-        {o.fields?.product ? <KV k="Sản phẩm" v={o.fields.product} /> : null}
-        {customer ? <KV k="Khách hàng" v={customer} /> : null}
-        <KV k="Ngày phát sinh" v={when(o.created_at)} />
-        {o.approved_on ? <KV k="Ngày duyệt / giải ngân" v={when(o.approved_on)} /> : null}
-        {o.updated_at ? <KV k="Cập nhật" v={when(o.updated_at)} /> : null}
-      </Card>
-
-      {m ? (
-        <Card style={{ gap: 10 }}>
-          <KV k="Thành viên" v={m.name} onPress={() => router.push(`/members/${m.id}`)} />
-          {m.rd_code ? <KV k="Mã RD" v={m.rd_code} /> : null}
-          {m.team ? <KV k="Nhóm" v={m.team} /> : null}
-          {m.region ? <KV k="Khu vực" v={m.region} /> : null}
-          {m.team_lead_name ? <KV k="TeamLead" v={m.team_lead_name} /> : null}
-          {m.am_name ? <KV k="AM" v={m.am_name} /> : null}
-        </Card>
-      ) : null}
-
-      <SectionTitle title="Lịch sử xử lý" />
-      {hist.isPending ? <Loading /> : hist.isError ? (
-        <Text style={{ color: t.sub }}>{hist.error instanceof ApiError && hist.error.status === 403 ? "Bạn chưa có quyền xem lịch sử đơn." : "Chưa xem được lịch sử đơn."}</Text>
-      ) : steps.length ? (
-        <Card style={{ gap: 0 }}>
-          {steps.map((x, i) => {
-            const label = x.status ? orderStatus(x.status).label : x.biz_status || x.partner_status || "Cập nhật"
-            const color = x.status ? orderStatus(x.status).color : t.navy2
-            return (
-              <View key={i} style={s.step}>
-                <View style={{ alignItems: "center" }}>
-                  <View style={[s.node, { backgroundColor: color }]} />
-                  {i < steps.length - 1 ? <View style={s.line} /> : null}
-                </View>
-                <View style={{ flex: 1, paddingBottom: 16, gap: 2 }}>
-                  <Text style={{ fontWeight: "800", color: t.text }}>{label}</Text>
-                  {x.partner_status && x.status ? <Text style={{ color: t.sub, fontSize: 12 }}>Đối tác: {x.partner_status}</Text> : null}
-                  {x.sale_amount != null ? <Text style={{ color: t.sub, fontSize: 12 }}>Doanh số {vnd(x.sale_amount)}</Text> : null}
-                  <Text style={{ color: t.sub, fontSize: 12 }}><Ionicons name={x.source === "partner" ? "business-outline" : "server-outline"} size={11} /> {x.source === "partner" ? "Đối tác" : "Hệ thống"} · {when(x.at)}</Text>
-                </View>
-              </View>
-            )
-          })}
-        </Card>
-      ) : <Text style={{ color: t.sub }}>Chưa có bước xử lý nào.</Text>}
-    </ScrollView>
+        {code ? <Text onPress={() => copyText(o.id, "Đã sao chép mã hệ thống")} style={{ color: t.sub, fontSize: 11, textAlign: "center" }}>Mã hệ thống: {o.id}</Text> : null}
+      </ScrollView>
     </View>
   )
 }
-const s = StyleSheet.create({
-  step: { flexDirection: "row", gap: 12 },
-  node: { width: 12, height: 12, borderRadius: 6, marginTop: 4 },
-  line: { width: 2, flex: 1, backgroundColor: t.line, marginTop: 2 },
-})
