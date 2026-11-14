@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "../src/auth"
 import { BrandLogo, BrandProvider, useBrand } from "../src/brand"
 import { registerPush, setBadge } from "../src/push"
 import { useUnread } from "../src/hooks"
+import { useAutoUpdate } from "../src/autoupdate"
 import { t } from "../src/theme"
 
 void SplashScreen.preventAutoHideAsync().catch(() => {})
@@ -56,6 +57,7 @@ function Gate() {
   const qc = useQueryClient()
   const inLogin = segments[0] === "login"
   const unread = useUnread()
+  useAutoUpdate()
 
   useEffect(() => {
     if (!ready) return

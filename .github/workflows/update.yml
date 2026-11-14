@@ -16,4 +16,7 @@ jobs:
       - run: npx tsc --noEmit
       - uses: expo/expo-github-action@v8
         with: { eas-version: latest, token: "${{ secrets.EXPO_TOKEN }}" }
+      # Kênh "preview" luôn trỏ vào nhánh "preview": link cố định theo kênh luôn mở ra bản mới nhất (README.md).
+      - run: eas channel:create preview --non-interactive || true
       - run: eas update --branch preview --platform ios --message "${{ github.sha }}" --non-interactive
+      - run: eas channel:edit preview --branch preview --non-interactive || true
