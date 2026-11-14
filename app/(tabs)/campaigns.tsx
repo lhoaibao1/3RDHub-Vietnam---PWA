@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react"
-import { Dimensions, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { Dimensions, FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Text, TextInput } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -7,8 +7,8 @@ import { LinearGradient } from "expo-linear-gradient"
 import { type Campaign, useCampaigns, useMemberships } from "../../src/hooks"
 import { num, rateText, vnd } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Art, Empty, ErrorBox, Loading, t } from "../../src/ui"
-import { LargeTitle, Pager, tap, usePager } from "../../src/chrome"
+import { Art, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
+import { Glass, LargeTitle, Pager, tap, usePager } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
 const W = Dimensions.get("window").width
@@ -102,7 +102,7 @@ export default function Campaigns() {
 
   const header = (
     <View style={{ gap: 12, paddingBottom: 4 }}>
-      <View style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tìm chiến dịch, ngành hàng…" placeholderTextColor={t.sub} value={term} onChangeText={setTerm} />{term ? <Pressable onPress={() => setTerm("")} hitSlop={10}><Ionicons name="close-circle" size={18} color={t.sub} /></Pressable> : null}</View>
+      <Glass style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tìm chiến dịch, ngành hàng…" placeholderTextColor={t.sub} value={term} onChangeText={setTerm} />{term ? <Pressable onPress={() => setTerm("")} hitSlop={10}><Ionicons name="close-circle" size={18} color={t.sub} /></Pressable> : null}</Glass>
       <View style={s.seg}>
         {TABS.map((x) => (
           <Pressable key={x.k} onPress={() => setTab(x.k)} style={[s.segItem, tab === x.k && s.segOn]}>
@@ -129,7 +129,7 @@ export default function Campaigns() {
         keyExtractor={(c) => c.id}
         ListHeaderComponent={header}
         contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 12, flexGrow: 1 }}
-        refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch(); void mem.refetch() }} tintColor={t.navy} />}
+        refreshControl={<PullRefresh run={() => Promise.all([q.refetch(), mem.refetch()])} />}
         ListEmptyComponent={<Empty text={tab === "joined" ? "Bạn chưa tham gia chiến dịch nào." : "Không có chiến dịch phù hợp."} icon="megaphone-outline" />}
         renderItem={({ item }) => <CampaignCard c={item} status={status(item.id)} onPress={() => { tap(); router.push(`/campaign/${item.id}`) }} />}
       />
@@ -139,7 +139,7 @@ export default function Campaigns() {
   )
 }
 const s = StyleSheet.create({
-  search: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#fff", borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
+  search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   seg: { flexDirection: "row", backgroundColor: "#E7EBF4", borderRadius: 12, padding: 3 },
   segItem: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 10 },
   segOn: { backgroundColor: "#fff", ...shadow },

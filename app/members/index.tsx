@@ -1,13 +1,13 @@
 import { useMemo, useRef, useState } from "react"
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Text, TextInput } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { countsForCommission, kycOf, memberState, type Member, useMembers, useOrders } from "../../src/hooks"
 import { num, vnd } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Avatar, Empty, ErrorBox, Loading, t } from "../../src/ui"
-import { Pager, TopBar, tap, usePager } from "../../src/chrome"
+import { Avatar, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
+import { Glass, Pager, TopBar, tap, usePager } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
 const SORTS = [{ value: "name", label: "Tên A → Z" }, { value: "new", label: "Mới tham gia" }, { value: "comm", label: "Hoa hồng cao nhất" }, { value: "orders", label: "Nhiều đơn nhất" }]
@@ -62,7 +62,7 @@ export default function Members() {
 
   const header = (
     <View style={{ gap: 12, paddingBottom: 4 }}>
-      <View style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tên, mã RD, email, SĐT…" placeholderTextColor={t.sub} value={term} onChangeText={setTerm} autoCorrect={false} autoCapitalize="none" /></View>
+      <Glass style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tên, mã RD, email, SĐT…" placeholderTextColor={t.sub} value={term} onChangeText={setTerm} autoCorrect={false} autoCapitalize="none" /></Glass>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
         <FilterButton label="Vai trò" value={role} active={!!role} onPress={() => setSheet("role")} />
         {teams.length ? <FilterButton label="Nhóm" value={team} active={!!team} onPress={() => setSheet("team")} /> : null}
@@ -84,7 +84,7 @@ export default function Members() {
         keyExtractor={(m) => m.id}
         ListHeaderComponent={header}
         contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}
-        refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}
+        refreshControl={<PullRefresh run={() => Promise.all([q.refetch()])} />}
         ListEmptyComponent={<Empty text="Không có thành viên phù hợp." icon="people-outline" />}
         renderItem={({ item: m }) => {
           const k = kycOf(m.kyc_status)
@@ -115,7 +115,7 @@ export default function Members() {
   )
 }
 const s = StyleSheet.create({
-  search: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#fff", borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
+  search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line },
   chipOn: { backgroundColor: t.navy, borderColor: t.navy },
   row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 12, ...shadow },

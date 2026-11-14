@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react"
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Text, TextInput } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -7,8 +7,8 @@ import { commissionOf, ORDER_STATUS, orderCode, orderStatus, useCampaigns, useMe
 import { RANGES, rangeOf, type RangeKey } from "../../src/dates"
 import { num, vnd, vndShort, when } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
-import { Art, Card, Empty, ErrorBox, Loading, t } from "../../src/ui"
-import { LargeTitle, Pager, tap, usePager } from "../../src/chrome"
+import { Art, Card, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
+import { Glass, LargeTitle, Pager, tap, usePager } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
 const SORTS = [{ value: "new", label: "Mới nhất" }, { value: "old", label: "Cũ nhất" }, { value: "sale", label: "Giá trị đơn cao nhất" }, { value: "comm", label: "Hoa hồng cao nhất" }]
@@ -69,7 +69,7 @@ export default function Orders() {
 
   const header = (
     <View style={{ gap: 12, paddingBottom: 4 }}>
-      <View style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder={members.on ? "Tìm mã đơn, chiến dịch, thành viên…" : "Tìm mã đơn hoặc chiến dịch…"} placeholderTextColor={t.sub} value={term} onChangeText={setTerm} autoCorrect={false} />{term ? <Pressable onPress={() => setTerm("")} hitSlop={10}><Ionicons name="close-circle" size={18} color={t.sub} /></Pressable> : null}</View>
+      <Glass style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder={members.on ? "Tìm mã đơn, chiến dịch, thành viên…" : "Tìm mã đơn hoặc chiến dịch…"} placeholderTextColor={t.sub} value={term} onChangeText={setTerm} autoCorrect={false} />{term ? <Pressable onPress={() => setTerm("")} hitSlop={10}><Ionicons name="close-circle" size={18} color={t.sub} /></Pressable> : null}</Glass>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
         <FilterButton label="Thời gian" value={RANGES.find((r) => r.value === range)?.label} active onPress={() => setSheet("range")} />
         <FilterButton label="Chiến dịch" value={campName.get(camp)} active={!!camp} onPress={() => setSheet("camp")} />
@@ -106,7 +106,7 @@ export default function Orders() {
         ListHeaderComponent={header}
         contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 10, flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}
+        refreshControl={<PullRefresh run={() => Promise.all([q.refetch()])} />}
         ListEmptyComponent={<Empty text={filtered ? "Không có đơn nào khớp bộ lọc." : "Chưa có đơn hàng."} icon="receipt-outline" />}
         ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="đơn" onPage={(p) => { pg.setPage(p); list.current?.scrollToOffset({ offset: 0, animated: true }) }} />}
         renderItem={({ item: o }) => {
@@ -151,7 +151,7 @@ export default function Orders() {
   )
 }
 const s = StyleSheet.create({
-  search: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#fff", borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
+  search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   clear: { justifyContent: "center", paddingHorizontal: 10 },
   st: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line },
   stOn: { backgroundColor: t.navy, borderColor: t.navy },

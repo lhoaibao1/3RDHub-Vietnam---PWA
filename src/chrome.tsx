@@ -14,11 +14,12 @@ export const tap = () => { if (Platform.OS === "ios") void Haptics.selectionAsyn
 
 const liquid = Platform.OS === "ios" && (() => { try { return isLiquidGlassAvailable() } catch { return false } })()
 
-/** Nền kính: Liquid Glass thật trên iOS 26+, kính mờ (blur) trên iOS cũ, nền trắng mờ trên web. */
-export function Glass({ children, style, interactive }: { children?: ReactNode; style?: StyleProp<ViewStyle>; interactive?: boolean }) {
-  if (liquid) return <GlassView glassEffectStyle="regular" isInteractive={interactive} style={style}>{children}</GlassView>
-  if (Platform.OS === "ios") return <BlurView intensity={60} tint="systemChromeMaterialLight" style={[style, { overflow: "hidden" }]}>{children}</BlurView>
-  return <View style={[style, { backgroundColor: "rgba(255,255,255,0.88)", borderWidth: StyleSheet.hairlineWidth, borderColor: t.line }]}>{children}</View>
+/** Nền kính: Liquid Glass thật trên iOS 26+, kính mờ (blur) trên iOS cũ, nền mờ trên Android / web.
+ *  clear: kính trong đặt trên nền tối (đầu Trang chủ), chữ / icon bên trong màu trắng. */
+export function Glass({ children, style, interactive, clear }: { children?: ReactNode; style?: StyleProp<ViewStyle>; interactive?: boolean; clear?: boolean }) {
+  if (liquid) return <GlassView glassEffectStyle={clear ? "clear" : "regular"} isInteractive={interactive} style={style}>{children}</GlassView>
+  if (Platform.OS === "ios") return <BlurView intensity={clear ? 35 : 60} tint={clear ? "systemUltraThinMaterialDark" : "systemChromeMaterialLight"} style={[style, { overflow: "hidden" }]}>{children}</BlurView>
+  return <View style={[style, clear ? { backgroundColor: "rgba(255,255,255,0.16)" } : { backgroundColor: "rgba(255,255,255,0.92)", borderWidth: StyleSheet.hairlineWidth, borderColor: t.line }]}>{children}</View>
 }
 
 /** Nút tròn kính (quay lại, hành động trên thanh tiêu đề). */
@@ -81,13 +82,13 @@ export function Pager({ page, pages, total, size, unit = "mục", onPage }: { pa
   return (
     <View style={{ alignItems: "center", gap: 8, paddingVertical: 14 }}>
       {pages > 1 ? (
-        <View style={s.pager}>
+        <Glass style={s.pager}>
           <Pressable onPress={() => go(page - 1)} disabled={page === 1} style={[s.pbtn, page === 1 && { opacity: 0.3 }]}><Ionicons name="chevron-back" size={16} color={t.navy} /></Pressable>
           {nums.map((n, i) => n === "…" ? <Text key={`e${i}`} style={{ color: t.sub, paddingHorizontal: 4 }}>…</Text> : (
             <Pressable key={n} onPress={() => go(n)} style={[s.pnum, n === page && s.pnumOn]}><Text style={{ color: n === page ? "#fff" : t.text, fontWeight: "800", fontSize: 13 }}>{n}</Text></Pressable>
           ))}
           <Pressable onPress={() => go(page + 1)} disabled={page === pages} style={[s.pbtn, page === pages && { opacity: 0.3 }]}><Ionicons name="chevron-forward" size={16} color={t.navy} /></Pressable>
-        </View>
+        </Glass>
       ) : null}
       <Text style={{ color: t.sub, fontSize: 12 }}>{from}–{to} trên {total} {unit}{pages > 1 ? ` · Trang ${page}/${pages}` : ""}</Text>
     </View>
@@ -101,7 +102,7 @@ const s = StyleSheet.create({
   title: { flex: 1, textAlign: "center", fontSize: 17, fontWeight: "800", color: t.text },
   large: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 16, paddingBottom: 6, backgroundColor: t.bg },
   largeText: { fontSize: 32, fontWeight: "900", color: t.text, letterSpacing: -0.5 },
-  pager: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#fff", borderRadius: 22, padding: 4, borderWidth: StyleSheet.hairlineWidth, borderColor: t.line },
+  pager: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 22, padding: 4, overflow: "hidden" },
   pbtn: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
   pnum: { minWidth: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", paddingHorizontal: 6 },
   pnumOn: { backgroundColor: t.navy },

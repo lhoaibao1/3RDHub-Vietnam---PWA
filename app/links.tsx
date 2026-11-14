@@ -1,11 +1,11 @@
-import { Alert, FlatList, RefreshControl, Share, View } from "react-native"
+import { Alert, FlatList, Share, View } from "react-native"
 import { Text } from "../src/text"
 import * as Clipboard from "expo-clipboard"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../src/api"
 import { useCampaigns } from "../src/hooks"
 import { day, num } from "../src/format"
-import { Art, Button, Card, Empty, ErrorBox, Loading, Pill, t } from "../src/ui"
+import { Art, Button, Card, Empty, ErrorBox, Loading, Pill, t, PullRefresh } from "../src/ui"
 import { Pager, TopBar, usePager } from "../src/chrome"
 
 type Link = { id: string; code: string; name: string; url: string; campaign_id: string; status: string; created_at: string }
@@ -32,7 +32,7 @@ export default function Links() {
         ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="link" onPage={pg.setPage} />}
         keyExtractor={(l) => l.id}
         contentContainerStyle={{ padding: 16, gap: 12, flexGrow: 1 }}
-        refreshControl={<RefreshControl refreshing={links.isFetching} onRefresh={() => { void links.refetch(); void clicks.refetch() }} tintColor={t.navy} />}
+        refreshControl={<PullRefresh run={() => Promise.all([links.refetch(), clicks.refetch()])} />}
         ListEmptyComponent={<Empty text="Bạn chưa có link nào. Vào một chiến dịch để lấy link." icon="link-outline" />}
         renderItem={({ item: l }) => {
           const c = camps.data?.find((x) => x.id === l.campaign_id)

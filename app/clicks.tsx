@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react"
-import { FlatList, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { FlatList, ScrollView, StyleSheet, View } from "react-native"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "../src/api"
 import { useCampaigns, useCan } from "../src/hooks"
 import { RANGES, rangeOf, type RangeKey } from "../src/dates"
 import { num, when } from "../src/format"
-import { Empty, ErrorBox, Loading, t } from "../src/ui"
+import { Empty, ErrorBox, Loading, t, PullRefresh } from "../src/ui"
 import { Pager, TopBar, usePager } from "../src/chrome"
 import { StatBar } from "../src/detail"
 import { FilterButton, PickerSheet } from "../src/sheet"
@@ -103,7 +103,7 @@ export default function Clicks() {
         keyExtractor={(c) => c.id}
         ListHeaderComponent={header}
         contentContainerStyle={{ padding: 16, gap: 8, flexGrow: 1, paddingBottom: 40 }}
-        refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}
+        refreshControl={<PullRefresh run={() => Promise.all([q.refetch()])} />}
         ListEmptyComponent={<Text style={{ color: t.sub, textAlign: "center", paddingVertical: 20 }}>Không có lượt click nào trong khoảng này.</Text>}
         ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="click" onPage={pg.setPage} />}
         renderItem={({ item: c }) => (

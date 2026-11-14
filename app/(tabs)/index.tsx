@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Dimensions, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { Dimensions, Linking, Pressable, ScrollView, StyleSheet, View, Platform } from "react-native"
 import { Text } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Image } from "expo-image"
@@ -11,11 +11,11 @@ import { abs, api } from "../../src/api"
 import { useAuth } from "../../src/auth"
 import { BrandLogo } from "../../src/brand"
 import { useCampaigns, useCan, useKycAdmin, useLost, useMembers, useUnread } from "../../src/hooks"
-import { tap } from "../../src/chrome"
+import { Glass, tap } from "../../src/chrome"
 import { ZALO_SUPPORT } from "../../src/links"
 import { PromoPopup } from "../../src/promo"
 import { compact, num, vnd, when, ymd } from "../../src/format"
-import { Art, Avatar, Card, Chip, ErrorBox, Pill, SectionTitle, t } from "../../src/ui"
+import { Art, Avatar, Card, Chip, ErrorBox, Pill, SectionTitle, t, PullRefresh } from "../../src/ui"
 import { shadow } from "../../src/theme"
 
 type Totals = { clicks: number; orders: number; approved: number; commission: number; sale: number; approval_rate: number | null }
@@ -54,7 +54,7 @@ export default function Home() {
   const name = user?.display_name || user?.email?.split("@")[0] || ""
   const hour = new Date().getHours()
   const hello = hour < 11 ? "Chào buổi sáng" : hour < 14 ? "Chào buổi trưa" : hour < 18 ? "Chào buổi chiều" : "Chào buổi tối"
-  const refresh = () => { void ov.refetch(); void chart.refetch(); void recent.refetch(); void banners.refetch(); void camps.refetch() }
+  const refresh = () => Promise.all([ov.refetch(), chart.refetch(), recent.refetch(), banners.refetch(), camps.refetch()])
 
   const t0 = ov.data?.totals, p0 = ov.data?.previous
   const bars = chart.data?.series[0]?.values ?? []
@@ -69,16 +69,19 @@ export default function Home() {
   }
 
   return (
-    <ScrollView contentInsetAdjustmentBehavior="never" style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 110 }} refreshControl={<RefreshControl refreshing={ov.isFetching && !ov.isPending} onRefresh={refresh} tintColor={t.navy} />}>
+    <ScrollView contentInsetAdjustmentBehavior="never" style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 110 }} refreshControl={<PullRefresh run={refresh} />}>
       <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 12 }]}>
         <View style={s.heroTop}>
           <BrandLogo light width={112} height={21} />
           <View style={{ flex: 1 }} />
-          <Pressable onPress={() => { tap(); void Linking.openURL(ZALO_SUPPORT) }} style={s.bell} accessibilityLabel="Nhóm hỗ trợ">
-            <Ionicons name="headset-outline" size={21} color="#fff" />
+          {Platform.OS !== "ios" ? <Pressable onPress={() => { tap(); router.push("/find") }}  accessibilityLabel="Tìm kiếm">
+            <Glass clear interactive style={s.bell}><Ionicons name="search" size={21} color="#fff" /></Glass>
+          </Pressable> : null}
+          <Pressable onPress={() => { tap(); void Linking.openURL(ZALO_SUPPORT) }}  accessibilityLabel="Nhóm hỗ trợ">
+            <Glass clear interactive style={s.bell}><Ionicons name="headset-outline" size={21} color="#fff" /></Glass>
           </Pressable>
-          <Pressable onPress={() => router.push("/notifications")} style={s.bell}>
-            <Ionicons name="notifications-outline" size={22} color="#fff" />
+          <Pressable onPress={() => router.push("/notifications")} >
+            <Glass clear interactive style={s.bell}><Ionicons name="notifications-outline" size={22} color="#fff" /></Glass>
             {(unread.data || 0) > 0 ? <View style={s.dot}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>{Math.min(unread.data || 0, 99)}</Text></View> : null}
           </Pressable>
         </View>
@@ -188,7 +191,7 @@ export default function Home() {
 const s = StyleSheet.create({
   hero: { paddingHorizontal: 16, paddingBottom: 18, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   heroTop: { flexDirection: "row", alignItems: "center", gap: 10 },
-  bell: { width: 42, height: 42, borderRadius: 21, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
+  bell: { width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   dot: { position: "absolute", top: -2, right: -2, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: t.bad, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
   bars: { flexDirection: "row", alignItems: "flex-end", gap: 4, height: 60, marginTop: 12 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },

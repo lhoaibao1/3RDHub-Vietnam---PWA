@@ -48,6 +48,13 @@
         {
           "faceIDPermission": "Cho phép 3RDHub Vietnam dùng Face ID để đăng nhập nhanh."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Cho phép 3RDHub Vietnam dùng camera để chụp CCCD và khuôn mặt khi định danh.",
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "extra": {
@@ -77,9 +84,10 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.POST_NOTIFICATIONS",
         "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.USE_FINGERPRINT"
       ],
       "predictiveBackGestureEnabled": false
     }

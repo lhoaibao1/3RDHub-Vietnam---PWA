@@ -4,6 +4,7 @@ import { Text, TextInput } from "./text"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { t } from "./theme"
+import { Glass, tap } from "./chrome"
 
 export type Option = { value: string; label: string; sub?: string }
 
@@ -49,9 +50,11 @@ export function PickerSheet({ open, title, options, value, onPick, onClose }: { 
 /** Nút lọc dạng viên thuốc: nhãn + giá trị đang chọn. */
 export function FilterButton({ label, value, active, onPress }: { label: string; value?: string; active?: boolean; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={[s.fbtn, active && { backgroundColor: t.navySoft, borderColor: t.navy }]}>
-      <Text style={{ color: active ? t.navy : t.text, fontWeight: "700", fontSize: 13 }} numberOfLines={1}>{active && value ? value : label}</Text>
-      <Ionicons name="chevron-down" size={14} color={active ? t.navy : t.sub} />
+    <Pressable onPress={() => { tap(); onPress() }} style={({ pressed }) => [pressed && { transform: [{ scale: 0.96 }] }]}>
+      <Glass interactive style={[s.fbtn, active && { borderWidth: 1.5, borderColor: t.navy }]}>
+        <Text style={{ color: active ? t.navy : t.text, fontWeight: "700", fontSize: 13 }} numberOfLines={1}>{active && value ? value : label}</Text>
+        <Ionicons name="chevron-down" size={14} color={active ? t.navy : t.sub} />
+      </Glass>
     </Pressable>
   )
 }
@@ -64,5 +67,5 @@ const s = StyleSheet.create({
   title: { fontSize: 17, fontWeight: "800", color: t.text },
   search: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: t.bg, borderRadius: 12, paddingHorizontal: 12, marginBottom: 6 },
   row: { flexDirection: "row", alignItems: "center", paddingVertical: 13, paddingHorizontal: 4, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.line },
-  fbtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line, maxWidth: 180 },
+  fbtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, overflow: "hidden", maxWidth: 180 },
 })

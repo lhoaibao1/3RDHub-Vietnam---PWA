@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react"
-import { FlatList, Pressable, RefreshControl, ScrollView, View } from "react-native"
+import { FlatList, Pressable, ScrollView, View } from "react-native"
 import { Text } from "../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../src/api"
 import { when } from "../src/format"
-import { Card, Chip, Empty, ErrorBox, Loading, t } from "../src/ui"
+import { Card, Chip, Empty, ErrorBox, Loading, t, PullRefresh } from "../src/ui"
 import { Pager, TopBar, usePager } from "../src/chrome"
 
 type Note = { id: string; title: string; body: string; link: string; kind: string; created_at: string; read_at: string | null }
@@ -45,7 +45,7 @@ export default function Notifications() {
           ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="thông báo" onPage={pg.setPage} />}
           keyExtractor={(n) => n.id}
           contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}
-          refreshControl={<RefreshControl refreshing={q.isFetching} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}
+          refreshControl={<PullRefresh run={() => Promise.all([q.refetch()])} />}
           ListEmptyComponent={<Empty text="Chưa có thông báo." icon="notifications-off-outline" />}
           renderItem={({ item: n }) => (
             <Pressable onPress={() => open(n)}>

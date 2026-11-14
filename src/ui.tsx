@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react"
-import { ActivityIndicator, Animated, Pressable, StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from "react-native"
+import { useEffect, useRef, useState } from "react"
+import { ActivityIndicator, Animated, Pressable, RefreshControl, type RefreshControlProps, StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from "react-native"
 import { Text } from "./text"
 import { Image } from "expo-image"
 import { Ionicons } from "@expo/vector-icons"
@@ -134,3 +134,15 @@ const s = StyleSheet.create({
   rowItem: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 4, borderRadius: 12 },
   rowIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: t.navySoft, alignItems: "center", justifyContent: "center" },
 })
+
+/** Kéo để làm mới. Vòng xoay chỉ hiện khi NGƯỜI DÙNG kéo, và tắt khi tải xong: không gắn vào trạng thái tải nền
+ *  (isFetching), vì tải nền bật vòng xoay giữa chừng làm iOS kẹt một khoảng trống trên đầu danh sách
+ *  (owner, 2026-11-14: "chuyển tab nào cũng bị"). */
+export function PullRefresh({ run, ...rest }: { run: () => Promise<unknown> } & Partial<RefreshControlProps>) {
+  const [on, setOn] = useState(false)
+  const pull = async () => {
+    setOn(true)
+    try { await Promise.all([run(), new Promise((r) => setTimeout(r, 400))]) } catch {} finally { setOn(false) }
+  }
+  return <RefreshControl {...rest} refreshing={on} onRefresh={() => { void pull() }} tintColor={t.navy} />
+}

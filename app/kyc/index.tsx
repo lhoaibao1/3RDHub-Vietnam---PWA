@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react"
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { KYC_STATE, useKycAdmin } from "../../src/hooks"
 import { num, when } from "../../src/format"
-import { Avatar, Empty, ErrorBox, Loading, t } from "../../src/ui"
-import { Pager, TopBar, tap, usePager } from "../../src/chrome"
+import { Avatar, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
+import { Glass, Pager, TopBar, tap, usePager } from "../../src/chrome"
 import { Text, TextInput } from "../../src/text"
 import { shadow } from "../../src/theme"
 
@@ -33,10 +33,10 @@ export default function KycList() {
         data={pg.rows}
         keyExtractor={(x) => x.kyc.user_id}
         contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1, paddingBottom: 40 }}
-        refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}
+        refreshControl={<PullRefresh run={() => Promise.all([q.refetch()])} />}
         ListHeaderComponent={
           <View style={{ gap: 12, paddingBottom: 4 }}>
-            <View style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tên, email, mã RD, số CCCD…" placeholderTextColor={t.sub} value={term} onChangeText={setTerm} autoCorrect={false} autoCapitalize="none" /></View>
+            <Glass style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tên, email, mã RD, số CCCD…" placeholderTextColor={t.sub} value={term} onChangeText={setTerm} autoCorrect={false} autoCapitalize="none" /></Glass>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
               {(["pending", "approved", "rejected", "requested"] as const).map((k) => (
                 <Pressable key={k} onPress={() => setStatus(status === k ? "" : k)} style={[s.st, status === k && { backgroundColor: KYC_STATE[k]!.color, borderColor: KYC_STATE[k]!.color }]}><Text style={[s.stText, status === k && { color: "#fff" }]}>{KYC_STATE[k]!.label} · {num(counts[k] ?? 0)}</Text></Pressable>
@@ -66,7 +66,7 @@ export default function KycList() {
   )
 }
 const s = StyleSheet.create({
-  search: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#fff", borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
+  search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   st: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line },
   stText: { color: t.text, fontWeight: "700", fontSize: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 12, ...shadow },

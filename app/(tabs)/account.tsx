@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../../src/auth"
 import { api, API_URL } from "../../src/api"
 import { BrandLogo } from "../../src/brand"
-import { commissionOf, useCan, useKycAdmin, useLost, useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
+import { commissionOf, KYC_STATE, useCan, useKycAdmin, useLost, useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
 import { ZALO_SUPPORT } from "../../src/links"
 import { num, vndShort } from "../../src/format"
 import { Avatar, t } from "../../src/ui"
@@ -52,6 +52,7 @@ export default function Account() {
   const line = me.data?.me
   const pendingKyc = kyc.data?.filter((x) => x.kyc.status === "pending").length || 0
   const orders = useOrders()
+  const ownKyc = useQuery({ queryKey: ["own-kyc"], queryFn: () => api<{ data: { status: string } }>("/api/v1/tenant/account/kyc").then((r) => r.data), retry: false })
   const wallet = useQuery({ queryKey: ["wallet"], queryFn: () => api<{ data: { balance?: { available: number } } }>("/api/v1/wallet").then((r) => r.data), retry: false })
   const name = user?.display_name || user?.email || ""
   const code = me.data?.me?.rd_code
@@ -93,6 +94,7 @@ export default function Account() {
         <Group title="Tài khoản" items={[
           { icon: "person", color: "#2563EB", label: "Thông tin cá nhân", onPress: () => router.push("/profile") },
           { icon: "wallet", color: "#15803D", label: "Ví & rút tiền", onPress: () => router.push("/(tabs)/wallet") },
+          { icon: "shield-checkmark", color: "#0F766E", label: "Định danh eKYC", value: KYC_STATE[ownKyc.data?.status ?? ""]?.label ?? "", onPress: () => router.push("/ekyc") },
           ...(code ? [{ icon: "qr-code" as const, color: "#7C3AED", label: "Mã Publisher", value: code, onPress: copyCode }] : []),
         ]} />
         <Group title="Kinh doanh" items={[

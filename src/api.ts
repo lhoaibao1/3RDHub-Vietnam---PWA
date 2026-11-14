@@ -35,8 +35,8 @@ export const abs = (u?: string | null) => (!u ? "" : /^https?:/.test(u) ? u : `$
 /** Nguồn ảnh cho expo-image: ảnh avatar cần Bearer, ảnh chiến dịch là public. */
 export const img = (u?: string | null) => (u ? { uri: abs(u), headers: token ? { Authorization: `Bearer ${token}` } : undefined } : undefined)
 
-async function call<T>(path: string, init: { method?: string; body?: unknown; form?: FormData }): Promise<T> {
-  const headers: Record<string, string> = { Accept: "application/json" }
+async function call<T>(path: string, init: { method?: string; body?: unknown; form?: FormData; headers?: Record<string, string> }): Promise<T> {
+  const headers: Record<string, string> = { Accept: "application/json", ...init.headers }
   if (token) headers.Authorization = `Bearer ${token}`
   // Backend chỉ trả token trong body khi header này là "zalo" (client không giữ được cookie). App mobile dùng chung đường đó.
   headers["X-Client"] = "zalo"
@@ -55,5 +55,5 @@ async function call<T>(path: string, init: { method?: string; body?: unknown; fo
   }
   return payload
 }
-export const api = <T,>(path: string, init: { method?: string; body?: unknown } = {}) => call<T>(path, init)
-export const upload = <T,>(path: string, form: FormData) => call<T>(path, { method: "POST", form })
+export const api = <T,>(path: string, init: { method?: string; body?: unknown; headers?: Record<string, string> } = {}) => call<T>(path, init)
+export const upload = <T,>(path: string, form: FormData, headers?: Record<string, string>) => call<T>(path, { method: "POST", form, headers })

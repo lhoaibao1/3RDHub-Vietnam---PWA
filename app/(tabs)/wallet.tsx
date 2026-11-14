@@ -1,17 +1,18 @@
 import { useState } from "react"
-import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native"
+import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../../src/api"
 import { day, num, vnd, vndShort, when } from "../../src/format"
-import { Button, Empty, ErrorBox, Loading, t } from "../../src/ui"
+import { Button, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
 import { LargeTitle, tap } from "../../src/chrome"
 import { Hero, HeroStat } from "../../src/detail"
 import { Notice } from "../../src/form"
 import { Text, TextInput } from "../../src/text"
 import { shadow } from "../../src/theme"
 import { prompt } from "../../src/prompt"
+import { useRouter } from "expo-router"
 
 type Withdrawal = { id: string; amount: number; tax?: number; net?: number; status: "pending" | "paid" | "rejected" | "cancelled"; bank?: string; note?: string; requested_at: string; decided_at?: string | null }
 type Credit = { id: string; period: string; gross?: number; tax?: number; amount: number; note: string; created_at: string; release_at?: string | null }
@@ -33,6 +34,7 @@ const digits = (v: string) => Number(v.replace(/\D/g, "")) || 0
 
 export default function WalletScreen() {
   const qc = useQueryClient()
+  const router = useRouter()
   const insets = useSafeAreaInsets()
   const [sheet, setSheet] = useState(false)
   const [amount, setAmount] = useState("")
@@ -56,7 +58,7 @@ export default function WalletScreen() {
   const b = w.balance ?? { credited: 0, pending: 0, withdrawn: 0, available: 0 }
   const min = w.min_amount ?? 0
   const n = digits(amount)
-  const blocked = !w.bank ? "Chưa có tài khoản nhận tiền. Cập nhật trên bản web trước khi rút." : !w.bank.kyc_done ? "Cần định danh (eKYC) trên bản web trước khi rút tiền." : !w.bank.ready ? "Thông tin ngân hàng chưa đầy đủ. Bổ sung trên bản web." : ""
+  const blocked = !w.bank ? "Chưa có tài khoản nhận tiền. Cập nhật trên bản web trước khi rút." : !w.bank.kyc_done ? "Cần định danh (eKYC) trước khi rút tiền." : !w.bank.ready ? "Thông tin ngân hàng chưa đầy đủ. Bổ sung trên bản web." : ""
   const why = n <= 0 ? "" : n < min ? `Số tiền tối thiểu là ${vnd(min)}.` : n > b.available ? "Vượt quá số dư có thể rút." : ""
   const ok = !blocked && n > 0 && !why
   const confirm = () => Alert.alert("Xác nhận rút tiền", `Rút ${vnd(n)} về ${w.bank?.bank_name} ${w.bank?.bank_account_number}?`, [{ text: "Hủy", style: "cancel" }, { text: "Rút tiền", onPress: () => withdraw.mutate(n) }])
@@ -66,7 +68,7 @@ export default function WalletScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <LargeTitle title="Ví" />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 16 }} refreshControl={<RefreshControl refreshing={q.isFetching && !q.isPending} onRefresh={() => { void q.refetch() }} tintColor={t.navy} />}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 16 }} refreshControl={<PullRefresh run={() => Promise.all([q.refetch()])} />}>
         <Hero>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <Text style={{ color: "#C9D6F5" }}>Số dư có thể rút</Text>
@@ -90,6 +92,7 @@ export default function WalletScreen() {
           </Pressable>
         </Hero>
         {blocked ? <Notice tone="warn" text={blocked} /> : null}
+        {w.bank && !w.bank.kyc_done ? <Button label="Định danh ngay trong app" icon="shield-checkmark-outline" onPress={() => router.push("/ekyc")} /> : null}
 
         <View style={s.seg}>
           {([["out", `Lịch sử rút (${num(outs.length)})`], ["in", `Hoa hồng theo kỳ (${num(ins.length)})`]] as const).map(([k, l]) => (
