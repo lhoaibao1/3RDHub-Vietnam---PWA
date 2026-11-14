@@ -40,6 +40,7 @@ export default function Account() {
         </Card>
         <Button label="Đăng xuất" kind="ghost" icon="log-out-outline" onPress={() => Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [{ text: "Hủy", style: "cancel" }, { text: "Đăng xuất", style: "destructive", onPress: () => void logout() }])} />
         <Text style={{ color: t.sub, textAlign: "center", fontSize: 12 }}>3RDVN Hub · v{Constants.expoConfig?.version}</Text>
+        <Text selectable style={{ color: t.sub, textAlign: "center", fontSize: 12 }}>Bản cập nhật: {(process.env.EXPO_PUBLIC_BUILD_SHA || "chạy thử trên máy").slice(0, 7)}{process.env.EXPO_PUBLIC_BUILD_AT ? ` · ${new Date(process.env.EXPO_PUBLIC_BUILD_AT).toLocaleString("vi-VN")}` : ""}</Text>
       </View>
     </ScrollView>
   )
