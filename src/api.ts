@@ -7,7 +7,9 @@ const SecureStore = Platform.OS === "web"
   : SecureStoreNative
 import Constants from "expo-constants"
 
-export const API_URL: string = (process.env.EXPO_PUBLIC_API_URL || (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl || "").replace(/\/$/, "")
+// Điện thoại: gọi thẳng máy chủ (extra.apiUrl). Bản web PWA: đặt cùng tên miền với API nên gọi đường dẫn tương đối
+// (backend không mở CORS cho tên miền khác); muốn trỏ chỗ khác thì đặt EXPO_PUBLIC_API_URL lúc build.
+export const API_URL: string = (process.env.EXPO_PUBLIC_API_URL ?? (Platform.OS === "web" ? "" : (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl) ?? "").replace(/\/$/, "")
 export const PROJECT_ID: string | undefined = (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId
 
 const TOKEN_KEY = "hub_token"

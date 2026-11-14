@@ -15,7 +15,8 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "single"
     },
     "scheme": "threerdhub",
     "plugins": [
@@ -72,7 +73,8 @@
     },
     "platforms": [
       "ios",
-      "android"
+      "android",
+      "web"
     ],
     "android": {
       "package": "vn.threerdhub.app",

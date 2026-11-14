@@ -42,3 +42,7 @@ yarn-error.*
 .env
 android/
 ios/
+
+# bản web PWA (npm run build:pwa)
+dist-pwa/
+dist/

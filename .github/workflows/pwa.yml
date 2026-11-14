@@ -1,0 +1,35 @@
+name: Web PWA
+# Mỗi lần đẩy code: build bản web PWA và đính file zip lên GitHub Releases (KHÔNG đánh dấu "latest", để link tải APK
+# Android vẫn đúng). Bản này không tự deploy đi đâu: tải zip về rồi đặt lên server theo pwa/README.md.
+on:
+  push:
+    branches: [main, claude/nifty-wozniak-y6il87]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pwa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build:pwa
+        env:
+          EXPO_PUBLIC_BUILD_SHA: ${{ github.sha }}
+          EXPO_PUBLIC_BUILD_AT: ${{ github.event.head_commit.timestamp }}
+      - run: cd dist-pwa && zip -qr ../3RDHub-Vietnam-pwa.zip . && cd .. && ls -la 3RDHub-Vietnam-pwa.zip
+      - uses: actions/upload-artifact@v4
+        with: { name: 3RDHub-Vietnam-pwa, path: 3RDHub-Vietnam-pwa.zip }
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: pwa-${{ github.run_number }}
+          name: PWA bản ${{ github.run_number }}
+          body: |
+            Bản web PWA build từ commit ${{ github.sha }}. Giải nén và đặt lên server theo pwa/README.md.
+          files: 3RDHub-Vietnam-pwa.zip
+          make_latest: "false"

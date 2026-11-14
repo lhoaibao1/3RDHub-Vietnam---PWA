@@ -76,6 +76,12 @@ export default function Ekyc() {
   const begin = async () => {
     setBusy(true); setError("")
     try {
+      // Bản web PWA: dùng luôn trang eKYC của web (có tự nhận diện khuôn mặt), không chụp trong app.
+      if (Platform.OS === "web") {
+        const w = await api<{ data: { url: string } }>("/api/v1/tenant/account/kyc/handoff", { method: "POST", body: {} })
+        globalThis.location?.assign(w.data.url)
+        return
+      }
       if (!perm?.granted && !(await askPerm()).granted) { setError("Cần cho phép dùng camera để chụp giấy tờ và khuôn mặt. Bật trong Cài đặt của máy rồi thử lại."); return }
       const h = await api<{ data: { url: string } }>("/api/v1/tenant/account/kyc/handoff", { method: "POST", body: {} })
       const token = (h.data.url.match(/[?&]token=([^&]+)/) ?? [])[1]

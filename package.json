@@ -46,7 +46,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "build:ipa": "eas build -p ios --profile ipa-internal",
-    "publish:preview": "npx eas-cli@latest update --branch preview --platform ios --message \"Ban thu\""
+    "publish:preview": "npx eas-cli@latest update --branch preview --platform ios --message \"Ban thu\"",
+    "build:pwa": "node scripts/build-pwa.mjs"
   },
   "private": true
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Animated, AppState, Easing, StyleSheet, View } from "react-native"
+import { Animated, AppState, Easing, Platform, StyleSheet, View } from "react-native"
 import { Stack, useRouter, useSegments } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import * as SplashScreen from "expo-splash-screen"
@@ -14,6 +14,7 @@ import { useAutoUpdate } from "../src/autoupdate"
 import { t } from "../src/theme"
 import { FetchBar } from "../src/fetchbar"
 import { PromptHost } from "../src/prompt"
+import { WebAlertHost } from "../src/webalert"
 
 void SplashScreen.preventAutoHideAsync().catch(() => {})
 // Quay lại app (từ nền hoặc màn khoá) = "focus": dữ liệu cũ hơn 30 giây tự tải lại, nên chiến dịch / đơn mới trên web
@@ -105,7 +106,7 @@ function Gate() {
   }, [router, qc])
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={Platform.OS === "web" ? { flex: 1, width: "100%", maxWidth: 520, alignSelf: "center", backgroundColor: t.bg } : { flex: 1 }}>
       {ready ? (
         <Stack screenOptions={{ headerShown: false, animation: "slide_from_right", gestureEnabled: true, contentStyle: { backgroundColor: t.bg } }}>
           <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
@@ -114,6 +115,7 @@ function Gate() {
       ) : null}
       <FetchBar />
       <PromptHost />
+      <WebAlertHost />
       <BrandSplash done={ready} />
     </View>
   )

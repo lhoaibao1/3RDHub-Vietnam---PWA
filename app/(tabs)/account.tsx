@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View, Platform } from "react-native"
 import { Text } from "../../src/text"
 import { useRouter } from "expo-router"
 import * as Clipboard from "expo-clipboard"
@@ -131,7 +131,7 @@ export default function Account() {
           { icon: "notifications", color: "#D97706", label: "Thông báo", badge: unread.data || 0, onPress: () => router.push("/notifications") },
           { icon: "chatbubbles", color: "#0068FF", label: "Nhóm Zalo hỗ trợ", onPress: () => void Linking.openURL(ZALO_SUPPORT) },
           { icon: "settings", color: "#475569", label: "Cài đặt", onPress: () => router.push("/settings") },
-          { icon: "globe", color: t.navy2, label: "Mở bản web", onPress: () => void Linking.openURL(API_URL) },
+          ...(Platform.OS !== "web" ? [{ icon: "globe" as const, color: t.navy2, label: "Mở bản web", onPress: () => void Linking.openURL(API_URL) }] : []),
         ]} />
         <Pressable onPress={askLogout} style={({ pressed }) => [s.logout, pressed && { opacity: 0.8 }]}>
           <Ionicons name="log-out-outline" size={19} color={t.bad} /><Text style={{ color: t.bad, fontWeight: "800" }}>Đăng xuất</Text>

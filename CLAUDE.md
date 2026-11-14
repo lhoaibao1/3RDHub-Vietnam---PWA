@@ -19,8 +19,7 @@ npm start               # Expo dev server (Expo Go on a phone)
 ```
 
 There is no test suite. UI is verified by exporting the web build and screenshotting it with Playwright against
-mocked `/api/v1` responses (temporarily set `platforms: ["ios","web"]` + `web.output: "single"` in `app.json`,
-`npx expo export --platform web`, then restore `app.json`). The web build cannot render `NativeTabs`, haptics,
+mocked `/api/v1` responses (`npm run build:pwa`, serve `dist-pwa/`, mock `**/api/v1/**` on the same origin). The web build cannot render `NativeTabs`, haptics,
 biometrics or push, so anything touching those is unverified until the owner tries it on a device — say so.
 
 `npx expo install` / `expo-doctor` may fail in sandboxes without access to `api.expo.dev`; then install with npm at
@@ -38,6 +37,11 @@ reaches real users within minutes.
 - **Android** — `.github/workflows/android.yml`: `expo prebuild` + Gradle → APK on GitHub Releases (stable link
   `releases/latest/download/3RDHub-Vietnam.apk`). The workflow turns Expo Updates off and bumps `versionCode`; the
   APK is debug-signed (fine for sideloading, not for Play).
+- **Web PWA** — `.github/workflows/pwa.yml`: `npm run build:pwa` (`scripts/build-pwa.mjs`: Expo web export +
+  manifest / service worker injected into `index.html`) → `3RDHub-Vietnam-pwa.zip` on a non-latest release. It is not
+  deployed anywhere; the owner places it behind the HUB nginx (`pwa/README.md`). On web the API base is same-origin
+  (`""`), tabs come from `app/(tabs)/_layout.web.tsx`, and `Alert.alert` is replaced by `src/webalert.tsx` (it is a
+  no-op in react-native-web). Keep every screen working on web.
 - `android/` and `ios/` are generated (never committed). `android-app/` is an abandoned native-Kotlin spec; ignore it.
 
 ## Backend contract (the things that bite)

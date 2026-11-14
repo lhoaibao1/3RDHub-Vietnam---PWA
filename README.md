@@ -2,6 +2,10 @@
 
 App Expo / React Native cho Publisher, một bộ code cho cả iOS và Android.
 
+## Web PWA
+
+Bản web cài được như app, cùng bộ code: xem `pwa/README.md` (build bằng `npm run build:pwa`, hoặc tải file zip ở trang Releases).
+
 ## Android: tải file APK
 
 Link cố định, luôn là bản mới nhất:
