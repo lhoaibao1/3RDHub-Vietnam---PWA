@@ -1,4 +1,4 @@
-# AGENTS.md — Android app "3RDVN Hub" (dành cho Publisher)
+# AGENTS.md — Android app "3RDHub Vietnam" (dành cho Publisher)
 
 Bạn (Codex) làm **app Android native** trong thư mục `android-app/` này.
 App iOS do người khác làm ở thư mục gốc của repo (Expo / React Native). **Hai bản tách hẳn nhau: không import, không copy code, không sửa file ngoài `android-app/`.** Chỉ dùng chung **API backend** và **bộ nhận diện** (logo/màu) ghi bên dưới. Giao diện tiếng Việt.
@@ -9,7 +9,7 @@ Chủ dự án nói tiếng Việt; commit message và comment ngắn gọn, ti�
 
 ## 1. Mục tiêu
 
-Một app cho **Publisher (affiliate)** của hệ thống 3RDHub Vietnam (3RDVN): đăng nhập, xem tổng quan hoa hồng, duyệt chiến dịch (có ảnh), đăng ký tham gia, lấy link giới thiệu, xem đơn hàng, ví/rút tiền, thông báo (có push), ảnh đại diện.
+Một app cho **Publisher (affiliate)** của hệ thống 3RDHub Vietnam: đăng nhập, xem tổng quan hoa hồng, duyệt chiến dịch (có ảnh), đăng ký tham gia, lấy link giới thiệu, xem đơn hàng, ví/rút tiền, thông báo (có push), ảnh đại diện.
 
 Bản iOS đã có đủ các tính năng này; bản Android phải **tương đương về tính năng** và có giao diện đẹp, đúng nhận diện (mục 3).
 
@@ -19,7 +19,7 @@ Bản iOS đã có đủ các tính năng này; bản Android phải **tương �
 - Mạng: Retrofit + OkHttp + kotlinx.serialization (hoặc Moshi). Ảnh: Coil. Lưu token: `EncryptedSharedPreferences` / Keystore.
 - Kiến trúc: MVVM (ViewModel + StateFlow), một `Repository` mỏng quanh API, Hilt hoặc DI thủ công.
 - Push: Firebase Cloud Messaging (xem mục 7).
-- `applicationId`: `vn.threerdhub.app`. Tên app: **3RDVN Hub**.
+- `applicationId`: `vn.threerdhub.app`. Tên app: **3RDHub Vietnam**.
 - Build bằng Gradle Kotlin DSL. Phải build được bằng `./gradlew assembleDebug` và `assembleRelease` trên Linux (GitHub Actions `ubuntu-latest`, JDK 17).
 - Không dùng thư viện cross-platform (Flutter, RN, KMP UI). Chỉ Android native.
 
@@ -35,7 +35,7 @@ Logo nằm ở `android-app/design/` (đã copy sẵn, dùng trực tiếp):
 | `android-icon-foreground.png` / `-background.png` / `-monochrome.png` | Adaptive icon (1024×1024, vùng an toàn đã chừa) |
 | `splash-icon.png` | Ảnh cho Splash Screen API (logo, nền trong suốt) |
 
-> **Logo trong app là file `design/logo.png` (do chủ gửi), dùng nó cho splash, đăng nhập và mọi chỗ cần logo. KHÔNG lấy logo, icon hay ảnh splash từ API** (`/api/v1/brand`, `/api/v1/appearance`): ảnh trên server hiện là hình cũ (chú robot mascot) và sẽ đè lên logo đúng. Muốn đổi logo thì thay file trong `design/`. Icon launcher và splash hệ điều hành cũng lấy từ `design/`. Tên app cố định "3RDVN Hub".
+> **Logo trong app là file `design/logo.png` (do chủ gửi), dùng nó cho splash, đăng nhập và mọi chỗ cần logo. KHÔNG lấy logo, icon hay ảnh splash từ API** (`/api/v1/brand`, `/api/v1/appearance`): ảnh trên server hiện là hình cũ (chú robot mascot) và sẽ đè lên logo đúng. Muốn đổi logo thì thay file trong `design/`. Icon launcher và splash hệ điều hành cũng lấy từ `design/`. Tên app cố định "3RDHub Vietnam".
 
 Màu (Material 3 `ColorScheme`, chỉ light theme):
 

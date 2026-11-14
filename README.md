@@ -1,4 +1,4 @@
-# 3RDVN Hub (iOS)
+# 3RDHub Vietnam (iOS)
 
 App Expo / React Native cho Publisher. Android làm riêng trong `android-app/`.
 

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "3RDVN Hub",
+    "name": "3RDHub Vietnam",
     "slug": "3rdhub-vietnam",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -39,8 +39,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Cho phép 3RDVN Hub truy cập ảnh để bạn đổi ảnh đại diện.",
-          "cameraPermission": "Cho phép 3RDVN Hub dùng camera để chụp ảnh đại diện."
+          "photosPermission": "Cho phép 3RDHub Vietnam truy cập ảnh để bạn đổi ảnh đại diện.",
+          "cameraPermission": "Cho phép 3RDHub Vietnam dùng camera để chụp ảnh đại diện."
         }
       ]
     ],
