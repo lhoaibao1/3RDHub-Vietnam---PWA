@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Animated, Easing, StyleSheet, View } from "react-native"
-import { Slot, useRouter, useSegments } from "expo-router"
+import { Stack, useRouter, useSegments } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import * as SplashScreen from "expo-splash-screen"
 import * as Notifications from "expo-notifications"
@@ -75,7 +75,19 @@ function Gate() {
 
   return (
     <View style={{ flex: 1 }}>
-      {ready ? <Slot /> : null}
+      {ready ? (
+        <Stack screenOptions={{ headerBackTitle: "Quay lại", headerTintColor: t.navy, headerTitleStyle: { fontWeight: "800", color: t.navy }, headerShadowVisible: false, headerStyle: { backgroundColor: t.bg }, contentStyle: { backgroundColor: t.bg } }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="campaign/[id]" options={{ title: "Chiến dịch" }} />
+          <Stack.Screen name="order/[id]" options={{ title: "Chi tiết đơn" }} />
+          <Stack.Screen name="members/index" options={{ title: "Thành viên" }} />
+          <Stack.Screen name="members/[id]" options={{ title: "Thành viên" }} />
+          <Stack.Screen name="notifications" options={{ title: "Thông báo" }} />
+          <Stack.Screen name="links" options={{ title: "Link của tôi" }} />
+          <Stack.Screen name="profile" options={{ title: "Thông tin cá nhân" }} />
+        </Stack>
+      ) : null}
       <BrandSplash done={ready} />
     </View>
   )

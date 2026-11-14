@@ -49,7 +49,7 @@ export default function CampaignDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <Stack.Screen options={{ title: "", headerBackTitle: "Quay lại", headerTransparent: false }} />
+      <Stack.Screen options={{ title: d.name }} />
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         {pics.length ? (
           <View>

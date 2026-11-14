@@ -1,4 +1,10 @@
-import * as SecureStore from "expo-secure-store"
+import { Platform } from "react-native"
+import * as SecureStoreNative from "expo-secure-store"
+
+// Trình duyệt (chỉ dùng khi chụp màn hình kiểm tra) không có SecureStore: dùng localStorage.
+const SecureStore = Platform.OS === "web"
+  ? { getItemAsync: async (k: string) => globalThis.localStorage?.getItem(k) ?? null, setItemAsync: async (k: string, v: string) => { globalThis.localStorage?.setItem(k, v) }, deleteItemAsync: async (k: string) => { globalThis.localStorage?.removeItem(k) } }
+  : SecureStoreNative
 import Constants from "expo-constants"
 
 export const API_URL: string = (process.env.EXPO_PUBLIC_API_URL || (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl || "").replace(/\/$/, "")

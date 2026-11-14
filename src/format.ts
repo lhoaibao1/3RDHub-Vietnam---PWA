@@ -24,3 +24,9 @@ export function plain(html?: string) {
 }
 export type OfferRate = { label?: string; channel?: string; kind?: string; rate_bps?: number; amount_minor?: number; note?: string }
 export const rateText = (r: OfferRate) => (r.kind === "fixed" ? vnd(r.amount_minor) : `${((r.rate_bps || 0) / 100).toLocaleString("vi-VN", { maximumFractionDigits: 2 })}%`)
+/** Tiền dạng gọn cho ô nhỏ: 10,57 tr · 1,2 tỷ · 950.000đ. */
+export const vndShort = (n?: number) => {
+  const v = Math.round(n || 0)
+  const f = (x: number) => x.toLocaleString("vi-VN", { maximumFractionDigits: 2 })
+  return Math.abs(v) >= 1e9 ? `${f(v / 1e9)} tỷ` : Math.abs(v) >= 1e6 ? `${f(v / 1e6)} tr` : vnd(v)
+}

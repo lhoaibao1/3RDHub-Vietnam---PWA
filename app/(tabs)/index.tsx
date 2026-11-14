@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useQuery } from "@tanstack/react-query"
 import { abs, api } from "../../src/api"
 import { useAuth } from "../../src/auth"
-import { useCampaigns, useUnread } from "../../src/hooks"
+import { useCampaigns, useMembers, useUnread } from "../../src/hooks"
 import { compact, num, vnd, when, ymd } from "../../src/format"
 import { Art, Avatar, Card, Chip, ErrorBox, Pill, SectionTitle, t } from "../../src/ui"
 import { shadow } from "../../src/theme"
@@ -41,6 +41,7 @@ export default function Home() {
   const recent = useQuery({ queryKey: ["orders", "recent"], queryFn: () => api<{ data: Order[] }>("/api/v1/conversions?limit=5").then((r) => r.data) })
   const banners = useQuery({ queryKey: ["banners"], queryFn: () => api<{ data: Banner[] }>("/api/v1/catalog-banners").then((r) => r.data ?? []) })
   const camps = useCampaigns()
+  const members = useMembers()
 
   const name = user?.display_name || user?.email?.split("@")[0] || ""
   const hour = new Date().getHours()
@@ -110,7 +111,7 @@ export default function Home() {
         )}
 
         <View style={{ flexDirection: "row", gap: 10 }}>
-          {[{ icon: "link", label: "Link của tôi", to: "/links" }, { icon: "megaphone", label: "Chiến dịch", to: "/(tabs)/campaigns" }, { icon: "wallet", label: "Rút tiền", to: "/(tabs)/wallet" }].map((a) => (
+          {[{ icon: "link", label: "Link của tôi", to: "/links" }, { icon: "megaphone", label: "Chiến dịch", to: "/(tabs)/campaigns" }, ...(members.on ? [{ icon: "people", label: "Thành viên", to: "/members" }] : []), { icon: "wallet", label: "Rút tiền", to: "/(tabs)/wallet" }].map((a) => (
             <Pressable key={a.label} onPress={() => router.push(a.to as never)} style={s.quick}>
               <View style={s.quickIcon}><Ionicons name={a.icon as never} size={20} color={t.navy} /></View>
               <Text style={{ fontWeight: "700", fontSize: 12, color: t.text }}>{a.label}</Text>
@@ -143,7 +144,8 @@ export default function Home() {
 
         <SectionTitle title="Đơn gần đây" action="Xem tất cả" onAction={() => router.push("/(tabs)/orders")} />
         {(recent.data ?? []).map((o) => (
-          <Card key={o.id} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <Pressable key={o.id} onPress={() => router.push(`/order/${o.id}`)}>
+          <Card style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <View style={s.orderIcon}><Ionicons name="receipt-outline" size={18} color={t.navy} /></View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontWeight: "700", color: t.text }} numberOfLines={1}>{o.campaign_name || o.external_order_id || "Đơn hàng"}</Text>
@@ -151,6 +153,7 @@ export default function Home() {
             </View>
             <Text style={{ fontWeight: "800", color: t.ok }}>+{vnd(o.publisher_commission)}</Text>
           </Card>
+          </Pressable>
         ))}
         {recent.data && !recent.data.length ? <Text style={{ color: t.sub }}>Chưa có đơn hàng nào.</Text> : null}
       </View>

@@ -6,7 +6,7 @@ import { LinearGradient } from "expo-linear-gradient"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useAuth } from "../../src/auth"
 import { API_URL } from "../../src/api"
-import { useMe, useUnread } from "../../src/hooks"
+import { useMe, useMembers, useUnread } from "../../src/hooks"
 import { Avatar, Button, Card, Pill, Row, t } from "../../src/ui"
 
 export default function Account() {
@@ -15,6 +15,7 @@ export default function Account() {
   const { user, logout } = useAuth()
   const me = useMe()
   const unread = useUnread()
+  const members = useMembers()
   const name = user?.display_name || user?.email || ""
   const code = me.data?.me?.rd_code
   return (
@@ -23,7 +24,7 @@ export default function Account() {
         <Avatar url={user?.avatar_url} name={name} size={84} />
         <Text style={{ color: "#fff", fontSize: 20, fontWeight: "900" }}>{name}</Text>
         {user?.display_name ? <Text style={{ color: "#C9D6F5" }}>{user.email}</Text> : null}
-        {me.data?.role_name ? <Pill label={me.data.role_name} tone="gold" /> : null}
+        {me.data?.role_name ? <View><Pill label={me.data.role_name} tone="gold" /></View> : null}
       </LinearGradient>
       <View style={{ padding: 16, gap: 14 }}>
         {code ? (
@@ -35,6 +36,7 @@ export default function Account() {
         <Card style={{ paddingVertical: 6 }}>
           <Row icon="person-outline" label="Thông tin cá nhân" onPress={() => router.push("/profile")} />
           <Row icon="link-outline" label="Link giới thiệu của tôi" onPress={() => router.push("/links")} />
+          {members.on ? <Row icon="people-outline" label="Thành viên" value={members.data ? `${members.data.length} người` : ""} onPress={() => router.push("/members")} /> : null}
           <Row icon="notifications-outline" label="Thông báo" value={(unread.data || 0) > 0 ? `${unread.data} chưa đọc` : ""} onPress={() => router.push("/notifications")} />
           <Row icon="globe-outline" label="Mở bản web" onPress={() => Linking.openURL(API_URL)} />
         </Card>
