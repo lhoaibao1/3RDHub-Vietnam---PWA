@@ -17,7 +17,7 @@ const SHORTCUTS: { icon: keyof typeof Ionicons.glyphMap; label: string; to: stri
 ]
 
 /** Tìm chung một chỗ: chiến dịch, đơn hàng, thành viên, phiếu đơn thất lạc. */
-export function SearchScreen({ stack }: { stack?: boolean }) {
+export function SearchScreen({ stack = true }: { stack?: boolean }) {
   const router = useRouter()
   const [term, setTerm] = useState("")
   const camps = useCampaigns(), orders = useOrders(), members = useMembers(), lost = useLost()

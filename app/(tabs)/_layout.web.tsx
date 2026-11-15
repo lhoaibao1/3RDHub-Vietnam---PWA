@@ -4,8 +4,7 @@ import type { ColorValue } from "react-native"
 import { useUnread } from "../../src/hooks"
 import { t } from "../../src/theme"
 
-// Bản web PWA: thanh tab vẽ bằng JS ở đáy (NativeTabs chỉ có trên iOS / Android). Tìm kiếm mở từ nút kính lúp ở
-// Trang chủ (/find), nên tab search bị ẩn ở đây.
+// Bản web PWA: thanh tab vẽ bằng JS ở đáy (NativeTabs chỉ có trên iOS / Android).
 export default function TabsLayoutWeb() {
   const n = useUnread().data || 0
   const icon = (on: keyof typeof Ionicons.glyphMap, off: keyof typeof Ionicons.glyphMap) =>
@@ -17,7 +16,6 @@ export default function TabsLayoutWeb() {
       <Tabs.Screen name="orders" options={{ title: "Đơn hàng", tabBarIcon: icon("receipt", "receipt-outline") }} />
       <Tabs.Screen name="wallet" options={{ title: "Ví", tabBarIcon: icon("wallet", "wallet-outline") }} />
       <Tabs.Screen name="account" options={{ title: "Tôi", tabBarIcon: icon("person-circle", "person-circle-outline"), tabBarBadge: n > 0 ? Math.min(n, 99) : undefined }} />
-      <Tabs.Screen name="search" options={{ href: null }} />
     </Tabs>
   )
 }

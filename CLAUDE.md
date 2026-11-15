@@ -85,8 +85,8 @@ reaches real users within minutes.
 - **Text** — import `Text`/`TextInput` from `src/text.tsx`, not `react-native`: system font, weight 900 clamped to 800.
 - **Pull to refresh** — always `<PullRefresh run={() => Promise.all([q.refetch()])} />` from `src/ui.tsx`. Never bind
   `RefreshControl.refreshing` to `isFetching`: background refetches then leave a stuck spinner gap on iOS.
-- **Search** — `src/searchscreen.tsx`, shown as the iOS search tab (`role="search"`) and as `/find` on Android
-  (its bottom bar allows 5 items, so the search trigger is hidden there).
+- **Search** — `src/searchscreen.tsx` at `/find`, opened from the magnifier button in the header (`LargeTitle`
+  default right button, home and account heroes). It is not a tab (owner, 2026-11-15).
 - **eKYC** — `app/ekyc.tsx` drives the web eKYC API from the app (handoff → `/ekyc/open` → `X-KYC-Token` →
   challenge → multipart submit). The app does not detect the liveness actions (no face-detection library in Expo
   Go): the person follows prompts and taps; the left/right and portrait photos go to the admin for review.

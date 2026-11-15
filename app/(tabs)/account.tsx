@@ -69,7 +69,7 @@ export default function Account() {
       <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 20 }]}>
         <View style={[s.ring, { width: 240, height: 240, top: -90, right: -80 }]} />
         <View style={[s.ring, { width: 140, height: 140, bottom: -40, left: -50, borderColor: "rgba(255,106,43,0.35)" }]} />
-        <View style={{ position: "absolute", right: 14, top: insets.top + 6 }}><GlassButton icon="settings-outline" label="Cài đặt" onPress={() => router.push("/settings")} /></View>
+        <View style={{ position: "absolute", right: 14, top: insets.top + 6, flexDirection: "row", gap: 8 }}><GlassButton icon="search" label="Tìm kiếm" onPress={() => router.push("/find")} /><GlassButton icon="settings-outline" label="Cài đặt" onPress={() => router.push("/settings")} /></View>
         <Pressable onPress={() => { tap(); router.push("/profile") }} style={s.avatarWrap}>
           <Avatar url={user?.avatar_url} name={name} size={88} />
           <View style={s.cam}><Ionicons name="camera" size={14} color="#fff" /></View>

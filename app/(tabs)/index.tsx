@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Dimensions, Linking, Pressable, ScrollView, StyleSheet, View, Platform } from "react-native"
+import { Dimensions, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Text } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Image } from "expo-image"
@@ -74,9 +74,9 @@ export default function Home() {
         <View style={s.heroTop}>
           <BrandLogo light width={112} height={21} />
           <View style={{ flex: 1 }} />
-          {Platform.OS !== "ios" ? <Pressable onPress={() => { tap(); router.push("/find") }}  accessibilityLabel="Tìm kiếm">
+          <Pressable onPress={() => { tap(); router.push("/find") }} accessibilityLabel="Tìm kiếm">
             <Glass clear interactive style={s.bell}><Ionicons name="search" size={21} color="#fff" /></Glass>
-          </Pressable> : null}
+          </Pressable>
           <Pressable onPress={() => { tap(); void Linking.openURL(ZALO_SUPPORT) }}  accessibilityLabel="Nhóm hỗ trợ">
             <Glass clear interactive style={s.bell}><Ionicons name="headset-outline" size={21} color="#fff" /></Glass>
           </Pressable>

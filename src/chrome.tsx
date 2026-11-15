@@ -46,16 +46,18 @@ export function TopBar({ title, right, overlay }: { title?: string; right?: Reac
   )
 }
 
-/** Tiêu đề lớn kiểu iOS cho các tab chính. */
+/** Tiêu đề lớn kiểu iOS cho các tab chính. Bên phải mặc định là nút kính lúp mở màn Tìm kiếm (/find)
+ *  (owner, 2026-11-15: tìm kiếm nằm trên tiêu đề, không phải một tab). */
 export function LargeTitle({ title, sub, right }: { title: string; sub?: string; right?: ReactNode }) {
   const insets = useSafeAreaInsets()
+  const router = useRouter()
   return (
     <View style={[s.large, { paddingTop: insets.top + 10 }]}>
       <View style={{ flex: 1 }}>
         <Text style={s.largeText}>{title}</Text>
         {sub ? <Text style={{ color: t.sub, marginTop: 2 }}>{sub}</Text> : null}
       </View>
-      {right}
+      {right ?? <GlassButton icon="search" label="Tìm kiếm" onPress={() => router.push("/find")} />}
     </View>
   )
 }
@@ -100,7 +102,7 @@ const s = StyleSheet.create({
   bar: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingBottom: 8 },
   overlay: { position: "absolute", left: 0, right: 0, top: 0, zIndex: 20 },
   title: { flex: 1, textAlign: "center", fontSize: 17, fontWeight: "800", color: t.text },
-  large: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 16, paddingBottom: 6, backgroundColor: t.bg },
+  large: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingBottom: 6, backgroundColor: t.bg },
   largeText: { fontSize: 32, fontWeight: "900", color: t.text, letterSpacing: -0.5 },
   pager: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 22, padding: 4, overflow: "hidden" },
   pbtn: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },

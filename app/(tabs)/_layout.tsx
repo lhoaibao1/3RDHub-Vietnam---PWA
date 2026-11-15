@@ -1,4 +1,3 @@
-import { Platform } from "react-native"
 import { NativeTabs } from "expo-router/native-tabs"
 import { useUnread } from "../../src/hooks"
 import { t } from "../../src/theme"
@@ -32,10 +31,6 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Icon sf={{ default: "person.crop.circle", selected: "person.crop.circle.fill" }} md="account_circle" />
         <NativeTabs.Trigger.Label>Tôi</NativeTabs.Trigger.Label>
         {n > 0 ? <NativeTabs.Trigger.Badge>{String(Math.min(n, 99))}</NativeTabs.Trigger.Badge> : null}
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="search" role="search" hidden={Platform.OS !== "ios"} disableAutomaticContentInsets>
-        <NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
-        <NativeTabs.Trigger.Label>Tìm kiếm</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   )
