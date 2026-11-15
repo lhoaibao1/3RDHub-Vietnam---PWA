@@ -6,7 +6,8 @@ import { shadow, t } from "./theme"
 // Hộp nhập chữ chạy được cả iOS lẫn Android (Alert.prompt chỉ có trên iOS). iOS dùng hộp gốc của hệ thống,
 // Android / web dùng hộp tự vẽ. Gọi: const v = await prompt({ title, message, secure }) → chuỗi hoặc null nếu hủy.
 type Req = { title: string; message?: string; placeholder?: string; secure?: boolean; ok?: string; resolve: (v: string | null) => void }
-let show: (r: Req) => void = () => {}
+// Giữ trong object, không dùng biến `let` rời (xem ghi chú ở src/webalert.tsx: trình đóng gói có thể xoá biến rời).
+const host: { show: (r: Req) => void } = { show: () => {} }
 
 export function prompt(o: Omit<Req, "resolve">): Promise<string | null> {
   return new Promise((resolve) => {
@@ -14,7 +15,7 @@ export function prompt(o: Omit<Req, "resolve">): Promise<string | null> {
       Alert.prompt(o.title, o.message, [{ text: "Hủy", style: "cancel", onPress: () => resolve(null) }, { text: o.ok ?? "Xong", onPress: (v?: string) => resolve(v ?? "") }], o.secure ? "secure-text" : "plain-text")
       return
     }
-    show({ ...o, resolve })
+    host.show({ ...o, resolve })
   })
 }
 
@@ -22,7 +23,7 @@ export function prompt(o: Omit<Req, "resolve">): Promise<string | null> {
 export function PromptHost() {
   const [req, setReq] = useState<Req | null>(null)
   const [v, setV] = useState("")
-  useEffect(() => { show = (r) => { setV(""); setReq(r) } }, [])
+  useEffect(() => { host.show = (r) => { setV(""); setReq(r) } }, [])
   if (!req) return null
   const done = (val: string | null) => { req.resolve(val); setReq(null) }
   return (

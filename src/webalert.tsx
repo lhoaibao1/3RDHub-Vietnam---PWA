@@ -6,15 +6,18 @@ import { shadow, t } from "./theme"
 // Trên web, Alert.alert của React Native không làm gì cả, nên mọi hộp xác nhận (rút tiền, đăng xuất, duyệt định danh…)
 // sẽ im lặng. Ở bản web ta thay Alert.alert bằng hộp tự vẽ dưới đây; trên điện thoại vẫn là hộp gốc của hệ thống.
 type Req = { title: string; message?: string; buttons: AlertButton[] }
-let show: (r: Req) => void = () => {}
+// Giữ hàm hiện hộp trong một object (không dùng biến `let` rời): khi đóng gói cho iOS / Android, nhánh
+// `Platform.OS === "web"` bị cắt bỏ và trình đóng gói xoá luôn biến rời chỉ được đọc trong nhánh đó, trong khi
+// component vẫn gán vào nó → "ReferenceError: Property 'show' doesn't exist", app không mở được (2026-11-15).
+const host: { show: (r: Req) => void } = { show: () => {} }
 
 if (Platform.OS === "web") {
-  Alert.alert = (title: string, message?: string, buttons?: AlertButton[]) => show({ title, message, buttons: buttons?.length ? buttons : [{ text: "OK" }] })
+  Alert.alert = (title: string, message?: string, buttons?: AlertButton[]) => host.show({ title, message, buttons: buttons?.length ? buttons : [{ text: "OK" }] })
 }
 
 export function WebAlertHost() {
   const [req, setReq] = useState<Req | null>(null)
-  useEffect(() => { show = setReq }, [])
+  useEffect(() => { if (Platform.OS === "web") host.show = setReq }, [])
   if (Platform.OS !== "web" || !req) return null
   const press = (b: AlertButton) => { setReq(null); b.onPress?.() }
   const col = req.buttons.length > 2

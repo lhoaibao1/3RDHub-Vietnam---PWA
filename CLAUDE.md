@@ -90,6 +90,11 @@ reaches real users within minutes.
 - **eKYC** — `app/ekyc.tsx` drives the web eKYC API from the app (handoff → `/ekyc/open` → `X-KYC-Token` →
   challenge → multipart submit). The app does not detect the liveness actions (no face-detection library in Expo
   Go): the person follows prompts and taps; the left/right and portrait photos go to the admin for review.
+- **Platform-gated module state** — never keep module state in a bare `let` that is only read inside a
+  `Platform.OS === "web"` (or other platform) branch: the native bundle strips the branch and drops the binding while
+  other code still assigns it (`ReferenceError: Property 'show' doesn't exist` took iOS down on 2026-11-15). Put it on
+  a `const` object (`host.show`). After touching platform branches, export the iOS bundle unminified
+  (`npx expo export --platform ios --no-bytecode --no-minify`) and check the affected module.
 - **Cross-platform traps** — `Alert.prompt` is iOS-only: use `prompt()` from `src/prompt.tsx`. Persist small
   values through `store` from `src/api.ts` (SecureStore natively, localStorage on web).
 
