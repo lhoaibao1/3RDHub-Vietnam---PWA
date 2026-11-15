@@ -95,16 +95,20 @@ reaches real users within minutes.
   other code still assigns it (`ReferenceError: Property 'show' doesn't exist` took iOS down on 2026-11-15). Put it on
   a `const` object (`host.show`). After touching platform branches, export the iOS bundle unminified
   (`npx expo export --platform ios --no-bytecode --no-minify`) and check the affected module.
-- **Theme** — `src/theme.ts` picks the light or dark palette once at load from `src/prefs.ts` (`pref_theme`: light /
-  dark / system). Never hard-code `#fff` or light greys for surfaces: use `t.card`, `t.fill`, `t.bg`, `t.line`;
-  `t.brand`/`t.brand2` are the always-navy hero colours, `t.solid` the filled-button colour, `t.navy` is a text/icon
-  colour (light blue in dark mode). Changing theme or language saves the pref and reloads the app (`setPref`).
+- **Theme** — `src/theme.ts` holds the light/dark palette in the mutable `t` / `shadow` objects (pref `pref_theme`:
+  light / dark / system, `src/prefs.ts`). `setPref` applies a change at once, no reload (owner, 2026-11-15: never ask
+  to close the app): it overwrites `t`, bumps `prefs.version`, and the root layout remounts the `Stack`
+  (`key={look}`). So: write styles as `const s = sheet(() => StyleSheet.create({...}))`, never capture `t.*` in a
+  module-level constant (compute it inside a function). Never hard-code `#fff` or light greys for surfaces: use
+  `t.card`, `t.fill`, `t.bg`, `t.line`; `t.brand`/`t.brand2` are the always-navy hero colours, `t.solid` the
+  filled-button colour, `t.navy` is a text/icon colour (light blue in dark mode). Quick VI/EN and sun/moon buttons
+  (`src/quickprefs.tsx`) sit on the login screen and the Me tab header; Settings also has "Theo máy".
 - **Language** — UI strings are written in Vietnamese; `Text`/`TextInput` (`src/text.tsx`) and `Alert.alert` look
   them up in `src/en.ts` (key = the exact Vietnamese string) when the language is English. Add a line there for every
   new static string. Template strings (`${n} đơn`) are not translated unless wrapped in `L()` from `src/i18n.ts`.
 - **Date ranges** — `src/dates.ts` (`RangeKey` presets incl. `yesterday`, custom `c:from:to`) + `RangeSheet`
   (`src/rangesheet.tsx`, presets and a from–to calendar). Use it for every date filter.
-- **Tab scroll** — every tab's ScrollView/FlatList spreads `useOwnScroll()` (`src/chrome.tsx`) so a tab keeps its own
+- **Tab scroll** — the native tab bar minimizes on scroll down (`minimizeBehavior`, owner wants it). Every tab's ScrollView/FlatList spreads `useOwnScroll()` (`src/chrome.tsx`) so a tab keeps its own
   offset; scroll indicators are hidden everywhere (`showsVerticalScrollIndicator={false}`).
 - **Support** — `openSupport()` (`src/support.tsx`) opens the sheet with the Zalo OA and the Zalo group; do not link
   straight to one of them.

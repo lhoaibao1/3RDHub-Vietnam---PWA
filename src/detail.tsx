@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { tap } from "./chrome"
 import { Text } from "./text"
-import { shadow, t } from "./theme"
+import { shadow, t, sheet } from "./theme"
 
 export const copyText = (v: string, what = "Đã sao chép") => { tap(); void Clipboard.setStringAsync(v); Alert.alert(what, v) }
 
@@ -89,7 +89,7 @@ export function Timeline({ steps }: { steps: { title: string; sub?: string; note
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   hero: { borderRadius: 22, padding: 18, overflow: "hidden", gap: 10 },
   ring: { position: "absolute", borderRadius: 999, borderWidth: 2, borderColor: "rgba(255,255,255,0.12)" },
   hstat: { flex: 1, backgroundColor: "rgba(255,255,255,0.14)", borderRadius: 14, paddingVertical: 9, paddingHorizontal: 10, gap: 2 },
@@ -100,4 +100,4 @@ const s = StyleSheet.create({
   icon: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   stats: { flexDirection: "row", backgroundColor: t.card, borderRadius: 18, paddingVertical: 12, ...shadow },
   stat: { flex: 1, alignItems: "center", gap: 3, paddingHorizontal: 6 },
-})
+}))

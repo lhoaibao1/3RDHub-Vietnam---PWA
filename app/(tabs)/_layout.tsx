@@ -6,13 +6,12 @@ import { L } from "../../src/i18n"
 // disableAutomaticContentInsets: NativeTabs mặc định ÉP ScrollView đầu tiên của mỗi tab tự chừa vùng an toàn (và bỏ qua
 // contentInsetAdjustmentBehavior của màn), trong khi các màn đã tự chừa bằng insets → bị hụt hai lần ở Trang chủ
 // (owner, 2026-11-14: "nó hụt xuống cả khúc"). Tắt đi; mỗi màn tự lo: trên = insets.top, dưới = paddingBottom 110.
-// Thanh tab gốc của iOS: kính Liquid Glass trên iOS 26+. Không bật thu nhỏ khi cuộn (minimizeBehavior): nó gắn thanh tab
-// vào danh sách đang cuộn và bị nghi làm các tab cuộn theo nhau (owner, 2026-11-15).
+// Thanh tab gốc của iOS: kính Liquid Glass trên iOS 26+, tự thu gọn khi lướt xuống ở mọi tab (owner, 2026-11-15).
 export default function TabsLayout() {
   const unread = useUnread()
   const n = unread.data || 0
   return (
-    <NativeTabs tintColor={t.navy} labelStyle={{ fontWeight: "600" }}>
+    <NativeTabs tintColor={t.navy} minimizeBehavior="onScrollDown" labelStyle={{ fontWeight: "600" }}>
       <NativeTabs.Trigger name="index" disableAutomaticContentInsets>
         <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
         <NativeTabs.Trigger.Label>{L("Trang chủ")}</NativeTabs.Trigger.Label>

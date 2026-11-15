@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { Animated, Easing, StyleSheet, View } from "react-native"
 import { useIsFetching } from "@tanstack/react-query"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { t } from "./theme"
+import { t, sheet } from "./theme"
 
 /** Thanh tải mảnh màu cam ở mép trên, chỉ hiện khi mạng chậm (đang tải quá 350 ms). */
 export function FetchBar() {
@@ -29,7 +29,7 @@ export function FetchBar() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   track: { position: "absolute", left: 0, right: 0, height: 3, overflow: "hidden", zIndex: 50 },
   bar: { width: 160, height: 3, borderRadius: 2, backgroundColor: t.gold },
-})
+}))

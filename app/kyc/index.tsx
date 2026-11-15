@@ -8,6 +8,7 @@ import { Avatar, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
 import { Glass, Pager, TopBar, tap, usePager } from "../../src/chrome"
 import { Text, TextInput } from "../../src/text"
 import { shadow } from "../../src/theme"
+import { sheet } from "../../src/theme"
 
 export const unix = (n?: number) => (n ? when(new Date(n * (n < 1e12 ? 1000 : 1)).toISOString()) : "")
 
@@ -65,9 +66,9 @@ export default function KycList() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   st: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },
   stText: { color: t.text, fontWeight: "700", fontSize: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: t.card, borderRadius: 16, padding: 12, ...shadow },
-})
+}))

@@ -7,7 +7,7 @@ import { BlurView } from "expo-blur"
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect"
 import * as Haptics from "expo-haptics"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { t } from "./theme"
+import { t, sheet } from "./theme"
 
 /** Rung nhẹ khi chạm (iOS). */
 export const tap = () => { if (Platform.OS === "ios") void Haptics.selectionAsync().catch(() => {}) }
@@ -115,7 +115,7 @@ export function Pager({ page, pages, total, size, unit = "mục", onPage }: { pa
   )
 }
 
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   round: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   bar: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingBottom: 8 },
   overlay: { position: "absolute", left: 0, right: 0, top: 0, zIndex: 20 },
@@ -126,4 +126,4 @@ const s = StyleSheet.create({
   pbtn: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
   pnum: { minWidth: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", paddingHorizontal: 6 },
   pnumOn: { backgroundColor: t.solid },
-})
+}))

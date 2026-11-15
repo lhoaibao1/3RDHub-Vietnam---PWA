@@ -510,4 +510,5 @@ export const EN: Record<string, string> = {
   "Đến ngày": "To",
   "người": "people",
   "Lọc": "Filter",
+  "Tiếp tục với": "Continue with",
 }

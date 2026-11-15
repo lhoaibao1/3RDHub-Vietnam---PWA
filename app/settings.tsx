@@ -18,6 +18,7 @@ import { prompt } from "../src/prompt"
 import { openSupport } from "../src/support"
 import { prefs, setPref } from "../src/prefs"
 import { PickerSheet } from "../src/sheet"
+import { sheet } from "../src/theme"
 
 type RowProps = { icon: keyof typeof Ionicons.glyphMap; color: string; label: string; sub?: string; value?: string; right?: React.ReactNode; onPress?: () => void; danger?: boolean }
 function SRow({ icon, color, label, sub, value, right, onPress, danger }: RowProps) {
@@ -78,12 +79,6 @@ export default function Settings() {
     else if (r === "denied") Alert.alert("Chưa cho phép", "Vào Cài đặt của iPhone → Expo Go → Thông báo để bật.")
   }
   const testPush = () => void Notifications.scheduleNotificationAsync({ content: { title: "3RDHub Vietnam", body: "Thông báo thử: máy này đã nhận được thông báo.", data: { link: "/notifications" } }, trigger: null })
-  const clearCache = async () => {
-    qc.clear()
-    await Image.clearMemoryCache().catch(() => {})
-    await Image.clearDiskCache().catch(() => {})
-    Alert.alert("Đã xoá bộ nhớ đệm", "Dữ liệu sẽ được tải lại mới.")
-  }
   const sha = (process.env.EXPO_PUBLIC_BUILD_SHA || "").slice(0, 7)
 
   return (
@@ -116,25 +111,23 @@ export default function Settings() {
         </Section>
         <Section title="Ứng dụng">
           <SRow icon="information-circle-outline" color={t.navy} label="Phiên bản" value={`v${Constants.expoConfig?.version}${sha ? ` · ${sha}` : ""}`} />
-          <View style={s.line} />
-          <SRow icon="trash-outline" color="#B45309" label="Xoá bộ nhớ đệm" sub="Tải lại dữ liệu và ảnh mới nhất" onPress={() => void clearCache()} />
         </Section>
         <View style={s.group}>
           <SRow icon="log-out-outline" color={t.bad} label="Đăng xuất" danger onPress={() => Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [{ text: "Hủy", style: "cancel" }, { text: "Đăng xuất", style: "destructive", onPress: () => void logout() }])} />
         </View>
       </ScrollView>
-      <PickerSheet open={pick === "theme"} title="Giao diện" value={prefs.theme} onClose={() => setPick("")} onPick={(v) => { setPick(""); if (v !== prefs.theme) void setPref("theme", v) }}
+      <PickerSheet open={pick === "theme"} title="Giao diện" value={prefs.theme} onClose={() => setPick("")} onPick={(v) => { setPick(""); setPref("theme", v) }}
         options={[{ value: "light", label: "Sáng" }, { value: "dark", label: "Tối" }, { value: "system", label: "Theo máy" }]} />
-      <PickerSheet open={pick === "lang"} title="Ngôn ngữ" value={prefs.lang} onClose={() => setPick("")} onPick={(v) => { setPick(""); if (v !== prefs.lang) void setPref("lang", v) }}
+      <PickerSheet open={pick === "lang"} title="Ngôn ngữ" value={prefs.lang} onClose={() => setPick("")} onPick={(v) => { setPick(""); setPref("lang", v) }}
         options={[{ value: "vi", label: "Tiếng Việt" }, { value: "en", label: "English" }]} />
     </View>
   )
 }
 const THEME = { light: "Sáng", dark: "Tối", system: "Theo máy" }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   title: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6, marginLeft: 6 },
   group: { backgroundColor: t.card, borderRadius: 18, overflow: "hidden", ...shadow },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 14 },
   icon: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   line: { height: StyleSheet.hairlineWidth, backgroundColor: t.line, marginLeft: 60 },
-})
+}))

@@ -3,7 +3,7 @@ import { FlatList, Modal, Pressable, StyleSheet, View } from "react-native"
 import { Text, TextInput } from "./text"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { t } from "./theme"
+import { t, sheet } from "./theme"
 import { Glass, tap } from "./chrome"
 
 export type Option = { value: string; label: string; sub?: string }
@@ -59,7 +59,7 @@ export function FilterButton({ label, value, active, onPress }: { label: string;
   )
 }
 
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: "rgba(15,27,61,0.35)" },
   sheet: { maxHeight: "75%", backgroundColor: t.card, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 16 },
   grab: { alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: t.line, marginTop: 8 },
@@ -68,4 +68,4 @@ const s = StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: t.bg, borderRadius: 12, paddingHorizontal: 12, marginBottom: 6 },
   row: { flexDirection: "row", alignItems: "center", paddingVertical: 13, paddingHorizontal: 4, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.line },
   fbtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, overflow: "hidden", maxWidth: 180 },
-})
+}))

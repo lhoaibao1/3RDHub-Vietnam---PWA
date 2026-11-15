@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { tap } from "./chrome"
 import { ZALO_OA, ZALO_SUPPORT } from "./links"
 import { Text } from "./text"
-import { t } from "./theme"
+import { t, sheet } from "./theme"
 
 // Bảng "Hỗ trợ" (owner, 2026-11-15): bấm nút hỗ trợ ở đâu cũng mở bảng này với hai lựa chọn: Zalo OA và Nhóm hỗ trợ.
 const host: { open: () => void } = { open: () => {} }
@@ -40,9 +40,9 @@ export function SupportHost() {
     </Modal>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   sheet: { backgroundColor: t.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, gap: 12 },
   grab: { alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: t.line },
   row: { flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: t.bg, borderRadius: 16, padding: 14 },
   icon: { width: 46, height: 46, borderRadius: 23, backgroundColor: "#0068FF", alignItems: "center", justifyContent: "center" },
-})
+}))

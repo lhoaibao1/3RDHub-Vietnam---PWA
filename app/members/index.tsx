@@ -9,6 +9,7 @@ import { FilterButton, PickerSheet } from "../../src/sheet"
 import { Avatar, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
 import { Glass, Pager, TopBar, tap, usePager } from "../../src/chrome"
 import { shadow } from "../../src/theme"
+import { sheet } from "../../src/theme"
 
 const SORTS = [{ value: "name", label: "Tên A → Z" }, { value: "new", label: "Mới tham gia" }, { value: "comm", label: "Hoa hồng cao nhất" }, { value: "orders", label: "Nhiều đơn nhất" }]
 
@@ -114,10 +115,10 @@ export default function Members() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },
   chipOn: { backgroundColor: t.solid, borderColor: t.solid },
   row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: t.card, borderRadius: 16, padding: 12, ...shadow },
   pill: { borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2 },
-})
+}))

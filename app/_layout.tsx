@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { Animated, AppState, Easing, Platform, StyleSheet, View } from "react-native"
 import { Stack, useRouter, useSegments } from "expo-router"
 import { StatusBar } from "expo-status-bar"
@@ -16,6 +16,8 @@ import { FetchBar } from "../src/fetchbar"
 import { PromptHost } from "../src/prompt"
 import { WebAlertHost } from "../src/webalert"
 import { SupportHost } from "../src/support"
+import { sheet } from "../src/theme"
+import { onPrefs, prefs } from "../src/prefs"
 
 void SplashScreen.preventAutoHideAsync().catch(() => {})
 // Quay lại app (từ nền hoặc màn khoá) = "focus": dữ liệu cũ hơn 30 giây tự tải lại, nên chiến dịch / đơn mới trên web
@@ -106,10 +108,12 @@ function Gate() {
     return () => sub.remove()
   }, [router, qc])
 
+  // Đổi ngôn ngữ / giao diện: dựng lại cây màn hình với màu và chữ mới, không cần nạp lại app.
+  const look = useSyncExternalStore(onPrefs, () => prefs.version)
   return (
     <View style={Platform.OS === "web" ? { flex: 1, width: "100%", maxWidth: 520, alignSelf: "center", backgroundColor: t.bg } : { flex: 1 }}>
       {ready ? (
-        <Stack screenOptions={{ headerShown: false, animation: "slide_from_right", gestureEnabled: true, contentStyle: { backgroundColor: t.bg } }}>
+        <Stack key={look} screenOptions={{ headerShown: false, animation: "slide_from_right", gestureEnabled: true, contentStyle: { backgroundColor: t.bg } }}>
           <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
           <Stack.Screen name="login" options={{ animation: "fade" }} />
         </Stack>
@@ -124,6 +128,7 @@ function Gate() {
 }
 
 export default function Root() {
+  useSyncExternalStore(onPrefs, () => prefs.version)
   return (
     <QueryClientProvider client={client}>
       <BrandProvider>
@@ -135,9 +140,9 @@ export default function Root() {
     </QueryClientProvider>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   splash: { backgroundColor: t.card, alignItems: "center", justifyContent: "center", zIndex: 99 },
   tag: { position: "absolute", bottom: 56, color: t.gold, fontWeight: "700", letterSpacing: 1 },
   track: { width: 180, height: 4, borderRadius: 2, backgroundColor: t.navySoft, overflow: "hidden", marginTop: 34 },
   run: { width: 70, height: 4, borderRadius: 2, backgroundColor: t.gold },
-})
+}))

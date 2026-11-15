@@ -1,9 +1,8 @@
-import { Alert, Appearance, Platform } from "react-native"
+import { Appearance, Platform } from "react-native"
 import * as SecureStore from "expo-secure-store"
-import * as Updates from "expo-updates"
 
-// Hai lựa chọn của người dùng: ngôn ngữ (vi / en) và giao diện (light / dark / system). Đọc ĐỒNG BỘ ngay lúc app khởi
-// động, vì màu trong StyleSheet.create và bảng dịch được tính một lần khi nạp module; đổi lựa chọn = lưu rồi nạp lại app.
+// Hai lựa chọn của người dùng: ngôn ngữ (vi / en) và giao diện (light / dark / system). Đổi là áp dụng ngay, không nạp
+// lại app (owner, 2026-11-15): src/theme.ts đổi bảng màu tại chỗ, root layout dựng lại toàn bộ cây giao diện.
 export type Lang = "vi" | "en"
 export type ThemeMode = "light" | "dark" | "system"
 
@@ -15,17 +14,22 @@ function write(key: string, value: string) {
 }
 
 const rawTheme = read("pref_theme")
-export const prefs: { lang: Lang; theme: ThemeMode } = {
+export const prefs: { lang: Lang; theme: ThemeMode; version: number } = {
   lang: read("pref_lang") === "en" ? "en" : "vi",
   theme: rawTheme === "dark" || rawTheme === "system" ? rawTheme : "light",
+  version: 0,
 }
-export const isDark = prefs.theme === "dark" || (prefs.theme === "system" && Appearance.getColorScheme() === "dark")
+export const darkNow = () => prefs.theme === "dark" || (prefs.theme === "system" && Appearance.getColorScheme() === "dark")
 
-/** Lưu lựa chọn rồi nạp lại app để áp dụng. */
-export async function setPref(key: "lang" | "theme", value: string) {
+const subs = new Set<() => void>()
+/** Theo dõi thay đổi ngôn ngữ / giao diện (root layout dùng để dựng lại giao diện). */
+export function onPrefs(fn: () => void) { subs.add(fn); return () => { subs.delete(fn) } }
+export function bumpPrefs() { prefs.version++; subs.forEach((fn) => fn()) }
+
+/** Lưu lựa chọn và áp dụng ngay. */
+export function setPref(key: "lang" | "theme", value: string) {
   write(`pref_${key}`, value)
-  if (Platform.OS === "web") { globalThis.location?.reload(); return }
-  try { await Updates.reloadAsync() } catch {
-    Alert.alert(prefs.lang === "en" ? "Saved" : "Đã lưu", prefs.lang === "en" ? "Close the app completely and open it again to apply." : "Đóng hẳn app rồi mở lại để áp dụng.")
-  }
+  if (key === "lang") prefs.lang = value === "en" ? "en" : "vi"
+  else prefs.theme = value === "dark" || value === "system" ? value : "light"
+  bumpPrefs()
 }

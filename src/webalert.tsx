@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Alert, Modal, Platform, Pressable, StyleSheet, View, type AlertButton } from "react-native"
 import { Text } from "./text"
-import { shadow, t } from "./theme"
+import { shadow, t, sheet } from "./theme"
 
 // Trên web, Alert.alert của React Native không làm gì cả, nên mọi hộp xác nhận (rút tiền, đăng xuất, duyệt định danh…)
 // sẽ im lặng. Ở bản web ta thay Alert.alert bằng hộp tự vẽ dưới đây; trên điện thoại vẫn là hộp gốc của hệ thống.
@@ -42,8 +42,8 @@ export function WebAlertHost() {
     </Modal>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   wrap: { flex: 1, backgroundColor: "rgba(15,27,61,0.45)", alignItems: "center", justifyContent: "center", padding: 24 },
   box: { width: "100%", maxWidth: 380, backgroundColor: t.card, borderRadius: 20, padding: 20, gap: 8, ...shadow },
   btn: { alignItems: "center", paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12 },
-})
+}))

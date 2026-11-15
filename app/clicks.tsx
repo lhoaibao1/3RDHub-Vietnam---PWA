@@ -12,6 +12,7 @@ import { StatBar } from "../src/detail"
 import { FilterButton, PickerSheet } from "../src/sheet"
 import { Text } from "../src/text"
 import { shadow } from "../src/theme"
+import { sheet } from "../src/theme"
 
 type Click = { id: string; click_id?: string; campaign_id?: string; link_id?: string; publisher_id?: string; publisher_name?: string; occurred_at: string; ip?: string; device?: string; via?: string }
 
@@ -122,8 +123,8 @@ export default function Clicks() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   card: { backgroundColor: t.card, borderRadius: 18, padding: 14, ...shadow },
   h: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: t.card, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 12 },
-})
+}))

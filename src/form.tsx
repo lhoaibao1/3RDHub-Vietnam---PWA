@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Pressable, StyleSheet, View, type TextInputProps } from "react-native"
 import { Text, TextInput } from "./text"
 import { Ionicons } from "@expo/vector-icons"
-import { t } from "./theme"
+import { t, sheet } from "./theme"
 
 /** Ô nhập có icon, nhãn và dòng lỗi; ô mật khẩu có nút hiện/ẩn. */
 export function Field({ icon, label, error, secure, ...rest }: TextInputProps & { icon: keyof typeof Ionicons.glyphMap; label?: string; error?: string; secure?: boolean }) {
@@ -23,9 +23,9 @@ export function Notice({ tone = "bad", text }: { tone?: "bad" | "ok" | "warn"; t
   const c = { bad: [t.badSoft, t.bad, "alert-circle"], ok: [t.okSoft, t.ok, "checkmark-circle"], warn: [t.warnSoft, t.warn, "information-circle"] }[tone] as [string, string, keyof typeof Ionicons.glyphMap]
   return <View style={[s.notice, { backgroundColor: c[0] }]}><Ionicons name={c[2]} size={18} color={c[1]} /><Text style={{ color: c[1], flex: 1, lineHeight: 19 }}>{text}</Text></View>
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   label: { color: t.text, fontWeight: "700", fontSize: 13 },
   field: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: t.card, borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
   input: { flex: 1, minWidth: 0, paddingVertical: 14, fontSize: 16, color: t.text },
   notice: { flexDirection: "row", gap: 8, alignItems: "flex-start", borderRadius: 12, padding: 12 },
-})
+}))

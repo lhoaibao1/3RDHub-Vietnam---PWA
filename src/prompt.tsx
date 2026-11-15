@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from "react-native"
 import { Text, TextInput } from "./text"
-import { shadow, t } from "./theme"
+import { shadow, t, sheet } from "./theme"
 
 // Hộp nhập chữ chạy được cả iOS lẫn Android (Alert.prompt chỉ có trên iOS). iOS dùng hộp gốc của hệ thống,
 // Android / web dùng hộp tự vẽ. Gọi: const v = await prompt({ title, message, secure }) → chuỗi hoặc null nếu hủy.
@@ -42,9 +42,9 @@ export function PromptHost() {
     </Modal>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   wrap: { flex: 1, backgroundColor: "rgba(15,27,61,0.45)", alignItems: "center", justifyContent: "center", padding: 24 },
   box: { alignSelf: "stretch", backgroundColor: t.card, borderRadius: 20, padding: 20, gap: 12, ...shadow },
   input: { borderWidth: 1, borderColor: t.line, borderRadius: 12, padding: 12, fontSize: 16, color: t.text, backgroundColor: t.bg },
   btn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 },
-})
+}))

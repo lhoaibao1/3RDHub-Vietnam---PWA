@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { Image } from "expo-image"
 import { LinearGradient } from "expo-linear-gradient"
 import { NetworkBg } from "../../src/networkbg"
+import { QuickPrefs } from "../../src/quickprefs"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../../src/auth"
@@ -19,6 +20,7 @@ import { Avatar, t } from "../../src/ui"
 import { GlassButton, tap, useOwnScroll } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 import { openSupport } from "../../src/support"
+import { sheet } from "../../src/theme"
 
 type Item = { icon: keyof typeof Ionicons.glyphMap; color: string; label: string; value?: string; badge?: number; onPress: () => void }
 
@@ -66,16 +68,16 @@ export default function Account() {
     const rows = (orders.data ?? []).filter((o) => new Date(o.created_at).getTime() >= from)
     return { n: rows.length, comm: commissionOf(rows) }
   }, [orders.data])
-  const contract = useQuery({ queryKey: ["contract"], queryFn: () => api<{ data: { status: string } }>("/api/v1/contract").then((r) => r.data), retry: false })
+  const contract = useQuery({ queryKey: ["contract"], queryFn: () => api<{ data: { status: string } }>("/api/v1/tenant/contract").then((r) => r.data), retry: false })
   const copyCode = () => { if (code) { void Clipboard.setStringAsync(code); Alert.alert("Đã sao chép mã", code) } }
   const askLogout = () => Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [{ text: "Hủy", style: "cancel" }, { text: "Đăng xuất", style: "destructive", onPress: () => void logout() }])
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentInsetAdjustmentBehavior="never" {...keep} style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 110 }}>
-      <LinearGradient colors={[t.brand, t.brand2]} style={[s.hero, { paddingTop: insets.top + 20 }]}>
+      <LinearGradient colors={[t.brand, t.brand2]} style={[s.hero, { paddingTop: insets.top + 58 }]}>
         <NetworkBg />
         <Image source={require("../../assets/logo-white.png")} contentFit="contain" style={{ position: "absolute", left: 16, top: insets.top + 10, width: 104, height: 30, opacity: 0.95 }} />
-        <View style={{ position: "absolute", right: 14, top: insets.top + 6, flexDirection: "row", gap: 8 }}><GlassButton icon="search" label="Tìm kiếm" onPress={() => router.push("/find")} /><GlassButton icon="settings-outline" label="Cài đặt" onPress={() => router.push("/settings")} /></View>
+        <View style={{ position: "absolute", right: 14, top: insets.top + 6, flexDirection: "row", gap: 8 }}><QuickPrefs /><GlassButton icon="search" label="Tìm kiếm" onPress={() => router.push("/find")} /><GlassButton icon="settings-outline" label="Cài đặt" onPress={() => router.push("/settings")} /></View>
         <Pressable onPress={() => { tap(); router.push("/profile") }} style={s.avatarWrap}>
           <Avatar url={user?.avatar_url} name={name} size={88} />
           <View style={s.cam}><Ionicons name="camera" size={14} color="#fff" /></View>
@@ -152,7 +154,7 @@ export default function Account() {
     </ScrollView>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   hero: { alignItems: "center", paddingBottom: 56, paddingHorizontal: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: "hidden" },
   ring: { position: "absolute", borderRadius: 999, borderWidth: 2, borderColor: "rgba(255,255,255,0.12)" },
   avatarWrap: { padding: 4, borderRadius: 60, backgroundColor: "rgba(255,255,255,0.25)" },
@@ -176,4 +178,4 @@ const s = StyleSheet.create({
   badge: { minWidth: 20, height: 20, borderRadius: 10, backgroundColor: t.bad, alignItems: "center", justifyContent: "center", paddingHorizontal: 5 },
   round: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   logout: { flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: t.badSoft, borderRadius: 16, paddingVertical: 14 },
-})
+}))

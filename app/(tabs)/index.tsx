@@ -19,6 +19,7 @@ import { RangeSheet } from "../../src/rangesheet"
 import { Art, Avatar, Card, ErrorBox, Pill, SectionTitle, t, PullRefresh } from "../../src/ui"
 import { shadow } from "../../src/theme"
 import { openSupport } from "../../src/support"
+import { sheet } from "../../src/theme"
 
 type Totals = { clicks: number; orders: number; approved: number; commission: number; sale: number; approval_rate: number | null }
 type Overview = { buckets: string[]; totals: Totals; previous: Totals }
@@ -195,7 +196,7 @@ export default function Home() {
     </ScrollView>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   hero: { paddingHorizontal: 16, paddingBottom: 18, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   heroTop: { flexDirection: "row", alignItems: "center", gap: 10 },
   bell: { width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center", overflow: "hidden" },
@@ -210,4 +211,4 @@ const s = StyleSheet.create({
   qbadge: { position: "absolute", top: -4, right: -6, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: t.bad, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
   quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.navySoft, alignItems: "center", justifyContent: "center" },
   hot: { width: 168, backgroundColor: t.card, borderRadius: 16, overflow: "hidden", ...shadow },
-})
+}))

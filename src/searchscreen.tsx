@@ -7,7 +7,7 @@ import { vnd } from "./format"
 import { Art, Avatar, t } from "./ui"
 import { Glass, LargeTitle, TopBar, tap } from "./chrome"
 import { Text, TextInput } from "./text"
-import { shadow } from "./theme"
+import { shadow, sheet } from "./theme"
 
 const has = (k: string, ...v: (string | undefined)[]) => v.some((x) => (x ?? "").toLowerCase().includes(k))
 const SHORTCUTS: { icon: keyof typeof Ionicons.glyphMap; label: string; to: string }[] = [
@@ -97,7 +97,7 @@ export function SearchScreen({ stack = true }: { stack?: boolean }) {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   h: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6 },
   short: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: t.card, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14, ...shadow },
@@ -105,4 +105,4 @@ const s = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: t.card, borderRadius: 14, padding: 12, ...shadow },
   name: { fontWeight: "700", color: t.text },
   sub: { color: t.sub, fontSize: 12, marginTop: 1 },
-})
+}))

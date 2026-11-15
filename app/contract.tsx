@@ -34,7 +34,7 @@ export default function ContractScreen() {
   const router = useRouter()
   const qc = useQueryClient()
   const insets = useSafeAreaInsets()
-  const q = useQuery({ queryKey: ["contract"], queryFn: () => api<{ data: Contract }>("/api/v1/contract").then((r) => r.data) })
+  const q = useQuery({ queryKey: ["contract"], queryFn: () => api<{ data: Contract }>("/api/v1/tenant/contract").then((r) => r.data) })
   const [view, setView] = useState(false)
   const [session, setSession] = useState("")
   const [mail, setMail] = useState("")
@@ -56,7 +56,7 @@ export default function ContractScreen() {
     if (Platform.OS !== "web") { setView(true); return }
     // Web: tải file kèm token rồi mở ở tab mới.
     try {
-      const src = img("/api/v1/contract/file")!
+      const src = img("/api/v1/tenant/contract/file")!
       const blob = await (await fetch(src.uri, { headers: src.headers })).blob()
       globalThis.open?.(URL.createObjectURL(blob), "_blank")
     } catch { void Linking.openURL(abs("/account/contract")) }
@@ -71,7 +71,7 @@ export default function ContractScreen() {
   const start = async () => {
     setBusy("start"); setError("")
     try {
-      const h = await api<{ data: { url: string } }>("/api/v1/contract/handoff", { method: "POST", body: {} })
+      const h = await api<{ data: { url: string } }>("/api/v1/tenant/contract/handoff", { method: "POST", body: {} })
       const token = (h.data.url.match(/[?&]token=([^&]+)/) ?? [])[1]
       if (!token) throw new Error("Máy chủ không trả về phiên ký.")
       const o = await api<{ data: { session: string } }>("/api/v1/econtract/open", { method: "POST", body: { token: decodeURIComponent(token) } })
@@ -93,7 +93,7 @@ export default function ContractScreen() {
   if (q.isError) return <View style={{ flex: 1 }}><TopBar title="Hợp đồng" /><ErrorBox error={q.error} retry={() => q.refetch()} /></View>
   const c = q.data, st = STATE[c.status] ?? { label: c.status, color: "#6B7280", hint: "" }
   const has = c.status !== "none"
-  const file = img("/api/v1/contract/file")
+  const file = img("/api/v1/tenant/contract/file")
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Hợp đồng" />

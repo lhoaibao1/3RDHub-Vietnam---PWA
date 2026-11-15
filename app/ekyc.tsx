@@ -13,6 +13,7 @@ import { Field, Notice } from "../src/form"
 import { KYC_STATE } from "../src/hooks"
 import { Button, Card, Loading, t } from "../src/ui"
 import { Text } from "../src/text"
+import { sheet } from "../src/theme"
 
 // eKYC ngay trong app (owner, 2026-11-14: "làm luôn ekyc trong app"), dùng đúng API của trang eKYC trên web:
 //   POST /tenant/account/kyc/handoff → {url: …?token=X}   POST /ekyc/open {token} → {session}
@@ -277,7 +278,7 @@ export default function Ekyc() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   camTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingBottom: 12, backgroundColor: "rgba(0,0,0,0.45)" },
   camTitle: { color: "#fff", fontWeight: "800", fontSize: 16 },
   frame: { position: "absolute", top: "28%", alignSelf: "center", width: "88%", aspectRatio: 1.586, borderRadius: 14, borderWidth: 3, borderColor: t.card },
@@ -287,4 +288,4 @@ const s = StyleSheet.create({
   shutter: { width: 74, height: 74, borderRadius: 37, borderWidth: 4, borderColor: t.card, alignItems: "center", justifyContent: "center" },
   shutterIn: { width: 58, height: 58, borderRadius: 29, backgroundColor: t.card },
   faceBtn: { alignSelf: "stretch", backgroundColor: t.card, borderRadius: 14, paddingVertical: 14, alignItems: "center" },
-})
+}))

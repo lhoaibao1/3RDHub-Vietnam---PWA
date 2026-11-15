@@ -5,6 +5,7 @@ import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { QuickPrefs } from "../src/quickprefs"
 import { useAuth } from "../src/auth"
 import { bioCredentials, bioEnabled, bioInfo, enableBio, type Bio } from "../src/biometric"
 import { openPrivacy, openTerms } from "../src/links"
@@ -13,6 +14,7 @@ import { BrandLogo } from "../src/brand"
 import { fetchProviders, oauthSignIn, providerName, type Provider } from "../src/oauth"
 import { Button, t } from "../src/ui"
 import { shadow } from "../src/theme"
+import { sheet } from "../src/theme"
 
 const H = Dimensions.get("window").height
 
@@ -92,6 +94,7 @@ export default function Login() {
         <View style={[s.ring, { width: 180, height: 180, top: 90, left: -70, borderColor: "rgba(255,106,43,0.35)" }]} />
         <View style={[s.dot, { top: 70, right: 60 }]} />
         <View style={[s.dot, { top: 150, right: 130, width: 8, height: 8, backgroundColor: "rgba(255,255,255,0.4)" }]} />
+        <View style={{ position: "absolute", right: 16, top: insets.top + 8, zIndex: 5 }}><QuickPrefs /></View>
         <View style={{ paddingTop: insets.top + 36, paddingHorizontal: 28 }}>
           <Text style={s.hello}>Chào mừng trở lại 👋</Text>
           <Text style={s.sub}>Theo dõi chiến dịch, đơn hàng và hoa hồng của bạn mọi lúc.</Text>
@@ -144,7 +147,7 @@ export default function Login() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   top: { position: "absolute", left: 0, right: 0, top: 0, borderBottomLeftRadius: 36, borderBottomRightRadius: 36, overflow: "hidden" },
   ring: { position: "absolute", borderRadius: 999, borderWidth: 2, borderColor: "rgba(255,255,255,0.12)" },
   dot: { position: "absolute", width: 12, height: 12, borderRadius: 6, backgroundColor: t.gold },
@@ -158,4 +161,4 @@ const s = StyleSheet.create({
   or: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 2 },
   orLine: { flex: 1, height: 1, backgroundColor: t.line },
   prov: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, borderWidth: 1, borderColor: t.line, borderRadius: 14, paddingVertical: 13 },
-})
+}))

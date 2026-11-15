@@ -13,6 +13,7 @@ import { Text, TextInput } from "../../src/text"
 import { shadow } from "../../src/theme"
 import { prompt } from "../../src/prompt"
 import { useRouter } from "expo-router"
+import { sheet } from "../../src/theme"
 
 type Withdrawal = { id: string; amount: number; tax?: number; net?: number; status: "pending" | "paid" | "rejected" | "cancelled"; bank?: string; note?: string; requested_at: string; decided_at?: string | null }
 type Credit = { id: string; period: string; gross?: number; tax?: number; amount: number; note: string; created_at: string; release_at?: string | null }
@@ -24,12 +25,15 @@ type Wallet = {
   credits?: Credit[]
   withdrawals?: Withdrawal[]
 }
-const STATE = {
+const stateOf = (k: string) => {
+  const m = {
   pending: { label: "Chờ chuyển", color: t.warn, soft: t.warnSoft, icon: "time-outline" },
   paid: { label: "Đã chuyển", color: t.ok, soft: t.okSoft, icon: "checkmark-circle-outline" },
   rejected: { label: "Bị từ chối", color: t.bad, soft: t.badSoft, icon: "close-circle-outline" },
   cancelled: { label: "Đã hủy", color: t.sub, soft: t.fill, icon: "remove-circle-outline" },
-} as const
+  } as const
+  return m[k as keyof typeof m] ?? m.pending
+}
 const digits = (v: string) => Number(v.replace(/\D/g, "")) || 0
 
 export default function WalletScreen() {
@@ -102,7 +106,7 @@ export default function WalletScreen() {
         </View>
 
         {tab === "out" ? (outs.length ? outs.map((x) => {
-          const st = STATE[x.status] ?? STATE.pending
+          const st = stateOf(x.status)
           return (
             <View key={x.id} style={s.row}>
               <View style={[s.icon, { backgroundColor: st.soft }]}><Ionicons name={st.icon} size={20} color={st.color} /></View>
@@ -157,7 +161,7 @@ export default function WalletScreen() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   cta: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: t.card, borderRadius: 14, paddingVertical: 13 },
   seg: { flexDirection: "row", backgroundColor: t.fill, borderRadius: 12, padding: 3 },
   segItem: { flex: 1, alignItems: "center", paddingVertical: 9, borderRadius: 10 },
@@ -169,4 +173,4 @@ const s = StyleSheet.create({
   grab: { alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: t.line },
   amount: { flexDirection: "row", alignItems: "center", gap: 8, borderBottomWidth: 2, borderBottomColor: t.navy },
   quick: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: t.navySoft },
-})
+}))

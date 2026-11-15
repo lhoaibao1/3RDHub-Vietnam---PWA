@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons"
 import type { ReactNode } from "react"
 import { img } from "./api"
 import { initials } from "./format"
-import { shadow, t } from "./theme"
+import { shadow, t, sheet } from "./theme"
 
 export { t }
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
@@ -124,7 +124,7 @@ export function Row({ icon, label, value, onPress, danger }: { icon: keyof typeo
     </Pressable>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   card: { backgroundColor: t.card, borderRadius: t.radius, padding: 14, ...shadow },
   btn: { backgroundColor: t.solid, borderRadius: 14, paddingVertical: 13, paddingHorizontal: 18, alignItems: "center", justifyContent: "center", minHeight: 48 },
   ghost: { backgroundColor: "transparent", borderWidth: 1.5, borderColor: t.navy },
@@ -133,7 +133,7 @@ const s = StyleSheet.create({
   chipOn: { backgroundColor: t.solid, borderColor: t.solid },
   rowItem: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 4, borderRadius: 12 },
   rowIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: t.navySoft, alignItems: "center", justifyContent: "center" },
-})
+}))
 
 /** Kéo để làm mới. Vòng xoay chỉ hiện khi NGƯỜI DÙNG kéo, và tắt khi tải xong: không gắn vào trạng thái tải nền
  *  (isFetching), vì tải nền bật vòng xoay giữa chừng làm iOS kẹt một khoảng trống trên đầu danh sách

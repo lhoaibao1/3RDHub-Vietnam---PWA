@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { tap } from "./chrome"
 import { customRange, dmy, isCustom, RANGES, ymdOf } from "./dates"
 import { Text } from "./text"
-import { t } from "./theme"
+import { t, sheet } from "./theme"
 import { Button } from "./ui"
 
 const WD = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
@@ -84,7 +84,7 @@ export function RangeSheet({ open, value, onPick, onClose }: { open: boolean; va
     </Modal>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   sheet: { maxHeight: "85%", backgroundColor: t.card, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 16 },
   grab: { alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: t.line, marginTop: 8 },
   head: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 12 },
@@ -94,4 +94,4 @@ const s = StyleSheet.create({
   wd: { width: `${100 / 7}%`, textAlign: "center", color: t.sub, fontSize: 12, fontWeight: "700" },
   cell: { width: `${100 / 7}%`, height: 42, alignItems: "center", justifyContent: "center" },
   day: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-})
+}))

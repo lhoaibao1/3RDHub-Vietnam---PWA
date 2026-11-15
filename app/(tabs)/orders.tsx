@@ -11,6 +11,7 @@ import { FilterButton, PickerSheet } from "../../src/sheet"
 import { Art, Card, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
 import { Glass, LargeTitle, Pager, tap, usePager, useOwnScroll } from "../../src/chrome"
 import { shadow } from "../../src/theme"
+import { sheet } from "../../src/theme"
 
 const SORTS = [{ value: "new", label: "Mới nhất" }, { value: "old", label: "Cũ nhất" }, { value: "sale", label: "Giá trị đơn cao nhất" }, { value: "comm", label: "Hoa hồng cao nhất" }]
 
@@ -152,7 +153,7 @@ export default function Orders() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   clear: { justifyContent: "center", paddingHorizontal: 10 },
   st: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },
@@ -172,4 +173,4 @@ const s = StyleSheet.create({
   meta: { flexDirection: "row", alignItems: "center", gap: 8 },
   metaText: { color: t.sub, fontSize: 12, flexShrink: 1 },
   tag: { flexShrink: 0, color: t.navy, backgroundColor: t.navySoft, fontSize: 11, fontWeight: "700", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, overflow: "hidden" },
-})
+}))

@@ -10,6 +10,7 @@ import { FilterButton, PickerSheet } from "../../src/sheet"
 import { Art, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
 import { Glass, LargeTitle, Pager, tap, usePager, useOwnScroll } from "../../src/chrome"
 import { shadow } from "../../src/theme"
+import { sheet } from "../../src/theme"
 
 const W = Dimensions.get("window").width
 const TAGS: Record<string, [string, string]> = { hot: ["🔥 Hot", "#DC2626"], featured: ["⭐ Nổi bật", "#B45309"], top_pay: ["💰 Hoa hồng cao", "#15803D"], new: ["✨ Mới", "#2563EB"], fast_order: ["⚡ Lên đơn nhanh", "#0B2A6F"], fast_approve: ["✅ Duyệt nhanh", "#0B2A6F"], fast_pay: ["💸 Trả nhanh", "#0B2A6F"] }
@@ -139,7 +140,7 @@ export default function Campaigns() {
     </View>
   )
 }
-const s = StyleSheet.create({
+const s = sheet(() => StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   seg: { flexDirection: "row", backgroundColor: t.fill, borderRadius: 12, padding: 3 },
   segItem: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 10 },
@@ -153,4 +154,4 @@ const s = StyleSheet.create({
   cat: { color: t.gold, fontSize: 11, fontWeight: "700" },
   name: { color: t.text, fontSize: 14, fontWeight: "800", lineHeight: 18, minHeight: 36 },
   meta: { color: t.sub, fontSize: 11 },
-})
+}))
