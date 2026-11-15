@@ -1,0 +1,28 @@
+name: Release iOS (production)
+# Bản cho người dùng (owner, 2026-11-15: mỗi lần sửa ra một bản thì rối). Chỉ chạy khi bấm "Run workflow" trên GitHub
+# Actions (hoặc nhờ Claude "đẩy prod iOS"): đăng code hiện tại lên kênh "production". Người dùng mở link production
+# (README.md) chỉ nhận bản khi chạy workflow này; mỗi lần đẩy code bình thường chỉ vào kênh "preview" để chủ thử trước.
+on:
+  workflow_dispatch:
+    inputs:
+      note:
+        description: "Ghi chú phiên bản (người dùng không thấy, để chủ dễ nhớ)"
+        required: false
+        default: ""
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - uses: expo/expo-github-action@v8
+        with: { eas-version: latest, token: "${{ secrets.EXPO_TOKEN }}" }
+      - run: eas channel:create production --non-interactive || true
+      - run: eas update --branch production --platform ios --message "Prod ${{ github.sha }} ${{ inputs.note }}" --non-interactive
+        env:
+          EXPO_PUBLIC_BUILD_SHA: ${{ github.sha }}
+      - run: eas channel:edit production --branch production --non-interactive || true

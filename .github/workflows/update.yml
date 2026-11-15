@@ -1,5 +1,5 @@
-name: Publish preview update
-# Mỗi lần đẩy code lên GitHub → tự đăng bản mới lên Expo; user mở lại Expo Go là có bản mới.
+name: Publish preview update (owner testing)
+# Mỗi lần đẩy code → bản thử trên kênh "preview" (chủ thử trước). Người dùng ở kênh "production": release-ios.yml.
 on:
   push:
     branches: [main, claude/nifty-wozniak-y6il87]

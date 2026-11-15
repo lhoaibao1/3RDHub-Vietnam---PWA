@@ -25,13 +25,16 @@ biometrics or push, so anything touching those is unverified until the owner tri
 `npx expo install` / `expo-doctor` may fail in sandboxes without access to `api.expo.dev`; then install with npm at
 the versions in `node_modules/expo/bundledNativeModules.json`.
 
-## Release flow (every push ships)
+## Release flow
 
-Pushing to `main` or `claude/nifty-wozniak-y6il87` triggers both workflows; there is no staging step, so a push
-reaches real users within minutes.
+Pushing to `main` or `claude/nifty-wozniak-y6il87` publishes the iOS `preview` channel (owner's test link) and builds
+a new Android APK (Android users get it as soon as they download it). iOS users only get a version when the owner
+asks for "đẩy prod iOS".
 
-- **iOS** — `.github/workflows/update.yml`: `eas update --branch preview --platform ios`. Testers run the app inside
-  **Expo Go** through one fixed link (README.md, `docs/expo-go-qr.png`). Consequences: only libraries bundled in
+- **iOS** — two Expo Go channels (owner, 2026-11-15: one version per push was confusing). Every push →
+  `.github/workflows/update.yml` → channel `preview` (owner tests, `docs/expo-go-qr.png`). Users are on channel
+  `production` (`docs/expo-go-qr-prod.png`), published only by `.github/workflows/release-ios.yml`
+  (workflow_dispatch) when the owner says "đẩy prod iOS" or presses Run workflow — never on your own. Consequences: only libraries bundled in
   Expo Go work on iOS; Face ID falls back to the device passcode there; the home-screen icon/name are Expo Go's.
   Do not change `version` in `app.json` (`runtimeVersion` follows it and the fixed link pins `1.0.0`).
 - **Android** — `.github/workflows/android.yml`: `expo prebuild` + Gradle → APK on GitHub Releases (stable link
