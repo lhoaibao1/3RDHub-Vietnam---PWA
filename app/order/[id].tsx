@@ -37,7 +37,7 @@ export default function OrderDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Chi tiết đơn" />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
         <Hero>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <Art url={camp?.offer?.thumb_url || camp?.offer?.banner_url} name={name} style={{ width: 46, height: 46, borderRadius: 12, overflow: "hidden" }} />

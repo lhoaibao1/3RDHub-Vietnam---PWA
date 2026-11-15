@@ -45,7 +45,7 @@ export function SearchScreen({ stack = true }: { stack?: boolean }) {
           {term ? <Pressable onPress={() => setTerm("")} hitSlop={10}><Ionicons name="close-circle" size={18} color={t.sub} /></Pressable> : null}
         </Glass>
       </View>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 16 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 16 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         {!res ? (
           <>
             <Text style={s.h}>Đi nhanh tới</Text>
@@ -100,9 +100,9 @@ export function SearchScreen({ stack = true }: { stack?: boolean }) {
 const s = StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   h: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6 },
-  short: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#fff", borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14, ...shadow },
+  short: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: t.card, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14, ...shadow },
   group: { gap: 8 },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 14, padding: 12, ...shadow },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: t.card, borderRadius: 14, padding: 12, ...shadow },
   name: { fontWeight: "700", color: t.text },
   sub: { color: t.sub, fontSize: 12, marginTop: 1 },
 })

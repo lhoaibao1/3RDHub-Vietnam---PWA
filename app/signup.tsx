@@ -59,7 +59,7 @@ export default function Signup() {
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Đăng ký Publisher" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
           <BrandLogo width={200} height={38} style={{ alignSelf: "center", marginVertical: 6 }} />
           <Card style={{ gap: 12 }}>
             <Field icon="person-outline" label="Họ và tên" placeholder="Nguyễn Văn A" value={f.name} onChangeText={set("name")} autoComplete="name" />

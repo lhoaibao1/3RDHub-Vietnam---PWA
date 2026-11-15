@@ -28,7 +28,7 @@ export function PickerSheet({ open, title, options, value, onPick, onClose }: { 
         {options.length > 8 ? (
           <View style={s.search}><Ionicons name="search" size={16} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 10, color: t.text }} placeholder="Tìm…" placeholderTextColor={t.sub} value={q} onChangeText={setQ} /></View>
         ) : null}
-        <FlatList
+        <FlatList showsVerticalScrollIndicator={false}
           data={rows}
           keyExtractor={(o) => o.value || "_all"}
           keyboardShouldPersistTaps="handled"
@@ -61,7 +61,7 @@ export function FilterButton({ label, value, active, onPress }: { label: string;
 
 const s = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: "rgba(15,27,61,0.35)" },
-  sheet: { maxHeight: "75%", backgroundColor: "#fff", borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 16 },
+  sheet: { maxHeight: "75%", backgroundColor: t.card, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 16 },
   grab: { alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: t.line, marginTop: 8 },
   head: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 12 },
   title: { fontSize: 17, fontWeight: "800", color: t.text },

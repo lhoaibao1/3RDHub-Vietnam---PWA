@@ -44,6 +44,6 @@ export function WebAlertHost() {
 }
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: "rgba(15,27,61,0.45)", alignItems: "center", justifyContent: "center", padding: 24 },
-  box: { width: "100%", maxWidth: 380, backgroundColor: "#fff", borderRadius: 20, padding: 20, gap: 8, ...shadow },
+  box: { width: "100%", maxWidth: 380, backgroundColor: t.card, borderRadius: 20, padding: 20, gap: 8, ...shadow },
   btn: { alignItems: "center", paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12 },
 })

@@ -12,7 +12,7 @@ export const copyText = (v: string, what = "Đã sao chép") => { tap(); void Cl
 /** Khối đầu trang nền xanh có vòng trang trí, dùng cho màn chi tiết (đơn, thành viên, ví, hồ sơ). */
 export function Hero({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   return (
-    <LinearGradient colors={[t.navy, t.navy2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.hero, style]}>
+    <LinearGradient colors={[t.brand, t.brand2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.hero, style]}>
       <View style={[s.ring, { width: 200, height: 200, top: -80, right: -60 }]} />
       <View style={[s.ring, { width: 120, height: 120, bottom: -50, left: -30, borderColor: "rgba(255,106,43,0.35)" }]} />
       {children}
@@ -94,10 +94,10 @@ const s = StyleSheet.create({
   ring: { position: "absolute", borderRadius: 999, borderWidth: 2, borderColor: "rgba(255,255,255,0.12)" },
   hstat: { flex: 1, backgroundColor: "rgba(255,255,255,0.14)", borderRadius: 14, paddingVertical: 9, paddingHorizontal: 10, gap: 2 },
   gtitle: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6 },
-  group: { backgroundColor: "#fff", borderRadius: 18, overflow: "hidden", ...shadow },
+  group: { backgroundColor: t.card, borderRadius: 18, overflow: "hidden", ...shadow },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 11, paddingHorizontal: 14 },
   line: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.line },
   icon: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  stats: { flexDirection: "row", backgroundColor: "#fff", borderRadius: 18, paddingVertical: 12, ...shadow },
+  stats: { flexDirection: "row", backgroundColor: t.card, borderRadius: 18, paddingVertical: 12, ...shadow },
   stat: { flex: 1, alignItems: "center", gap: 3, paddingHorizontal: 6 },
 })

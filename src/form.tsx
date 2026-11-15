@@ -25,7 +25,7 @@ export function Notice({ tone = "bad", text }: { tone?: "bad" | "ok" | "warn"; t
 }
 const s = StyleSheet.create({
   label: { color: t.text, fontWeight: "700", fontSize: 13 },
-  field: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: "#fff", borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
+  field: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: t.card, borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
   input: { flex: 1, minWidth: 0, paddingVertical: 14, fontSize: 16, color: t.text },
   notice: { flexDirection: "row", gap: 8, alignItems: "flex-start", borderRadius: 12, padding: 12 },
 })

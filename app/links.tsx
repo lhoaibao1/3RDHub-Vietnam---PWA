@@ -27,7 +27,7 @@ export default function Links() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Link của tôi" />
-      <FlatList
+      <FlatList showsVerticalScrollIndicator={false}
         data={pg.rows}
         ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="link" onPage={pg.setPage} />}
         keyExtractor={(l) => l.id}

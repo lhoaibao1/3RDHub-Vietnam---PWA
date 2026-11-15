@@ -3,7 +3,8 @@ import { FlatList, ScrollView, StyleSheet, View } from "react-native"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "../src/api"
 import { useCampaigns, useCan } from "../src/hooks"
-import { RANGES, rangeOf, type RangeKey } from "../src/dates"
+import { rangeLabel, rangeOf } from "../src/dates"
+import { RangeSheet } from "../src/rangesheet"
 import { num, when } from "../src/format"
 import { Empty, ErrorBox, Loading, t, PullRefresh } from "../src/ui"
 import { Pager, TopBar, usePager } from "../src/chrome"
@@ -34,7 +35,7 @@ export default function Clicks() {
   const on = can("clicks.read")
   const camps = useCampaigns()
   const q = useQuery({ queryKey: ["clicks"], queryFn: () => api<{ data: Click[] }>("/api/v1/clicks").then((r) => r.data ?? []), enabled: on, staleTime: 60_000 })
-  const [range, setRange] = useState<RangeKey>("7d")
+  const [range, setRange] = useState<string>("7d")
   const [camp, setCamp] = useState("")
   const [sheet, setSheet] = useState<"" | "range" | "camp">("")
   const campName = useMemo(() => new Map((camps.data ?? []).map((c) => [c.id, c.name])), [camps.data])
@@ -73,7 +74,7 @@ export default function Clicks() {
   const header = (
     <View style={{ gap: 14, paddingBottom: 4 }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-        <FilterButton label="Thời gian" value={RANGES.find((r) => r.value === range)?.label} active onPress={() => setSheet("range")} />
+        <FilterButton label="Thời gian" value={rangeLabel(range)} active onPress={() => setSheet("range")} />
         <FilterButton label="Chiến dịch" value={campName.get(camp)} active={!!camp} onPress={() => setSheet("camp")} />
       </ScrollView>
       <StatBar items={[{ k: "Lượt click", v: num(rows.length), color: t.navy }, { k: "IP khác nhau", v: num(stats.ips) }, { k: "TB mỗi ngày", v: num(Math.round(rows.length / Math.max(1, stats.days.length))) }]} />
@@ -98,7 +99,7 @@ export default function Clicks() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Báo cáo click" />
-      <FlatList
+      <FlatList showsVerticalScrollIndicator={false}
         data={pg.rows}
         keyExtractor={(c) => c.id}
         ListHeaderComponent={header}
@@ -116,13 +117,13 @@ export default function Clicks() {
           </View>
         )}
       />
-      <PickerSheet open={sheet === "range"} title="Thời gian" options={RANGES} value={range} onPick={(v) => setRange(v as RangeKey)} onClose={() => setSheet("")} />
+      <RangeSheet open={sheet === "range"} value={range} onPick={setRange} onClose={() => setSheet("")} />
       <PickerSheet open={sheet === "camp"} title="Chiến dịch" options={campOpts} value={camp} onPick={setCamp} onClose={() => setSheet("")} />
     </View>
   )
 }
 const s = StyleSheet.create({
-  card: { backgroundColor: "#fff", borderRadius: 18, padding: 14, ...shadow },
+  card: { backgroundColor: t.card, borderRadius: 18, padding: 14, ...shadow },
   h: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 },
-  row: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: "#fff", borderRadius: 14, paddingVertical: 10, paddingHorizontal: 12 },
+  row: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: t.card, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 12 },
 })

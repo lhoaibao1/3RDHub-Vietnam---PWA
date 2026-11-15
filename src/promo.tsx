@@ -54,7 +54,7 @@ export function PromoPopup() {
               </Pressable>
             ))}
           </ScrollView>
-          <Pressable onPress={close} hitSlop={10} style={{ position: "absolute", top: -14, right: -10, width: 34, height: 34, borderRadius: 17, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+          <Pressable onPress={close} hitSlop={10} style={{ position: "absolute", top: -14, right: -10, width: 34, height: 34, borderRadius: 17, backgroundColor: t.card, alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="close" size={20} color={t.text} />
           </Pressable>
         </View>

@@ -1,14 +1,15 @@
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Text, TextInput } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { commissionOf, ORDER_STATUS, orderCode, orderStatus, useCampaigns, useMembers, useOrders, type Member, type Order } from "../../src/hooks"
-import { RANGES, rangeOf, type RangeKey } from "../../src/dates"
+import { rangeLabel, rangeOf } from "../../src/dates"
+import { RangeSheet } from "../../src/rangesheet"
 import { num, vnd, vndShort, when } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
 import { Art, Card, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
-import { Glass, LargeTitle, Pager, tap, usePager } from "../../src/chrome"
+import { Glass, LargeTitle, Pager, tap, usePager, useOwnScroll } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
 const SORTS = [{ value: "new", label: "Mới nhất" }, { value: "old", label: "Cũ nhất" }, { value: "sale", label: "Giá trị đơn cao nhất" }, { value: "comm", label: "Hoa hồng cao nhất" }]
@@ -20,7 +21,7 @@ export default function Orders() {
   const members = useMembers()
   const [term, setTerm] = useState("")
   const [status, setStatus] = useState("")
-  const [range, setRange] = useState<RangeKey>("30d")
+  const [range, setRange] = useState<string>("30d")
   const [camp, setCamp] = useState("")
   const [member, setMember] = useState("")
   const [team, setTeam] = useState("")
@@ -56,7 +57,8 @@ export default function Orders() {
   }, [base, status, sort])
   const sale = rows.reduce((a, o) => a + (o.sale_amount || 0), 0)
   const pg = usePager(rows, 20, `${status}|${range}|${camp}|${member}|${team}|${term}|${sort}`)
-  const list = useRef<FlatList<Order>>(null)
+  const keep = useOwnScroll()
+  const list = keep.ref
   const reset = () => { setStatus(""); setRange("30d"); setCamp(""); setMember(""); setTeam(""); setTerm(""); setSort("new") }
   const filtered = !!(status || range !== "30d" || camp || member || team || term)
 
@@ -71,7 +73,7 @@ export default function Orders() {
     <View style={{ gap: 12, paddingBottom: 4 }}>
       <Glass style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder={members.on ? "Tìm mã đơn, chiến dịch, thành viên…" : "Tìm mã đơn hoặc chiến dịch…"} placeholderTextColor={t.sub} value={term} onChangeText={setTerm} autoCorrect={false} />{term ? <Pressable onPress={() => setTerm("")} hitSlop={10}><Ionicons name="close-circle" size={18} color={t.sub} /></Pressable> : null}</Glass>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-        <FilterButton label="Thời gian" value={RANGES.find((r) => r.value === range)?.label} active onPress={() => setSheet("range")} />
+        <FilterButton label="Thời gian" value={rangeLabel(range)} active onPress={() => setSheet("range")} />
         <FilterButton label="Chiến dịch" value={campName.get(camp)} active={!!camp} onPress={() => setSheet("camp")} />
         {members.on && teams.length ? <FilterButton label="Nhóm" value={team} active={!!team} onPress={() => setSheet("team")} /> : null}
         {members.on ? <FilterButton label="Thành viên" value={memberOf.get(member)?.name} active={!!member} onPress={() => setSheet("member")} /> : null}
@@ -99,8 +101,8 @@ export default function Orders() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <LargeTitle title="Đơn hàng" sub={`${num(q.data.length)} đơn`} />
-      <FlatList
-        ref={list}
+      <FlatList showsVerticalScrollIndicator={false}
+        {...keep}
         data={pg.rows}
         keyExtractor={(o) => o.id}
         ListHeaderComponent={header}
@@ -142,7 +144,7 @@ export default function Orders() {
           )
         }}
       />
-      <PickerSheet open={sheet === "range"} title="Thời gian" options={RANGES} value={range} onPick={(v) => setRange(v as RangeKey)} onClose={() => setSheet("")} />
+      <RangeSheet open={sheet === "range"} value={range} onPick={setRange} onClose={() => setSheet("")} />
       <PickerSheet open={sheet === "camp"} title="Chiến dịch" options={campOpts} value={camp} onPick={setCamp} onClose={() => setSheet("")} />
       <PickerSheet open={sheet === "team"} title="Nhóm" options={[{ value: "", label: "Mọi nhóm" }, ...teams.map((x) => ({ value: x, label: x }))]} value={team} onPick={setTeam} onClose={() => setSheet("")} />
       <PickerSheet open={sheet === "member"} title="Thành viên" options={memberOpts} value={member} onPick={setMember} onClose={() => setSheet("")} />
@@ -153,14 +155,14 @@ export default function Orders() {
 const s = StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
   clear: { justifyContent: "center", paddingHorizontal: 10 },
-  st: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line },
-  stOn: { backgroundColor: t.navy, borderColor: t.navy },
+  st: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },
+  stOn: { backgroundColor: t.solid, borderColor: t.solid },
   stText: { color: t.text, fontWeight: "700", fontSize: 12 },
   dot: { width: 7, height: 7, borderRadius: 4 },
   sum: { flex: 1, paddingVertical: 10, paddingHorizontal: 10, gap: 2 },
   sumK: { color: t.sub, fontSize: 11 },
   sumV: { color: t.text, fontWeight: "800", fontSize: 15 },
-  row: { backgroundColor: "#fff", borderRadius: 16, padding: 12, gap: 8, ...shadow },
+  row: { backgroundColor: t.card, borderRadius: 16, padding: 12, gap: 8, ...shadow },
   thumb: { width: 40, height: 40, borderRadius: 10, overflow: "hidden" },
   pill: { borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3 },
   money: { flexDirection: "row", alignItems: "flex-end", gap: 10 },

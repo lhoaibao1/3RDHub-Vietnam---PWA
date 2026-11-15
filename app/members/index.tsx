@@ -77,7 +77,7 @@ export default function Members() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Thành viên" />
-      <FlatList
+      <FlatList showsVerticalScrollIndicator={false}
         ref={list}
         data={pg.rows}
         ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="thành viên" onPage={(p) => { pg.setPage(p); list.current?.scrollToOffset({ offset: 0, animated: true }) }} />}
@@ -116,8 +116,8 @@ export default function Members() {
 }
 const s = StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
-  chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line },
-  chipOn: { backgroundColor: t.navy, borderColor: t.navy },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 12, ...shadow },
+  chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },
+  chipOn: { backgroundColor: t.solid, borderColor: t.solid },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: t.card, borderRadius: 16, padding: 12, ...shadow },
   pill: { borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2 },
 })

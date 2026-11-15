@@ -51,7 +51,7 @@ export default function CampaignDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         {pics.length ? (
           <View>
             <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / W))}>
@@ -100,7 +100,7 @@ export default function CampaignDetail() {
           {(o?.labels ?? []).filter((l) => l.url).map((l, i) => <Pressable key={i} onPress={() => Linking.openURL(abs(l.url))}><Text style={{ color: t.navy2, fontWeight: "700" }}>🔗 {l.text}</Text></Pressable>)}
         </View>
       </ScrollView>
-      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: 16, paddingBottom: insets.bottom + 12, backgroundColor: "#fff", borderTopWidth: 1, borderTopColor: t.line }}>
+      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: 16, paddingBottom: insets.bottom + 12, backgroundColor: t.card, borderTopWidth: 1, borderTopColor: t.line }}>
         {approved ? <Button label={mine ? "Tạo link mới" : "Lấy link giới thiệu"} icon="link" onPress={() => make.mutate()} busy={make.isPending} />
           : status === "pending" ? <Button label="Đang chờ duyệt" kind="ghost" onPress={() => {}} disabled />
           : <Button label="Đăng ký tham gia" kind="gold" onPress={() => register.mutate()} busy={register.isPending} />}

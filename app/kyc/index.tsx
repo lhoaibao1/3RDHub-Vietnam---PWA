@@ -29,7 +29,7 @@ export default function KycList() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Duyệt định danh" />
-      <FlatList
+      <FlatList showsVerticalScrollIndicator={false}
         data={pg.rows}
         keyExtractor={(x) => x.kyc.user_id}
         contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1, paddingBottom: 40 }}
@@ -41,7 +41,7 @@ export default function KycList() {
               {(["pending", "approved", "rejected", "requested"] as const).map((k) => (
                 <Pressable key={k} onPress={() => setStatus(status === k ? "" : k)} style={[s.st, status === k && { backgroundColor: KYC_STATE[k]!.color, borderColor: KYC_STATE[k]!.color }]}><Text style={[s.stText, status === k && { color: "#fff" }]}>{KYC_STATE[k]!.label} · {num(counts[k] ?? 0)}</Text></Pressable>
               ))}
-              <Pressable onPress={() => setStatus("")} style={[s.st, !status && { backgroundColor: t.navy, borderColor: t.navy }]}><Text style={[s.stText, !status && { color: "#fff" }]}>Tất cả · {num(base.length)}</Text></Pressable>
+              <Pressable onPress={() => setStatus("")} style={[s.st, !status && { backgroundColor: t.solid, borderColor: t.solid }]}><Text style={[s.stText, !status && { color: "#fff" }]}>Tất cả · {num(base.length)}</Text></Pressable>
             </ScrollView>
           </View>
         }
@@ -67,7 +67,7 @@ export default function KycList() {
 }
 const s = StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
-  st: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line },
+  st: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },
   stText: { color: t.text, fontWeight: "700", fontSize: 12 },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 12, ...shadow },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: t.card, borderRadius: 16, padding: 12, ...shadow },
 })

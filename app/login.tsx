@@ -87,7 +87,7 @@ export default function Login() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <LinearGradient colors={[t.navy, t.navy2]} style={[s.top, { height: H * 0.42 }]}>
+      <LinearGradient colors={[t.brand, t.brand2]} style={[s.top, { height: H * 0.42 }]}>
         <View style={[s.ring, { width: 260, height: 260, top: -80, right: -90 }]} />
         <View style={[s.ring, { width: 180, height: 180, top: 90, left: -70, borderColor: "rgba(255,106,43,0.35)" }]} />
         <View style={[s.dot, { top: 70, right: 60 }]} />
@@ -98,7 +98,7 @@ export default function Login() {
         </View>
       </LinearGradient>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ paddingTop: H * 0.24, paddingHorizontal: 20, paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: H * 0.24, paddingHorizontal: 20, paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
           <Animated.View style={[s.card, { opacity: fade, transform: [{ translateY: rise }] }]}>
             <BrandLogo width={230} height={44} style={{ alignSelf: "center", marginBottom: 6 }} />
             {ticket ? (
@@ -150,7 +150,7 @@ const s = StyleSheet.create({
   dot: { position: "absolute", width: 12, height: 12, borderRadius: 6, backgroundColor: t.gold },
   hello: { color: "#fff", fontSize: 28, fontWeight: "900" },
   sub: { color: "#C9D6F5", marginTop: 6, lineHeight: 20, maxWidth: 300 },
-  card: { backgroundColor: "#fff", borderRadius: 24, padding: 20, gap: 12, ...shadow, shadowOpacity: 0.14, shadowRadius: 24 },
+  card: { backgroundColor: t.card, borderRadius: 24, padding: 20, gap: 12, ...shadow, shadowOpacity: 0.14, shadowRadius: 24 },
   field: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: t.bg, borderRadius: 14, paddingHorizontal: 14, borderWidth: 1, borderColor: t.line },
   input: { flex: 1, minWidth: 0, paddingVertical: 14, fontSize: 16, color: t.text },
   link: { color: t.navy2, fontWeight: "700" },

@@ -31,7 +31,7 @@ export default function Password() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Đổi mật khẩu" />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }} keyboardShouldPersistTaps="handled">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 14 }} keyboardShouldPersistTaps="handled">
         <Card style={{ gap: 12 }}>
           <Field icon="lock-closed-outline" label="Mật khẩu hiện tại" value={cur} onChangeText={setCur} secure autoComplete="current-password" />
           <Field icon="key-outline" label="Mật khẩu mới" placeholder="Ít nhất 8 ký tự" value={next} onChangeText={setNext} secure autoComplete="new-password" error={next && next.length < 8 ? "Mật khẩu cần từ 8 ký tự." : ""} />

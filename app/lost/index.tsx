@@ -32,7 +32,7 @@ export default function LostOrders() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Đơn thất lạc" right={add} />
-      <FlatList
+      <FlatList showsVerticalScrollIndicator={false}
         data={pg.rows}
         keyExtractor={(x) => x.id}
         contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1, paddingBottom: 40 }}
@@ -41,7 +41,7 @@ export default function LostOrders() {
           <View style={{ gap: 12, paddingBottom: 4 }}>
             <Glass style={s.search}><Ionicons name="search" size={18} color={t.sub} /><TextInput style={{ flex: 1, paddingVertical: 11, color: t.text }} placeholder="Tìm mã phiếu, mã đơn, chiến dịch…" placeholderTextColor={t.sub} value={term} onChangeText={setTerm} autoCorrect={false} /></Glass>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-              <Pressable onPress={() => setStatus("")} style={[s.st, !status && { backgroundColor: t.navy, borderColor: t.navy }]}><Text style={[s.stText, !status && { color: "#fff" }]}>Tất cả · {num(base.length)}</Text></Pressable>
+              <Pressable onPress={() => setStatus("")} style={[s.st, !status && { backgroundColor: t.solid, borderColor: t.solid }]}><Text style={[s.stText, !status && { color: "#fff" }]}>Tất cả · {num(base.length)}</Text></Pressable>
               {Object.entries(LOST_STATUS).map(([k, v]) => (
                 <Pressable key={k} onPress={() => setStatus(status === k ? "" : k)} style={[s.st, status === k && { backgroundColor: v.color, borderColor: v.color }]}><Text style={[s.stText, status === k && { color: "#fff" }]}>{v.label} · {num(counts[k] ?? 0)}</Text></Pressable>
               ))}
@@ -75,7 +75,7 @@ export default function LostOrders() {
 }
 const s = StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
-  st: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line },
+  st: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },
   stText: { color: t.text, fontWeight: "700", fontSize: 12 },
-  row: { backgroundColor: "#fff", borderRadius: 16, padding: 12, gap: 6, ...shadow },
+  row: { backgroundColor: t.card, borderRadius: 16, padding: 12, gap: 6, ...shadow },
 })

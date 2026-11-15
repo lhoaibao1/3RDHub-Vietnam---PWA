@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../../src/api"
 import { day, num, vnd, vndShort, when } from "../../src/format"
 import { Button, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
-import { LargeTitle, tap } from "../../src/chrome"
+import { LargeTitle, tap, useOwnScroll } from "../../src/chrome"
 import { Hero, HeroStat } from "../../src/detail"
 import { Notice } from "../../src/form"
 import { Text, TextInput } from "../../src/text"
@@ -28,13 +28,14 @@ const STATE = {
   pending: { label: "Chờ chuyển", color: t.warn, soft: t.warnSoft, icon: "time-outline" },
   paid: { label: "Đã chuyển", color: t.ok, soft: t.okSoft, icon: "checkmark-circle-outline" },
   rejected: { label: "Bị từ chối", color: t.bad, soft: t.badSoft, icon: "close-circle-outline" },
-  cancelled: { label: "Đã hủy", color: t.sub, soft: "#EEF0F5", icon: "remove-circle-outline" },
+  cancelled: { label: "Đã hủy", color: t.sub, soft: t.fill, icon: "remove-circle-outline" },
 } as const
 const digits = (v: string) => Number(v.replace(/\D/g, "")) || 0
 
 export default function WalletScreen() {
   const qc = useQueryClient()
   const router = useRouter()
+  const keep = useOwnScroll()
   const insets = useSafeAreaInsets()
   const [sheet, setSheet] = useState(false)
   const [amount, setAmount] = useState("")
@@ -68,7 +69,7 @@ export default function WalletScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <LargeTitle title="Ví" />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 16 }} refreshControl={<PullRefresh run={() => Promise.all([q.refetch()])} />}>
+      <ScrollView showsVerticalScrollIndicator={false} {...keep} contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 110, gap: 16 }} refreshControl={<PullRefresh run={() => Promise.all([q.refetch()])} />}>
         <Hero>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <Text style={{ color: "#C9D6F5" }}>Số dư có thể rút</Text>
@@ -157,14 +158,14 @@ export default function WalletScreen() {
   )
 }
 const s = StyleSheet.create({
-  cta: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#fff", borderRadius: 14, paddingVertical: 13 },
-  seg: { flexDirection: "row", backgroundColor: "#E7EBF4", borderRadius: 12, padding: 3 },
+  cta: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: t.card, borderRadius: 14, paddingVertical: 13 },
+  seg: { flexDirection: "row", backgroundColor: t.fill, borderRadius: 12, padding: 3 },
   segItem: { flex: 1, alignItems: "center", paddingVertical: 9, borderRadius: 10 },
-  segOn: { backgroundColor: "#fff", ...shadow },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 12, ...shadow },
+  segOn: { backgroundColor: t.card, ...shadow },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: t.card, borderRadius: 16, padding: 12, ...shadow },
   icon: { width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center" },
   none: { color: t.sub, textAlign: "center", paddingVertical: 20 },
-  sheet: { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, gap: 12 },
+  sheet: { backgroundColor: t.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, gap: 12 },
   grab: { alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: t.line },
   amount: { flexDirection: "row", alignItems: "center", gap: 8, borderBottomWidth: 2, borderBottomColor: t.navy },
   quick: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: t.navySoft },

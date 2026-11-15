@@ -229,7 +229,7 @@ export default function Ekyc() {
         </View>
       ) : stage === "info" ? (
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
             <View style={{ flexDirection: "row", gap: 10 }}>
               {([["Mặt trước", front, "front"], ["Mặt sau", back, "back"]] as const).map(([l, x, k]) => (
                 <Pressable key={k} onPress={() => setStage(k)} style={{ flex: 1, gap: 4 }}>
@@ -253,12 +253,12 @@ export default function Ekyc() {
           </ScrollView>
         </KeyboardAvoidingView>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
           <Hero>
             <Ionicons name="shield-checkmark-outline" size={34} color="#fff" />
             <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }}>Định danh tài khoản</Text>
             <Text style={{ color: "#C9D6F5", lineHeight: 20 }}>Cần định danh để rút tiền. Chuẩn bị CCCD gắn chip, làm ở nơi đủ sáng, mất khoảng 2 phút.</Text>
-            {own.data ? <View style={{ flexDirection: "row" }}><View style={{ backgroundColor: "#fff", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 }}><Text style={{ color: st.color, fontWeight: "700", fontSize: 12 }}>Trạng thái: {st.label}</Text></View></View> : null}
+            {own.data ? <View style={{ flexDirection: "row" }}><View style={{ backgroundColor: t.card, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 }}><Text style={{ color: st.color, fontWeight: "700", fontSize: 12 }}>Trạng thái: {st.label}</Text></View></View> : null}
           </Hero>
           {own.data?.note && own.data.status === "rejected" ? <Notice text={`Lý do bị từ chối: ${own.data.note}`} /> : null}
           {own.data?.status === "pending" ? <Notice tone="warn" text="Hồ sơ của bạn đang chờ duyệt. Gửi lại sẽ thay hồ sơ cũ." /> : null}
@@ -280,11 +280,11 @@ export default function Ekyc() {
 const s = StyleSheet.create({
   camTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingBottom: 12, backgroundColor: "rgba(0,0,0,0.45)" },
   camTitle: { color: "#fff", fontWeight: "800", fontSize: 16 },
-  frame: { position: "absolute", top: "28%", alignSelf: "center", width: "88%", aspectRatio: 1.586, borderRadius: 14, borderWidth: 3, borderColor: "#fff" },
-  oval: { position: "absolute", top: "14%", alignSelf: "center", width: "68%", aspectRatio: 0.76, borderRadius: 999, borderWidth: 3, borderColor: "#fff" },
+  frame: { position: "absolute", top: "28%", alignSelf: "center", width: "88%", aspectRatio: 1.586, borderRadius: 14, borderWidth: 3, borderColor: t.card },
+  oval: { position: "absolute", top: "14%", alignSelf: "center", width: "68%", aspectRatio: 0.76, borderRadius: 999, borderWidth: 3, borderColor: t.card },
   camBottom: { position: "absolute", left: 0, right: 0, bottom: 0, alignItems: "center", gap: 12, paddingTop: 16, paddingHorizontal: 20, backgroundColor: "rgba(0,0,0,0.55)" },
   camHint: { color: "#E5E7EB", textAlign: "center", fontSize: 13 },
-  shutter: { width: 74, height: 74, borderRadius: 37, borderWidth: 4, borderColor: "#fff", alignItems: "center", justifyContent: "center" },
-  shutterIn: { width: 58, height: 58, borderRadius: 29, backgroundColor: "#fff" },
-  faceBtn: { alignSelf: "stretch", backgroundColor: "#fff", borderRadius: 14, paddingVertical: 14, alignItems: "center" },
+  shutter: { width: 74, height: 74, borderRadius: 37, borderWidth: 4, borderColor: t.card, alignItems: "center", justifyContent: "center" },
+  shutterIn: { width: 58, height: 58, borderRadius: 29, backgroundColor: t.card },
+  faceBtn: { alignSelf: "stretch", backgroundColor: t.card, borderRadius: 14, paddingVertical: 14, alignItems: "center" },
 })

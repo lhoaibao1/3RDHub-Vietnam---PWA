@@ -15,6 +15,7 @@ import { t } from "../src/theme"
 import { FetchBar } from "../src/fetchbar"
 import { PromptHost } from "../src/prompt"
 import { WebAlertHost } from "../src/webalert"
+import { SupportHost } from "../src/support"
 
 void SplashScreen.preventAutoHideAsync().catch(() => {})
 // Quay lại app (từ nền hoặc màn khoá) = "focus": dữ liệu cũ hơn 30 giây tự tải lại, nên chiến dịch / đơn mới trên web
@@ -116,6 +117,7 @@ function Gate() {
       <FetchBar />
       <PromptHost />
       <WebAlertHost />
+      <SupportHost />
       <BrandSplash done={ready} />
     </View>
   )
@@ -126,7 +128,7 @@ export default function Root() {
     <QueryClientProvider client={client}>
       <BrandProvider>
         <AuthProvider>
-          <StatusBar style="dark" />
+          <StatusBar style={t.dark ? "light" : "dark"} />
           <Gate />
         </AuthProvider>
       </BrandProvider>
@@ -134,7 +136,7 @@ export default function Root() {
   )
 }
 const s = StyleSheet.create({
-  splash: { backgroundColor: "#fff", alignItems: "center", justifyContent: "center", zIndex: 99 },
+  splash: { backgroundColor: t.card, alignItems: "center", justifyContent: "center", zIndex: 99 },
   tag: { position: "absolute", bottom: 56, color: t.gold, fontWeight: "700", letterSpacing: 1 },
   track: { width: 180, height: 4, borderRadius: 2, backgroundColor: t.navySoft, overflow: "hidden", marginTop: 34 },
   run: { width: 70, height: 4, borderRadius: 2, backgroundColor: t.gold },

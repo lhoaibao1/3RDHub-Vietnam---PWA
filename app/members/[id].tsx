@@ -29,7 +29,7 @@ export default function MemberDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Thành viên" />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
         <Hero style={{ alignItems: "center" }}>
           <View style={{ padding: 4, borderRadius: 60, backgroundColor: "rgba(255,255,255,0.25)" }}><Avatar url={m.avatar_url} name={m.name} size={84} /></View>
           <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }} numberOfLines={1}>{m.name}</Text>
@@ -65,7 +65,7 @@ export default function MemberDetail() {
           {mine.slice(0, 10).map((o) => {
             const st = orderStatus(o.status)
             return (
-              <Pressable key={o.id} onPress={() => { tap(); router.push(`/order/${o.id}`) }} style={({ pressed }) => [{ backgroundColor: "#fff", borderRadius: 16, padding: 12, gap: 6, ...shadow }, pressed && { opacity: 0.85 }]}>
+              <Pressable key={o.id} onPress={() => { tap(); router.push(`/order/${o.id}`) }} style={({ pressed }) => [{ backgroundColor: t.card, borderRadius: 16, padding: 12, gap: 6, ...shadow }, pressed && { opacity: 0.85 }]}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                   <Text style={{ flex: 1, fontWeight: "700", color: t.text }} numberOfLines={1}>{camps.data?.find((c) => c.id === o.campaign_id)?.name || "Đơn hàng"}</Text>
                   <View style={{ backgroundColor: st.soft, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2 }}><Text style={{ color: st.color, fontSize: 11, fontWeight: "700" }}>{st.label}</Text></View>

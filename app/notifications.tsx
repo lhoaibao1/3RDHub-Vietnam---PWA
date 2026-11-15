@@ -40,7 +40,7 @@ export default function Notifications() {
         </ScrollView>
       </View>
       {q.isPending ? <Loading /> : q.isError ? <ErrorBox error={q.error} retry={() => q.refetch()} /> : (
-        <FlatList
+        <FlatList showsVerticalScrollIndicator={false}
           data={pg.rows}
           ListFooterComponent={<Pager page={pg.page} pages={pg.pages} total={pg.total} size={pg.size} unit="thông báo" onPage={pg.setPage} />}
           keyExtractor={(n) => n.id}

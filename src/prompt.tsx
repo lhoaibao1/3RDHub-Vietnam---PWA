@@ -35,7 +35,7 @@ export function PromptHost() {
           <TextInput autoFocus value={v} onChangeText={setV} secureTextEntry={req.secure} placeholder={req.placeholder} placeholderTextColor={t.sub} style={s.input} onSubmitEditing={() => done(v)} />
           <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 8 }}>
             <Pressable onPress={() => done(null)} style={s.btn}><Text style={{ color: t.sub, fontWeight: "700" }}>Hủy</Text></Pressable>
-            <Pressable onPress={() => done(v)} style={[s.btn, { backgroundColor: t.navy }]}><Text style={{ color: "#fff", fontWeight: "700" }}>{req.ok ?? "Xong"}</Text></Pressable>
+            <Pressable onPress={() => done(v)} style={[s.btn, { backgroundColor: t.solid }]}><Text style={{ color: "#fff", fontWeight: "700" }}>{req.ok ?? "Xong"}</Text></Pressable>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -44,7 +44,7 @@ export function PromptHost() {
 }
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: "rgba(15,27,61,0.45)", alignItems: "center", justifyContent: "center", padding: 24 },
-  box: { alignSelf: "stretch", backgroundColor: "#fff", borderRadius: 20, padding: 20, gap: 12, ...shadow },
+  box: { alignSelf: "stretch", backgroundColor: t.card, borderRadius: 20, padding: 20, gap: 12, ...shadow },
   input: { borderWidth: 1, borderColor: t.line, borderRadius: 12, padding: 12, fontSize: 16, color: t.text, backgroundColor: t.bg },
   btn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 },
 })

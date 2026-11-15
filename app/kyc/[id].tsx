@@ -36,7 +36,7 @@ export default function KycDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Hồ sơ định danh" />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 130 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 130 }}>
         <Hero>
           <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }}>{k.full_name || x.display_name || x.email}</Text>
           <Text style={{ color: "#C9D6F5" }}>{[x.rd_code, x.email].filter(Boolean).join(" · ")}</Text>
@@ -72,7 +72,7 @@ export default function KycDetail() {
         </InfoGroup>
       </ScrollView>
       {k.status === "pending" ? (
-        <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, flexDirection: "row", gap: 10, padding: 16, paddingBottom: 28, backgroundColor: "#fff", borderTopWidth: 1, borderTopColor: t.line }}>
+        <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, flexDirection: "row", gap: 10, padding: 16, paddingBottom: 28, backgroundColor: t.card, borderTopWidth: 1, borderTopColor: t.line }}>
           <View style={{ flex: 1 }}><Button label="Từ chối" kind="ghost" onPress={reject} disabled={review.isPending} /></View>
           <View style={{ flex: 1.4 }}><Button label="Duyệt" icon="checkmark-circle-outline" onPress={approve} busy={review.isPending} /></View>
         </View>

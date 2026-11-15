@@ -5,18 +5,20 @@ import { useRouter } from "expo-router"
 import * as Clipboard from "expo-clipboard"
 import Constants from "expo-constants"
 import { Ionicons } from "@expo/vector-icons"
+import { Image } from "expo-image"
 import { LinearGradient } from "expo-linear-gradient"
+import { NetworkBg } from "../../src/networkbg"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../../src/auth"
 import { api, API_URL } from "../../src/api"
 import { BrandLogo } from "../../src/brand"
 import { commissionOf, KYC_STATE, useCan, useKycAdmin, useLost, useMe, useMembers, useOrders, useUnread } from "../../src/hooks"
-import { ZALO_SUPPORT } from "../../src/links"
 import { num, vndShort } from "../../src/format"
 import { Avatar, t } from "../../src/ui"
-import { GlassButton, tap } from "../../src/chrome"
+import { GlassButton, tap, useOwnScroll } from "../../src/chrome"
 import { shadow } from "../../src/theme"
+import { openSupport } from "../../src/support"
 
 type Item = { icon: keyof typeof Ionicons.glyphMap; color: string; label: string; value?: string; badge?: number; onPress: () => void }
 
@@ -39,8 +41,11 @@ function Group({ title, items }: { title: string; items: Item[] }) {
   )
 }
 
+const CONTRACT: Record<string, string> = { requested: "Chờ bạn ký", signed: "Chờ duyệt", approved: "Đã ký" }
+
 export default function Account() {
   const router = useRouter()
+  const keep = useOwnScroll()
   const insets = useSafeAreaInsets()
   const { user, logout } = useAuth()
   const me = useMe()
@@ -61,14 +66,15 @@ export default function Account() {
     const rows = (orders.data ?? []).filter((o) => new Date(o.created_at).getTime() >= from)
     return { n: rows.length, comm: commissionOf(rows) }
   }, [orders.data])
+  const contract = useQuery({ queryKey: ["contract"], queryFn: () => api<{ data: { status: string } }>("/api/v1/contract").then((r) => r.data), retry: false })
   const copyCode = () => { if (code) { void Clipboard.setStringAsync(code); Alert.alert("Đã sao chép mã", code) } }
   const askLogout = () => Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [{ text: "Hủy", style: "cancel" }, { text: "Đăng xuất", style: "destructive", onPress: () => void logout() }])
 
   return (
-    <ScrollView contentInsetAdjustmentBehavior="never" style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 110 }}>
-      <LinearGradient colors={[t.navy, t.navy2]} style={[s.hero, { paddingTop: insets.top + 20 }]}>
-        <View style={[s.ring, { width: 240, height: 240, top: -90, right: -80 }]} />
-        <View style={[s.ring, { width: 140, height: 140, bottom: -40, left: -50, borderColor: "rgba(255,106,43,0.35)" }]} />
+    <ScrollView showsVerticalScrollIndicator={false} contentInsetAdjustmentBehavior="never" {...keep} style={{ backgroundColor: t.bg }} contentContainerStyle={{ paddingBottom: 110 }}>
+      <LinearGradient colors={[t.brand, t.brand2]} style={[s.hero, { paddingTop: insets.top + 20 }]}>
+        <NetworkBg />
+        <Image source={require("../../assets/logo-white.png")} contentFit="contain" style={{ position: "absolute", left: 16, top: insets.top + 10, width: 104, height: 30, opacity: 0.95 }} />
         <View style={{ position: "absolute", right: 14, top: insets.top + 6, flexDirection: "row", gap: 8 }}><GlassButton icon="search" label="Tìm kiếm" onPress={() => router.push("/find")} /><GlassButton icon="settings-outline" label="Cài đặt" onPress={() => router.push("/settings")} /></View>
         <Pressable onPress={() => { tap(); router.push("/profile") }} style={s.avatarWrap}>
           <Avatar url={user?.avatar_url} name={name} size={88} />
@@ -95,6 +101,7 @@ export default function Account() {
           { icon: "person", color: "#2563EB", label: "Thông tin cá nhân", onPress: () => router.push("/profile") },
           { icon: "wallet", color: "#15803D", label: "Ví & rút tiền", onPress: () => router.push("/(tabs)/wallet") },
           { icon: "shield-checkmark", color: "#0F766E", label: "Định danh eKYC", value: KYC_STATE[ownKyc.data?.status ?? ""]?.label ?? "", onPress: () => router.push("/ekyc") },
+          { icon: "document-text", color: "#7C3AED", label: "Hợp đồng", value: CONTRACT[contract.data?.status ?? ""] ?? "", onPress: () => router.push("/contract") },
           ...(code ? [{ icon: "qr-code" as const, color: "#7C3AED", label: "Mã Publisher", value: code, onPress: copyCode }] : []),
         ]} />
         <Group title="Kinh doanh" items={[
@@ -129,7 +136,7 @@ export default function Account() {
         ) : null}
         <Group title="Hỗ trợ & ứng dụng" items={[
           { icon: "notifications", color: "#D97706", label: "Thông báo", badge: unread.data || 0, onPress: () => router.push("/notifications") },
-          { icon: "chatbubbles", color: "#0068FF", label: "Nhóm Zalo hỗ trợ", onPress: () => void Linking.openURL(ZALO_SUPPORT) },
+          { icon: "chatbubbles", color: "#0068FF", label: "Hỗ trợ", onPress: openSupport },
           { icon: "settings", color: "#475569", label: "Cài đặt", onPress: () => router.push("/settings") },
           ...(Platform.OS !== "web" ? [{ icon: "globe" as const, color: t.navy2, label: "Mở bản web", onPress: () => void Linking.openURL(API_URL) }] : []),
         ]} />
@@ -149,18 +156,18 @@ const s = StyleSheet.create({
   hero: { alignItems: "center", paddingBottom: 56, paddingHorizontal: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: "hidden" },
   ring: { position: "absolute", borderRadius: 999, borderWidth: 2, borderColor: "rgba(255,255,255,0.12)" },
   avatarWrap: { padding: 4, borderRadius: 60, backgroundColor: "rgba(255,255,255,0.25)" },
-  cam: { position: "absolute", right: 2, bottom: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: t.gold, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" },
+  cam: { position: "absolute", right: 2, bottom: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: t.gold, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: t.card },
   name: { color: "#fff", fontSize: 22, fontWeight: "900", marginTop: 12 },
   chipGold: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: t.gold, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
   chipGlass: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
   chipText: { color: "#fff", fontWeight: "800", fontSize: 12 },
-  stats: { flexDirection: "row", marginHorizontal: 16, marginTop: -34, marginBottom: 18, backgroundColor: "#fff", borderRadius: 20, paddingVertical: 14, ...shadow, shadowOpacity: 0.12 },
+  stats: { flexDirection: "row", marginHorizontal: 16, marginTop: -34, marginBottom: 18, backgroundColor: t.card, borderRadius: 20, paddingVertical: 14, ...shadow, shadowOpacity: 0.12 },
   stat: { flex: 1, alignItems: "center", gap: 3, paddingHorizontal: 6 },
   statLine: { width: 1, backgroundColor: t.line },
   statK: { color: t.sub, fontSize: 11 },
   statV: { color: t.text, fontWeight: "900", fontSize: 16 },
   groupTitle: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6, marginLeft: 6 },
-  group: { backgroundColor: "#fff", borderRadius: 18, overflow: "hidden", ...shadow },
+  group: { backgroundColor: t.card, borderRadius: 18, overflow: "hidden", ...shadow },
   item: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 13, paddingHorizontal: 14 },
   itemLine: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.line },
   icon: { width: 36, height: 36, borderRadius: 11, alignItems: "center", justifyContent: "center" },

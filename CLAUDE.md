@@ -95,6 +95,22 @@ reaches real users within minutes.
   other code still assigns it (`ReferenceError: Property 'show' doesn't exist` took iOS down on 2026-11-15). Put it on
   a `const` object (`host.show`). After touching platform branches, export the iOS bundle unminified
   (`npx expo export --platform ios --no-bytecode --no-minify`) and check the affected module.
+- **Theme** — `src/theme.ts` picks the light or dark palette once at load from `src/prefs.ts` (`pref_theme`: light /
+  dark / system). Never hard-code `#fff` or light greys for surfaces: use `t.card`, `t.fill`, `t.bg`, `t.line`;
+  `t.brand`/`t.brand2` are the always-navy hero colours, `t.solid` the filled-button colour, `t.navy` is a text/icon
+  colour (light blue in dark mode). Changing theme or language saves the pref and reloads the app (`setPref`).
+- **Language** — UI strings are written in Vietnamese; `Text`/`TextInput` (`src/text.tsx`) and `Alert.alert` look
+  them up in `src/en.ts` (key = the exact Vietnamese string) when the language is English. Add a line there for every
+  new static string. Template strings (`${n} đơn`) are not translated unless wrapped in `L()` from `src/i18n.ts`.
+- **Date ranges** — `src/dates.ts` (`RangeKey` presets incl. `yesterday`, custom `c:from:to`) + `RangeSheet`
+  (`src/rangesheet.tsx`, presets and a from–to calendar). Use it for every date filter.
+- **Tab scroll** — every tab's ScrollView/FlatList spreads `useOwnScroll()` (`src/chrome.tsx`) so a tab keeps its own
+  offset; scroll indicators are hidden everywhere (`showsVerticalScrollIndicator={false}`).
+- **Support** — `openSupport()` (`src/support.tsx`) opens the sheet with the Zalo OA and the Zalo group; do not link
+  straight to one of them.
+- **Contract** — `app/contract.tsx` signs the service contract in the app through the web e-contract API (handoff →
+  `/econtract/open` → `X-Contract-Token` → OTP by email → sign). Lost-order tickets show and upload images through
+  `src/photos.tsx`.
 - **Cross-platform traps** — `Alert.prompt` is iOS-only: use `prompt()` from `src/prompt.tsx`. Persist small
   values through `store` from `src/api.ts` (SecureStore natively, localStorage on web).
 
@@ -109,4 +125,5 @@ reaches real users within minutes.
   server (it serves an old mascot) and do not add mascot images.
 - Biometric login never prompts on its own; only when the user taps the button.
 - Lists get numbered pagination; loading states use skeletons, not blank screens or bare spinners.
+- The home tab shows no commission (owner, 2026-11-15): orders, approved orders, order value, clicks only.
 - Colours: navy `#0B2A6F`, orange accent `#FF6A2B` (named `gold` in `src/theme.ts` for historical reasons).

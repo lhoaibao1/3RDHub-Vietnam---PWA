@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { Dimensions, FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { Text, TextInput } from "../../src/text"
 import { useRouter } from "expo-router"
@@ -8,7 +8,7 @@ import { type Campaign, useCampaigns, useMemberships } from "../../src/hooks"
 import { num, rateText, vnd } from "../../src/format"
 import { FilterButton, PickerSheet } from "../../src/sheet"
 import { Art, Empty, ErrorBox, Loading, t, PullRefresh } from "../../src/ui"
-import { Glass, LargeTitle, Pager, tap, usePager } from "../../src/chrome"
+import { Glass, LargeTitle, Pager, tap, usePager, useOwnScroll } from "../../src/chrome"
 import { shadow } from "../../src/theme"
 
 const W = Dimensions.get("window").width
@@ -95,7 +95,8 @@ export default function Campaigns() {
   }, [q.data, mem.data, term, cat, tab, sort])
 
   const pg = usePager(rows, 20, `${tab}|${cat}|${sort}|${term}`)
-  const list = useRef<FlatList<Campaign>>(null)
+  const keep = useOwnScroll()
+  const list = keep.ref
   if (q.isPending) return <Loading image rows={2} />
   if (q.isError) return <ErrorBox error={q.error} retry={() => q.refetch()} />
   const joinedCount = Object.values(mem.data ?? {}).filter((v) => v === "approved").length
@@ -120,8 +121,8 @@ export default function Campaigns() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <LargeTitle title="Chiến dịch" sub={`${num(q.data.length)} chiến dịch đang có`} />
-      <FlatList
-        ref={list}
+      <FlatList showsVerticalScrollIndicator={false}
+        {...keep}
         data={pg.rows}
         numColumns={2}
         columnWrapperStyle={{ gap: 12 }}
@@ -140,14 +141,14 @@ export default function Campaigns() {
 }
 const s = StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, paddingHorizontal: 14, overflow: "hidden" },
-  seg: { flexDirection: "row", backgroundColor: "#E7EBF4", borderRadius: 12, padding: 3 },
+  seg: { flexDirection: "row", backgroundColor: t.fill, borderRadius: 12, padding: 3 },
   segItem: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 10 },
-  segOn: { backgroundColor: "#fff", ...shadow },
-  card: { width: CW, backgroundColor: "#fff", borderRadius: 16, overflow: "hidden", ...shadow },
+  segOn: { backgroundColor: t.card, ...shadow },
+  card: { width: CW, backgroundColor: t.card, borderRadius: 16, overflow: "hidden", ...shadow },
   shade: { position: "absolute", left: 0, right: 0, bottom: 0, height: "50%" },
   tag: { position: "absolute", top: 8, left: 8, borderRadius: 20, paddingHorizontal: 7, paddingVertical: 3, maxWidth: CW - 50 },
   tagText: { color: "#fff", fontSize: 10, fontWeight: "800" },
-  state: { position: "absolute", top: 8, right: 8, width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" },
+  state: { position: "absolute", top: 8, right: 8, width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: t.card },
   offBadge: { position: "absolute", bottom: 8, left: 8, backgroundColor: "#6B7280", borderRadius: 20, paddingHorizontal: 7, paddingVertical: 3 },
   cat: { color: t.gold, fontSize: 11, fontWeight: "700" },
   name: { color: t.text, fontSize: 14, fontWeight: "800", lineHeight: 18, minHeight: 36 },

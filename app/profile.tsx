@@ -48,11 +48,11 @@ export default function Profile() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Thông tin cá nhân" />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
         <Hero style={{ alignItems: "center" }}>
           <Pressable onPress={photo} style={{ padding: 4, borderRadius: 60, backgroundColor: "rgba(255,255,255,0.25)" }}>
             <Avatar url={user?.avatar_url} name={name} size={92} />
-            <View style={{ position: "absolute", right: 2, bottom: 2, width: 30, height: 30, borderRadius: 15, backgroundColor: t.gold, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" }}>
+            <View style={{ position: "absolute", right: 2, bottom: 2, width: 30, height: 30, borderRadius: 15, backgroundColor: t.gold, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: t.card }}>
               <Ionicons name={pick.isPending || remove.isPending ? "hourglass-outline" : "camera"} size={15} color="#fff" />
             </View>
           </Pressable>

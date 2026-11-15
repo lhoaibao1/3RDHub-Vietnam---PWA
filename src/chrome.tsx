@@ -1,7 +1,7 @@
-import { useEffect, useState, type ReactNode } from "react"
-import { Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
+import { Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native"
 import { Text } from "./text"
-import { useRouter } from "expo-router"
+import { useFocusEffect, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { BlurView } from "expo-blur"
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect"
@@ -17,9 +17,9 @@ const liquid = Platform.OS === "ios" && (() => { try { return isLiquidGlassAvail
 /** Nền kính: Liquid Glass thật trên iOS 26+, kính mờ (blur) trên iOS cũ, nền mờ trên Android / web.
  *  clear: kính trong đặt trên nền tối (đầu Trang chủ), chữ / icon bên trong màu trắng. */
 export function Glass({ children, style, interactive, clear }: { children?: ReactNode; style?: StyleProp<ViewStyle>; interactive?: boolean; clear?: boolean }) {
-  if (liquid) return <GlassView glassEffectStyle={clear ? "clear" : "regular"} isInteractive={interactive} style={style}>{children}</GlassView>
-  if (Platform.OS === "ios") return <BlurView intensity={clear ? 35 : 60} tint={clear ? "systemUltraThinMaterialDark" : "systemChromeMaterialLight"} style={[style, { overflow: "hidden" }]}>{children}</BlurView>
-  return <View style={[style, clear ? { backgroundColor: "rgba(255,255,255,0.16)" } : { backgroundColor: "rgba(255,255,255,0.92)", borderWidth: StyleSheet.hairlineWidth, borderColor: t.line }]}>{children}</View>
+  if (liquid) return <GlassView glassEffectStyle={clear ? "clear" : "regular"} colorScheme={t.dark ? "dark" : "light"} isInteractive={interactive} style={style}>{children}</GlassView>
+  if (Platform.OS === "ios") return <BlurView intensity={clear ? 35 : 60} tint={clear || t.dark ? "systemUltraThinMaterialDark" : "systemChromeMaterialLight"} style={[style, { overflow: "hidden" }]}>{children}</BlurView>
+  return <View style={[style, clear ? { backgroundColor: "rgba(255,255,255,0.16)" } : { backgroundColor: t.dark ? "rgba(30,41,68,0.92)" : "rgba(255,255,255,0.92)", borderWidth: StyleSheet.hairlineWidth, borderColor: t.line }]}>{children}</View>
 }
 
 /** Nút tròn kính (quay lại, hành động trên thanh tiêu đề). */
@@ -60,6 +60,24 @@ export function LargeTitle({ title, sub, right }: { title: string; sub?: string;
       {right ?? <GlassButton icon="search" label="Tìm kiếm" onPress={() => router.push("/find")} />}
     </View>
   )
+}
+
+/** Mỗi tab giữ vị trí cuộn của riêng mình (owner, 2026-11-15: cuộn ở tab này thì tab khác cũng bị cuộn theo).
+ *  Ghi lại vị trí khi tab đang hiện, và mỗi lần tab được mở lại thì đặt đúng về vị trí đó, nên dù thanh tab gốc có
+ *  kéo các danh sách theo nhau thì tab vẫn về chỗ của nó. Gắn {...keep} vào ScrollView / FlatList của tab. */
+export function useOwnScroll() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ref = useRef<any>(null)
+  const y = useRef(0), shown = useRef(false)
+  useFocusEffect(useCallback(() => {
+    shown.current = false
+    const put = () => { const n = ref.current; if (n?.scrollToOffset) n.scrollToOffset({ offset: y.current, animated: false }); else n?.scrollTo?.({ y: y.current, animated: false }) }
+    put()
+    const a = setTimeout(() => { put(); shown.current = true }, 60)
+    return () => { clearTimeout(a); shown.current = false }
+  }, []))
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => { if (shown.current) y.current = Math.max(0, e.nativeEvent.contentOffset.y) }
+  return { ref, onScroll, scrollEventThrottle: 32 }
 }
 
 /** Phân trang có số: chia danh sách thành trang, đổi bộ lọc là về trang 1. */
@@ -107,5 +125,5 @@ const s = StyleSheet.create({
   pager: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 22, padding: 4, overflow: "hidden" },
   pbtn: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
   pnum: { minWidth: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", paddingHorizontal: 6 },
-  pnumOn: { backgroundColor: t.navy },
+  pnumOn: { backgroundColor: t.solid },
 })

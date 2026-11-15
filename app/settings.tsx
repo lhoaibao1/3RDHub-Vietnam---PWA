@@ -10,11 +10,14 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "../src/auth"
 import { bioEnabled, bioInfo, confirmBio, disableBio, enableBio, type Bio } from "../src/biometric"
 import { TopBar, tap } from "../src/chrome"
-import { openPrivacy, openTerms, ZALO_SUPPORT } from "../src/links"
+import { openPrivacy, openTerms } from "../src/links"
 import { registerPush } from "../src/push"
 import { t } from "../src/ui"
 import { shadow } from "../src/theme"
 import { prompt } from "../src/prompt"
+import { openSupport } from "../src/support"
+import { prefs, setPref } from "../src/prefs"
+import { PickerSheet } from "../src/sheet"
 
 type RowProps = { icon: keyof typeof Ionicons.glyphMap; color: string; label: string; sub?: string; value?: string; right?: React.ReactNode; onPress?: () => void; danger?: boolean }
 function SRow({ icon, color, label, sub, value, right, onPress, danger }: RowProps) {
@@ -46,6 +49,7 @@ export default function Settings() {
   const [bio, setBio] = useState<Bio | null>(null)
   const [bioOn, setBioOn] = useState(false)
   const [push, setPush] = useState<string>("")
+  const [pick, setPick] = useState<"" | "theme" | "lang">("")
 
   const refresh = useCallback(() => {
     void bioInfo().then(setBio)
@@ -85,7 +89,7 @@ export default function Settings() {
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <TopBar title="Cài đặt" />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 18, paddingBottom: 40 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 18, paddingBottom: 40 }}>
         <Section title="Bảo mật">
           {bio?.available ? (
             <SRow icon={bio.icon} color="#2563EB" label={`Đăng nhập bằng ${bio.label}`} sub={bioOn ? "Đang bật cho máy này" : "Đăng nhập nhanh, không cần gõ mật khẩu"} right={<Switch value={bioOn} onValueChange={toggleBio} trackColor={{ true: t.navy }} />} />
@@ -93,13 +97,18 @@ export default function Settings() {
           <View style={s.line} />
           <SRow icon="key-outline" color="#7C3AED" label="Đổi mật khẩu" onPress={() => router.push("/password")} />
         </Section>
+        <Section title="Giao diện & ngôn ngữ">
+          <SRow icon="contrast-outline" color="#475569" label="Giao diện" value={THEME[prefs.theme]} onPress={() => setPick("theme")} />
+          <View style={s.line} />
+          <SRow icon="language-outline" color="#2563EB" label="Ngôn ngữ" value={prefs.lang === "en" ? "English" : "Tiếng Việt"} onPress={() => setPick("lang")} />
+        </Section>
         <Section title="Thông báo">
           <SRow icon="notifications-outline" color="#D97706" label="Thông báo đẩy" sub={push === "granted" ? "Đang bật" : push === "denied" ? "Đang tắt — chạm để mở Cài đặt iPhone" : "Chưa bật — chạm để bật"} value={push === "granted" ? "Bật" : "Tắt"} onPress={askPush} />
           <View style={s.line} />
           <SRow icon="paper-plane-outline" color="#0F766E" label="Gửi thông báo thử" sub="Kiểm tra máy này có hiện thông báo" onPress={testPush} />
         </Section>
         <Section title="Hỗ trợ & pháp lý">
-          <SRow icon="chatbubbles-outline" color="#0068FF" label="Nhóm Zalo hỗ trợ" onPress={() => void Linking.openURL(ZALO_SUPPORT)} />
+          <SRow icon="chatbubbles-outline" color="#0068FF" label="Hỗ trợ (Zalo OA / Nhóm)" onPress={openSupport} />
           <View style={s.line} />
           <SRow icon="document-text-outline" color={t.navy2} label="Điều khoản sử dụng" onPress={openTerms} />
           <View style={s.line} />
@@ -114,12 +123,17 @@ export default function Settings() {
           <SRow icon="log-out-outline" color={t.bad} label="Đăng xuất" danger onPress={() => Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất?", [{ text: "Hủy", style: "cancel" }, { text: "Đăng xuất", style: "destructive", onPress: () => void logout() }])} />
         </View>
       </ScrollView>
+      <PickerSheet open={pick === "theme"} title="Giao diện" value={prefs.theme} onClose={() => setPick("")} onPick={(v) => { setPick(""); if (v !== prefs.theme) void setPref("theme", v) }}
+        options={[{ value: "light", label: "Sáng" }, { value: "dark", label: "Tối" }, { value: "system", label: "Theo máy" }]} />
+      <PickerSheet open={pick === "lang"} title="Ngôn ngữ" value={prefs.lang} onClose={() => setPick("")} onPick={(v) => { setPick(""); if (v !== prefs.lang) void setPref("lang", v) }}
+        options={[{ value: "vi", label: "Tiếng Việt" }, { value: "en", label: "English" }]} />
     </View>
   )
 }
+const THEME = { light: "Sáng", dark: "Tối", system: "Theo máy" }
 const s = StyleSheet.create({
   title: { color: t.sub, fontSize: 12, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.6, marginLeft: 6 },
-  group: { backgroundColor: "#fff", borderRadius: 18, overflow: "hidden", ...shadow },
+  group: { backgroundColor: t.card, borderRadius: 18, overflow: "hidden", ...shadow },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 14 },
   icon: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   line: { height: StyleSheet.hairlineWidth, backgroundColor: t.line, marginLeft: 60 },

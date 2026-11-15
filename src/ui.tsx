@@ -34,7 +34,7 @@ export function Chip({ label, on, onPress }: { label: string; on?: boolean; onPr
   )
 }
 export function Pill({ label, tone = "navy" }: { label: string; tone?: "navy" | "gold" | "ok" | "warn" | "bad" | "gray" }) {
-  const m = { navy: [t.navySoft, t.navy], gold: [t.goldSoft, t.gold], ok: [t.okSoft, t.ok], warn: [t.warnSoft, t.warn], bad: [t.badSoft, t.bad], gray: ["#EEF0F5", t.sub] }[tone]
+  const m = { navy: [t.navySoft, t.navy], gold: [t.goldSoft, t.gold], ok: [t.okSoft, t.ok], warn: [t.warnSoft, t.warn], bad: [t.badSoft, t.bad], gray: [t.fill, t.sub] }[tone]
   return <View style={{ backgroundColor: m[0], borderRadius: 20, paddingHorizontal: 9, paddingVertical: 3, alignSelf: "flex-start" }}><Text style={{ color: m[1], fontSize: 11, fontWeight: "700" }}>{label}</Text></View>
 }
 export function Avatar({ url, name, size = 44 }: { url?: string; name?: string; size?: number }) {
@@ -73,7 +73,7 @@ export function Bone({ w = "100%", h = 14, r = 8, style }: { w?: DimensionValue;
     loop.start()
     return () => loop.stop()
   }, [a])
-  return <Animated.View style={[{ width: w, height: h, borderRadius: r, backgroundColor: "#DDE3EF", opacity: a }, style]} />
+  return <Animated.View style={[{ width: w, height: h, borderRadius: r, backgroundColor: t.fill, opacity: a }, style]} />
 }
 /** Màn đang tải: vài thẻ xương giống danh sách thật (không còn vòng xoay trống trơn). */
 export function Loading({ rows = 4, image }: { rows?: number; image?: boolean }) {
@@ -126,11 +126,11 @@ export function Row({ icon, label, value, onPress, danger }: { icon: keyof typeo
 }
 const s = StyleSheet.create({
   card: { backgroundColor: t.card, borderRadius: t.radius, padding: 14, ...shadow },
-  btn: { backgroundColor: t.navy, borderRadius: 14, paddingVertical: 13, paddingHorizontal: 18, alignItems: "center", justifyContent: "center", minHeight: 48 },
+  btn: { backgroundColor: t.solid, borderRadius: 14, paddingVertical: 13, paddingHorizontal: 18, alignItems: "center", justifyContent: "center", minHeight: 48 },
   ghost: { backgroundColor: "transparent", borderWidth: 1.5, borderColor: t.navy },
   btnText: { fontWeight: "800", fontSize: 15 },
-  chip: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: t.line },
-  chipOn: { backgroundColor: t.navy, borderColor: t.navy },
+  chip: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },
+  chipOn: { backgroundColor: t.solid, borderColor: t.solid },
   rowItem: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 4, borderRadius: 12 },
   rowIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: t.navySoft, alignItems: "center", justifyContent: "center" },
 })
