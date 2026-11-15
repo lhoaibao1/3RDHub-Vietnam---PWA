@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
-import { FlatList, Modal, Pressable, StyleSheet, View } from "react-native"
+import { FlatList, Modal, StyleSheet, View } from "react-native"
+import { Pressable } from "./press"
 import { Text, TextInput } from "./text"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -50,7 +51,7 @@ export function PickerSheet({ open, title, options, value, onPick, onClose }: { 
 /** Nút lọc dạng viên thuốc: nhãn + giá trị đang chọn. */
 export function FilterButton({ label, value, active, onPress }: { label: string; value?: string; active?: boolean; onPress: () => void }) {
   return (
-    <Pressable onPress={() => { tap(); onPress() }} style={({ pressed }) => [pressed && { transform: [{ scale: 0.96 }] }]}>
+    <Pressable onPress={() => { tap(); onPress() }} style={({ pressed }) => [{ borderRadius: 20 }, pressed && { transform: [{ scale: 0.96 }] }]}>
       <Glass interactive style={[s.fbtn, active && { borderWidth: 1.5, borderColor: t.navy }]}>
         <Text style={{ color: active ? t.navy : t.text, fontWeight: "700", fontSize: 13 }} numberOfLines={1}>{active && value ? value : label}</Text>
         <Ionicons name="chevron-down" size={14} color={active ? t.navy : t.sub} />

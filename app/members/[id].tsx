@@ -1,4 +1,5 @@
-import { Linking, Pressable, ScrollView, View } from "react-native"
+import { Linking, ScrollView, View } from "react-native"
+import { Pressable } from "../../src/press"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { commissionOf, kycOf, memberState, orderCode, orderStatus, useCampaigns, useMembers, useOrders } from "../../src/hooks"

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
-import { Alert, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native"
+import { Alert, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native"
+import { Pressable } from "./press"
 import * as Clipboard from "expo-clipboard"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"

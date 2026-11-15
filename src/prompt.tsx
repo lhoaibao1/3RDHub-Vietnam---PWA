@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from "react-native"
+import { Alert, KeyboardAvoidingView, Modal, Platform, StyleSheet, View } from "react-native"
+import { Pressable } from "./press"
 import { Text, TextInput } from "./text"
 import { shadow, t, sheet } from "./theme"
 

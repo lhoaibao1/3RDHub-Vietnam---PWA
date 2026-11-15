@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
-import { Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { ScrollView, StyleSheet, View } from "react-native"
+import { Pressable } from "./press"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { orderCode, orderStatus, useCampaigns, useLost, useMembers, useOrders } from "./hooks"

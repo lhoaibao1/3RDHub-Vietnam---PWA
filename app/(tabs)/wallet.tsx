@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, View } from "react-native"
+import { Pressable } from "../../src/press"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"

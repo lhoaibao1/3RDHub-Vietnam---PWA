@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { FlatList, ScrollView, StyleSheet, View } from "react-native"
+import { Pressable } from "../../src/press"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { KYC_STATE, useKycAdmin } from "../../src/hooks"

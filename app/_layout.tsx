@@ -113,7 +113,7 @@ function Gate() {
   return (
     <View style={Platform.OS === "web" ? { flex: 1, width: "100%", maxWidth: 520, alignSelf: "center", backgroundColor: t.bg } : { flex: 1 }}>
       {ready ? (
-        <Stack key={look} screenOptions={{ headerShown: false, animation: "slide_from_right", gestureEnabled: true, contentStyle: { backgroundColor: t.bg } }}>
+        <Stack key={look} screenOptions={{ headerShown: false, animation: Platform.OS === "android" ? "default" : "slide_from_right", gestureEnabled: true, contentStyle: { backgroundColor: t.bg } }}>
           <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
           <Stack.Screen name="login" options={{ animation: "fade" }} />
         </Stack>

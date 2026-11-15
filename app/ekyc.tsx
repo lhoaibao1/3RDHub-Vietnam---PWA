@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native"
+import { Pressable } from "../src/press"
 import { useRouter } from "expo-router"
 import { CameraView, useCameraPermissions } from "expo-camera"
 import { Image } from "expo-image"

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
-import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Modal, ScrollView, StyleSheet, View } from "react-native"
+import { Pressable } from "./press"
 import { Ionicons } from "@expo/vector-icons"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { tap } from "./chrome"

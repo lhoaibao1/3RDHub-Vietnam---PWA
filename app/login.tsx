@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Alert, Animated, Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Alert, Animated, Dimensions, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native"
+import { Pressable } from "../src/press"
 import { Text, TextInput } from "../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"

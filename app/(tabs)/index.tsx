@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Dimensions, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Dimensions, Linking, ScrollView, StyleSheet, View } from "react-native"
+import { Pressable } from "../../src/press"
 import { Text } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Image } from "expo-image"
@@ -97,7 +98,7 @@ export default function Home() {
             <Text style={{ color: "#fff", fontSize: 18, fontWeight: "800" }} numberOfLines={1}>{name}</Text>
           </View>
         </Pressable>
-          <Pressable onPress={() => { tap(); setPick(true) }}>
+          <Pressable onPress={() => { tap(); setPick(true) }} style={{ borderRadius: 18 }}>
             <Glass clear interactive style={s.range}><Ionicons name="calendar-outline" size={15} color="#fff" /><Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }} numberOfLines={1}>{rangeLabel(range)}</Text></Glass>
           </Pressable>
         </View>

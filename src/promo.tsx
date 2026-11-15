@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { Dimensions, Linking, Modal, Pressable, ScrollView, View } from "react-native"
+import { Dimensions, Linking, Modal, ScrollView, View } from "react-native"
+import { Pressable } from "./press"
 import { useRouter } from "expo-router"
 import { Image } from "expo-image"
 import { Ionicons } from "@expo/vector-icons"

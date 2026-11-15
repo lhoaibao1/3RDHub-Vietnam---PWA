@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { Alert, Linking, Modal, Platform, Pressable, ScrollView, View } from "react-native"
+import { Alert, Linking, Modal, Platform, ScrollView, View } from "react-native"
+import { Pressable } from "../src/press"
 import { useRouter } from "expo-router"
 import { WebView } from "react-native-webview"
 import { Ionicons } from "@expo/vector-icons"

@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import { Pressable } from "./press"
 import { Ionicons } from "@expo/vector-icons"
 import { Glass, tap } from "./chrome"
 import { prefs, setPref } from "./prefs"

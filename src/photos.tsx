@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Modal, Pressable, ScrollView, View } from "react-native"
+import { Modal, ScrollView, View } from "react-native"
+import { Pressable } from "./press"
 import { Image } from "expo-image"
 import * as ImagePicker from "expo-image-picker"
 import { Ionicons } from "@expo/vector-icons"

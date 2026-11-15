@@ -1,4 +1,5 @@
-import { Alert, Pressable, ScrollView, View } from "react-native"
+import { Alert, ScrollView, View } from "react-native"
+import { Pressable } from "../../src/press"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { upload } from "../../src/api"
 import { appendPhotos, PhotoStrip, pickPhotos } from "../../src/photos"

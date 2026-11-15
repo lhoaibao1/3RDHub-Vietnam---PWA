@@ -1,3 +1,4 @@
+import { Platform } from "react-native"
 import { NativeTabs } from "expo-router/native-tabs"
 import { useUnread } from "../../src/hooks"
 import { t } from "../../src/theme"
@@ -7,11 +8,13 @@ import { L } from "../../src/i18n"
 // contentInsetAdjustmentBehavior của màn), trong khi các màn đã tự chừa bằng insets → bị hụt hai lần ở Trang chủ
 // (owner, 2026-11-14: "nó hụt xuống cả khúc"). Tắt đi; mỗi màn tự lo: trên = insets.top, dưới = paddingBottom 110.
 // Thanh tab gốc của iOS: kính Liquid Glass trên iOS 26+, tự thu gọn khi lướt xuống ở mọi tab (owner, 2026-11-15).
+// Android theo Material 3 (owner, 2026-11-15): viên thuốc sau icon đang chọn, gợn sóng khi chạm, luôn hiện nhãn.
 export default function TabsLayout() {
   const unread = useUnread()
   const n = unread.data || 0
   return (
-    <NativeTabs tintColor={t.navy} minimizeBehavior="onScrollDown" labelStyle={{ fontWeight: "600" }}>
+    <NativeTabs tintColor={t.navy} minimizeBehavior="onScrollDown" labelStyle={{ fontWeight: "600" }}
+      {...(Platform.OS === "android" ? { backgroundColor: t.card, indicatorColor: t.indicator, rippleColor: t.ripple, labelVisibilityMode: "labeled" as const, iconColor: { default: t.sub, selected: t.navy } } : {})}>
       <NativeTabs.Trigger name="index" disableAutomaticContentInsets>
         <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
         <NativeTabs.Trigger.Label>{L("Trang chủ")}</NativeTabs.Trigger.Label>

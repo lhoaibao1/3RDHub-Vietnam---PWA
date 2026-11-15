@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Alert, Dimensions, Linking, Pressable, ScrollView, Share, View } from "react-native"
+import { Alert, Dimensions, Linking, ScrollView, Share, View } from "react-native"
+import { Pressable } from "../../src/press"
 import { Text } from "../../src/text"
 import { useLocalSearchParams } from "expo-router"
 import { Image } from "expo-image"

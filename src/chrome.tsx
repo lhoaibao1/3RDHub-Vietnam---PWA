@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
-import { Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native"
+import { Platform, StyleSheet, View, type StyleProp, type ViewStyle, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native"
+import { Pressable } from "./press"
 import { Text } from "./text"
 import { useFocusEffect, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
@@ -9,16 +10,21 @@ import * as Haptics from "expo-haptics"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { t, sheet } from "./theme"
 
-/** Rung nhẹ khi chạm (iOS). */
-export const tap = () => { if (Platform.OS === "ios") void Haptics.selectionAsync().catch(() => {}) }
+/** Rung nhẹ khi chạm: iOS selection, Android rung chuẩn của hệ điều hành (như phím ảo). */
+export const tap = () => {
+  if (Platform.OS === "ios") void Haptics.selectionAsync().catch(() => {})
+  else if (Platform.OS === "android") void Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Virtual_Key).catch(() => {})
+}
 
 const liquid = Platform.OS === "ios" && (() => { try { return isLiquidGlassAvailable() } catch { return false } })()
 
-/** Nền kính: Liquid Glass thật trên iOS 26+, kính mờ (blur) trên iOS cũ, nền mờ trên Android / web.
+/** Nền kính: Liquid Glass thật trên iOS 26+, kính mờ (blur) trên iOS cũ. Android theo Material 3 (owner, 2026-11-15):
+ *  mặt nền tông (t.tonal) + bóng đổ, không viền. Web: nền mờ có viền.
  *  clear: kính trong đặt trên nền tối (đầu Trang chủ), chữ / icon bên trong màu trắng. */
 export function Glass({ children, style, interactive, clear }: { children?: ReactNode; style?: StyleProp<ViewStyle>; interactive?: boolean; clear?: boolean }) {
   if (liquid) return <GlassView glassEffectStyle={clear ? "clear" : "regular"} colorScheme={t.dark ? "dark" : "light"} isInteractive={interactive} style={style}>{children}</GlassView>
   if (Platform.OS === "ios") return <BlurView intensity={clear ? 35 : 60} tint={clear || t.dark ? "systemUltraThinMaterialDark" : "systemChromeMaterialLight"} style={[style, { overflow: "hidden" }]}>{children}</BlurView>
+  if (Platform.OS === "android") return <View style={[style, clear ? { backgroundColor: "rgba(255,255,255,0.18)" } : { backgroundColor: t.tonal, elevation: 2, shadowColor: t.dark ? "#000" : t.brand }]}>{children}</View>
   return <View style={[style, clear ? { backgroundColor: "rgba(255,255,255,0.16)" } : { backgroundColor: t.dark ? "rgba(30,41,68,0.92)" : "rgba(255,255,255,0.92)", borderWidth: StyleSheet.hairlineWidth, borderColor: t.line }]}>{children}</View>
 }
 

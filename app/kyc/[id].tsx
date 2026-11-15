@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Alert, Modal, Pressable, ScrollView, View } from "react-native"
+import { Alert, Modal, ScrollView, View } from "react-native"
+import { Pressable } from "../../src/press"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Image } from "expo-image"
 import { useMutation, useQueryClient } from "@tanstack/react-query"

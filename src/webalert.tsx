@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { Alert, Modal, Platform, Pressable, StyleSheet, View, type AlertButton } from "react-native"
+import { Alert, Modal, Platform, StyleSheet, View, type AlertButton } from "react-native"
+import { Pressable } from "./press"
 import { Text } from "./text"
 import { shadow, t, sheet } from "./theme"
 

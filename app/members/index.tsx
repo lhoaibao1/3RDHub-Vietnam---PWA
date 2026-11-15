@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react"
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { FlatList, ScrollView, StyleSheet, View } from "react-native"
+import { Pressable } from "../../src/press"
 import { Text, TextInput } from "../../src/text"
 import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"

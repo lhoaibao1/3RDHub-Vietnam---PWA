@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from "react-native"
+import { Alert, Linking, ScrollView, StyleSheet, Switch, View } from "react-native"
+import { Pressable } from "../src/press"
 import { Text } from "../src/text"
 import { useFocusEffect, useRouter } from "expo-router"
 import Constants from "expo-constants"

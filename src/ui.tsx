@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Animated, Pressable, RefreshControl, type RefreshControlProps, StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from "react-native"
+import { ActivityIndicator, Animated, RefreshControl, type RefreshControlProps, StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from "react-native"
+import { Pressable } from "./press"
 import { Text } from "./text"
 import { Image } from "expo-image"
 import { Ionicons } from "@expo/vector-icons"

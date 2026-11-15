@@ -1,5 +1,6 @@
 import { useMemo } from "react"
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View, Platform } from "react-native"
+import { Alert, Linking, ScrollView, StyleSheet, View, Platform } from "react-native"
+import { Pressable } from "../../src/press"
 import { Text } from "../../src/text"
 import { useRouter } from "expo-router"
 import * as Clipboard from "expo-clipboard"
