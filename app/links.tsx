@@ -1,4 +1,4 @@
-import { Alert, FlatList, Share, View } from "react-native"
+import { Alert, FlatList, View } from "react-native"
 import { Text } from "../src/text"
 import * as Clipboard from "expo-clipboard"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -7,6 +7,7 @@ import { useCampaigns } from "../src/hooks"
 import { day, num } from "../src/format"
 import { Art, Button, Card, Empty, ErrorBox, Loading, Pill, t, PullRefresh } from "../src/ui"
 import { Pager, TopBar, usePager } from "../src/chrome"
+import { share } from "../src/share"
 
 type Link = { id: string; code: string; name: string; url: string; campaign_id: string; status: string; created_at: string }
 
@@ -49,7 +50,7 @@ export default function Links() {
               <Text selectable style={{ color: t.navy2, fontSize: 12 }} numberOfLines={2}>{l.url}</Text>
               <View style={{ flexDirection: "row", gap: 8 }}>
                 <View style={{ flex: 1 }}><Button label="Sao chép" kind="ghost" onPress={() => { void Clipboard.setStringAsync(l.url); Alert.alert("Đã sao chép link") }} /></View>
-                <View style={{ flex: 1 }}><Button label="Chia sẻ" kind="ghost" onPress={() => Share.share({ message: l.url })} /></View>
+                <View style={{ flex: 1 }}><Button label="Chia sẻ" kind="ghost" onPress={() => void share(l.url)} /></View>
                 <View style={{ flex: 1 }}><Button label={l.status === "active" ? "Tắt" : "Bật"} kind="ghost" onPress={() => toggle.mutate(l)} busy={toggle.isPending && toggle.variables?.id === l.id} /></View>
               </View>
             </Card>

@@ -21,7 +21,7 @@ export function Button({ label, onPress, busy, kind = "primary", disabled, icon 
       {busy ? <ActivityIndicator color={fg} /> : (
         <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
           {icon ? <Ionicons name={icon} size={18} color={fg} /> : null}
-          <Text style={[s.btnText, { color: fg }]}>{label}</Text>
+          <Text style={[s.btnText, { color: fg }]} numberOfLines={1}>{label}</Text>
         </View>
       )}
     </Pressable>
@@ -127,7 +127,7 @@ export function Row({ icon, label, value, onPress, danger }: { icon: keyof typeo
 }
 const s = sheet(() => StyleSheet.create({
   card: { backgroundColor: t.card, borderRadius: t.radius, padding: 14, ...shadow },
-  btn: { backgroundColor: t.solid, borderRadius: 14, paddingVertical: 13, paddingHorizontal: 18, alignItems: "center", justifyContent: "center", minHeight: 48 },
+  btn: { backgroundColor: t.solid, borderRadius: 14, paddingVertical: 13, paddingHorizontal: 12, alignItems: "center", justifyContent: "center", minHeight: 48 },
   ghost: { backgroundColor: "transparent", borderWidth: 1.5, borderColor: t.navy },
   btnText: { fontWeight: "800", fontSize: 15 },
   chip: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, backgroundColor: t.card, borderWidth: 1, borderColor: t.line },

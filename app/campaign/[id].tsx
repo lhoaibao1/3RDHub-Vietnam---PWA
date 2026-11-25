@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Alert, Dimensions, Linking, ScrollView, Share, View } from "react-native"
+import { Alert, Dimensions, Linking, ScrollView, View } from "react-native"
+import { share } from "../../src/share"
 import { Pressable } from "../../src/press"
 import { Text } from "../../src/text"
 import { useLocalSearchParams } from "expo-router"
@@ -86,7 +87,7 @@ export default function CampaignDetail() {
               <Text selectable style={{ color: t.navy2 }}>{mine}</Text>
               <View style={{ flexDirection: "row", gap: 8 }}>
                 <View style={{ flex: 1 }}><Button label="Sao chép" kind="ghost" onPress={() => { void Clipboard.setStringAsync(mine); Alert.alert("Đã sao chép link") }} /></View>
-                <View style={{ flex: 1 }}><Button label="Chia sẻ" kind="ghost" onPress={() => Share.share({ message: mine })} /></View>
+                <View style={{ flex: 1 }}><Button label="Chia sẻ" kind="ghost" onPress={() => void share(mine)} /></View>
               </View>
             </Card>
           ) : null}
@@ -106,7 +107,7 @@ export default function CampaignDetail() {
           : status === "pending" ? <Button label="Đang chờ duyệt" kind="ghost" onPress={() => {}} disabled />
           : <Button label="Đăng ký tham gia" kind="gold" onPress={() => register.mutate()} busy={register.isPending} />}
       </View>
-      <TopBar overlay title={d.name} right={<GlassButton icon="share-outline" label="Chia sẻ" onPress={() => Share.share({ message: mine || d.name })} />} />
+      <TopBar overlay title={d.name} right={<GlassButton icon="share-outline" label="Chia sẻ" onPress={() => void share(mine || d.name)} />} />
     </View>
   )
 }

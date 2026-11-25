@@ -110,6 +110,15 @@ function Gate() {
 
   // Đổi ngôn ngữ / giao diện: dựng lại cây màn hình với màu và chữ mới, không cần nạp lại app.
   const look = useSyncExternalStore(onPrefs, () => prefs.version)
+  // Bản web: nền trang (html/body, lộ ra khi kéo quá đà hay quanh khung 520px) và màu thanh trạng thái theo sáng/tối.
+  // index.html đặt sẵn màu sáng (scripts/build-pwa.mjs); ở chế độ tối thì đổi theo, kẻo lộ dải sáng.
+  useEffect(() => {
+    if (Platform.OS !== "web") return
+    const d = globalThis.document
+    if (!d) return
+    for (const el of [d.documentElement, d.body, d.getElementById("root")]) if (el) el.style.background = t.bg
+    d.querySelector('meta[name="theme-color"]')?.setAttribute("content", t.dark ? t.bg : t.brand)
+  }, [look])
   return (
     <View style={Platform.OS === "web" ? { flex: 1, width: "100%", maxWidth: 520, alignSelf: "center", backgroundColor: t.bg } : { flex: 1 }}>
       {ready ? (

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Alert, Linking, ScrollView, StyleSheet, Switch, View } from "react-native"
+import { Alert, Linking, Platform, ScrollView, StyleSheet, Switch, View } from "react-native"
 import { Pressable } from "../src/press"
 import { Text } from "../src/text"
 import { useFocusEffect, useRouter } from "expo-router"
@@ -48,6 +48,7 @@ export default function Settings() {
   const router = useRouter()
   const qc = useQueryClient()
   const { logout, user } = useAuth()
+  const web = Platform.OS === "web"
   const [bio, setBio] = useState<Bio | null>(null)
   const [bioOn, setBioOn] = useState(false)
   const [push, setPush] = useState<string>("")
@@ -87,10 +88,11 @@ export default function Settings() {
       <TopBar title="Cài đặt" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 18, paddingBottom: 40 }}>
         <Section title="Bảo mật">
-          {bio?.available ? (
+          {/* Bản web không có Face ID / vân tay và chưa nối thông báo đẩy: ẩn các mục đó (pwa/README.md). */}
+          {web ? null : bio?.available ? (
             <SRow icon={bio.icon} color="#2563EB" label={`Đăng nhập bằng ${bio.label}`} sub={bioOn ? "Đang bật cho máy này" : "Đăng nhập nhanh, không cần gõ mật khẩu"} right={<Switch value={bioOn} onValueChange={toggleBio} trackColor={{ true: t.navy }} />} />
           ) : <SRow icon="finger-print-outline" color="#6B7280" label="Đăng nhập bằng Face ID / vân tay" sub="Máy này chưa cài Face ID hoặc vân tay" />}
-          <View style={s.line} />
+          {web ? null : <View style={s.line} />}
           <SRow icon="key-outline" color="#7C3AED" label="Đổi mật khẩu" onPress={() => router.push("/password")} />
         </Section>
         <Section title="Giao diện & ngôn ngữ">
@@ -98,11 +100,11 @@ export default function Settings() {
           <View style={s.line} />
           <SRow icon="language-outline" color="#2563EB" label="Ngôn ngữ" value={prefs.lang === "en" ? "English" : "Tiếng Việt"} onPress={() => setPick("lang")} />
         </Section>
-        <Section title="Thông báo">
+        {web ? null : <Section title="Thông báo">
           <SRow icon="notifications-outline" color="#D97706" label="Thông báo đẩy" sub={push === "granted" ? "Đang bật" : push === "denied" ? "Đang tắt — chạm để mở Cài đặt iPhone" : "Chưa bật — chạm để bật"} value={push === "granted" ? "Bật" : "Tắt"} onPress={askPush} />
           <View style={s.line} />
           <SRow icon="paper-plane-outline" color="#0F766E" label="Gửi thông báo thử" sub="Kiểm tra máy này có hiện thông báo" onPress={testPush} />
-        </Section>
+        </Section>}
         <Section title="Hỗ trợ & pháp lý">
           <SRow icon="chatbubbles-outline" color="#0068FF" label="Hỗ trợ (Zalo OA / Nhóm)" onPress={openSupport} />
           <View style={s.line} />

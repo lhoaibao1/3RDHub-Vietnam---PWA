@@ -29,6 +29,11 @@ như một PWA. Mục đích: thay bản PWA điện thoại hiện tại (đang
    bắt đầu bằng `/`.
 3. **Mọi đường dẫn không phải file phải trả về `index.html`** (app tự điều hướng: `/orders`, `/campaign/<id>`…).
 
+**Nếu nginx chia điện thoại / máy tính (như hiện tại) thì bắt buộc dùng [`pwa/nginx.conf`](nginx.conf)**: file JS, font,
+manifest, service worker của PWA phải trả cho mọi thiết bị. Không làm vậy thì máy tính / bot xin `/_expo/...js` sẽ
+nhận trang HTML của Nuxt, Cloudflare lưu cái HTML đó 4 tiếng và trả cho cả điện thoại → PWA trắng màn hoặc màn mở
+được màn không (lỗi gặp ngày 24/11/2026). Đổi xong thì purge cache Cloudflare.
+
 Ví dụ nginx (thay cho upstream :3422 của bản điện thoại hiện tại; phần `/api/` giữ như đang có):
 
 ```nginx
